@@ -225,8 +225,8 @@ uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 				*dst++ = src[src_off];
 				if (--dx >= decoded_data_len) {
 #if 0
-					char tmpfn[20];
-					sprintf(tmpfn, "chunk%03x.bin", chunk_id);
+					char tmpfn[30];
+					sprintf(tmpfn, "chunks/chunk%03x.bin", chunk_id);
 					std::FILE* df = std::fopen(tmpfn, "wb");
 					std::fwrite(dst_copy, decoded_data_len+1, 1, df);
 					std::fclose(df);
@@ -247,8 +247,8 @@ uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 					*dst++ = src[new_src_off];
 					if (--dx >= decoded_data_len) {
 #if 0
-						char tmpfn[20];
-						sprintf(tmpfn, "chunk%03x.bin", chunk_id);
+						char tmpfn[30];
+						sprintf(tmpfn, "chunks/chunk%03x.bin", chunk_id);
 						std::FILE* df = std::fopen(tmpfn, "wb");
 						std::fwrite(dst_copy, decoded_data_len+1, 1, df);
 						std::fclose(df);
