@@ -84,9 +84,17 @@ DataHeader1 data_header1;
 uint16_t ptr2_offset;
 uint8_t* ptr2_seg;
 
+struct DataLoadListStruct {
+	uint8_t dummy1[22];
+	uint16_t next_load_list_id;
+	uint8_t dummy2[43];
+	uint8_t data_load_list[0x100]; // TODO TODO TODO verify size
+} data_load_list_struct;
+auto& data_load_list = data_load_list_struct.data_load_list;
+
 void hookInts() {
 	// init memory and segments();
-	
+
 	hookKeyboard();
 
 	start_time = curSystemTime();
@@ -331,9 +339,329 @@ void freeMemAndQuit() {
 	std::exit(0);
 }
 
+uint16_t did_init_sound;
+void clearSoundBuffers() {}
+
+void initSound() {
+	// Major TODO
+
+	did_init_sound = 0;
+	// TODO word_32858
+	clearSoundBuffers();
+
+	if (!(data_header1_snd1 && data_header1_snd2 && 0x8000)) {
+		// sound enabled
+		did_init_sound = 1;
+	} else {
+		did_init_sound = 1;
+	}
+}
+
+void initVideo() {
+	// TODO I probably want to do some limited form of VGA emulation here at
+	// least initially, but in a less convoluted manner, please.
+}
+
+struct Color {
+	uint8_t rgb[3];
+};
+
+Color palette1[0x100];
+Color palette2[0x100];
+
+Color color1;
+Color color2;
+
+void fadePal() {
+	Color c_and;
+	for (int c = 0; c < 3; ++c) {
+		c_and.rgb[c] = color1.rgb[c] | color2.rgb[c];
+	}
+
+	for (int i = 0; i < 0x100; ++i) {
+		for (int c = 0; c < 3; ++c) {
+			int8_t x = palette1[i].rgb[c];
+
+			x -= c_and.rgb[c];
+
+			if (x < 0)
+				x = 0;
+			if ((x & 0x40) != 0)
+				x = 0x3F;
+
+			palette2[i].rgb[c] = x;
+		}
+	}
+}
+
+uint16_t word_28526;
+uint16_t word_28880;
+uint16_t word_2AA86;
+uint16_t word_317D9;
+uint16_t word_30ED8[1];
+uint16_t word_31338[1];
+uint16_t word_28524;
+uint16_t word_2887E;
+uint16_t word_2AA84;
+uint8_t byte_317CE;
+
+void sub_16775() {
+	uint16_t si = word_28526 + word_28880;
+	if (si > word_2AA86)
+		si = word_28526 - word_28880;
+
+	uint16_t cx = word_30ED8[(si & 0xFFF8)/8 + word_317D9/2];
+	uint16_t bx = word_31338[7 & si] + cx;
+
+	uint16_t ax = word_28524 + word_2887E;
+	if (ax > word_2AA84)
+		ax = word_28524 - word_2887E;
+
+	byte_317CE = (ax & 3) * 2;
+	bx += (ax * 4) + 8;
+
+	//vga_ports[0x3D4][0xD] = bx & 0xFF;
+	//vga_ports[0x3D4][0xC] = (bx >> 8) & 0xFF;
+
+	// TODO vars
+}
+
+void fadePalKeepFirst() {
+	Color c_and;
+	for (int c = 0; c < 3; ++c) {
+		c_and.rgb[c] = color1.rgb[c] | color2.rgb[c];
+	}
+
+	for (int i = 0; i < 0x100; ++i) {
+		for (int c = 0; c < 3; ++c) {
+			int8_t x = palette1[i].rgb[c];
+
+			x -= c_and.rgb[c];
+
+			if (x < 0)
+				x = 0;
+			if ((x & 0x40) != 0)
+				x = 0x3F;
+
+			palette2[i].rgb[c] = x;
+		}
+
+		// Copy entries 1-15 unchanged
+		for (; i < 0x10; ++i) {
+			palette2[i] = palette1[i];
+		}
+	}
+}
+
+Color byte_2AA88;
+
+void zero_word_288C4() {
+	// TODO
+	//word_288F4 = 0;
+	//word_288F6 = 0;
+	//word_288F8 = 0;
+	//std::memset(word_288C4, 0, 0x18);
+	//word_28903 = 6;
+	//word_28905 = 6;
+	//word_28907 = 6;
+	//word_28909 = 0;
+	//word_2890B = 0;
+	//word_2890D = 0;
+}
+
+void sub_108B8() {
+	zero_word_288C4();
+	data_load_list_struct.next_load_list_id = 0x27;
+	// TODO word_288A2 = 0;
+}
+
+const uint16_t loadListChunksA[0x30] = {
+	0xC6,  0xC8,  0xCA,  0xCC,  0x28,  0x2A,  0x2C,  0x2E,
+	0x30,  0x32,  0x34,  0x4B,  0x4D,  0x4F,  0x51,  0x53,
+	0x55,  0x72,  0x74,  0x76,  0x78,  0x7A,  0x7C,  0x7E,
+	0x80,  0x9C,  0x9E,  0xA0,  0xA2,  0xA4,  0xA6,  0xA8,
+	0xAA,  0xCE,  0xD0,  0xD2,  0xD4,  0x171, 0x17D, 0x186,
+	0x18C, 0x192, 0x17E, 0x1AF, 0x1B0, 0x1B1, 0x1B2, 0xDA
+};
+
+const uint16_t loadListChunksB[0x30] = {
+	0x1C1, 0x1C1, 0x1C1, 0x1C1, 0x1C2, 0x1C2,  0x1C2, 0x1C2,
+	0x1C2, 0x1C2, 0x1C2, 0x1C3, 0x1C3, 0x1C3,  0x1C3, 0x1C3,
+	0x1C3, 0x1C4, 0x1C4, 0x1C4, 0x1C4, 0x1C4,  0x1C4, 0x1C4,
+	0x1C4, 0x1C5, 0x1C5, 0x1C5, 0x1C5, 0x1C5,  0x1C5, 0x1C5,
+	0x1C5, 0x1C1, 0x1C1, 0x1C1, 0x1C1, 0xFFFF, 0x1C6, 0x1C6,
+	0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6,  0x1C6, 0x1C6
+};
+
+void loadLoadList(uint16_t list_id) {
+	uint16_t chunk_id = loadListChunksB[list_id];
+	if (chunk_id != 0xFFFF && chunk_id != loaded_chunk0) {
+		loaded_chunk0 = chunk_id;
+		decompressChunk(chunk_id, alloc_seg5);
+	}
+	decompressChunk(loadListChunksA[list_id], reinterpret_cast<uint8_t*>(&data_load_list_struct));
+}
+
+uint16_t seekLoadList() {
+	uint16_t di;
+	for (di = 0; load16LE(&data_load_list[di]) != 0xFFFF; di += 14);
+	return di + 2;
+}
+
+uint16_t loadPaletteList(uint16_t di) {
+	while (true) {
+		uint16_t ax = load16LE(&data_load_list[di]);
+		di += 2;
+
+		if (ax == 0xFFFF)
+			break;
+
+		uint16_t offset = data_load_list[di++];
+		decompressChunk(ax, reinterpret_cast<uint8_t*>(&palette1[offset]));
+	}
+
+	for (int i = 0; i < 16; ++i) {
+		palette1[16*i].rgb[0] = 0;
+		palette1[16*i].rgb[1] = 0;
+		palette1[16*i].rgb[2] = 0;
+	}
+
+	byte_2AA88 = palette1[3];
+
+	fadePalKeepFirst();
+
+	return di;
+}
+
+uint8_t byte_2AA63;
+uint8_t byte_2AA64[8];
+uint8_t byte_2AA6C[8];
+uint8_t byte_2AA74[8];
+uint8_t byte_2AA7C[8];
+
+uint16_t processLoadList(uint16_t di) {
+	byte_2AA63 = data_load_list[di];
+	di += 2;
+
+	uint16_t si = 0;
+
+	uint8_t al;
+	while ((al = data_load_list[di++]) != 0) {
+		byte_2AA64[si] = al;
+		byte_2AA6C[si] = al;
+		byte_2AA74[si] = data_load_list[di++ + 1];
+		byte_2AA7C[si] = data_load_list[di++ + 2];
+
+		for (; load16LE(&data_load_list[di]) != 0xFFFF; di += 2);
+		di += 2;
+
+		si += 1;
+	}
+
+	return di;
+}
+
+
+
+uint16_t loadChunkList(uint16_t di) {
+	uint16_t si = 0;
+	uint8_t* bx = alloc_seg11;
+
+	// TODO verify
+	while (true) {
+		uint16_t ax = load16LE(&data_load_list[di]);
+		di += 2;
+		if (ax == 0xFFFF)
+			break;
+		// TODO
+		//word_2978D[si] = ax;
+		//word_297CD[si] = (bx - alloc_seg11) + 1;
+		bx = decompressChunk(ax, bx);
+
+		di += 4;
+		si++;
+	}
+
+	return di;
+}
+
+void sub_11784() {
+	// TODO word_288A2 = 0;
+	// TODO word_288A4 = 0;
+}
+
+uint16_t word_2AA8D;
+
+void sub_11080() {
+	// TODO lotsa variables
+	// TODO doPalFade1();
+	// TODO sound_func1();
+	// TODO zero_byte_31A4C();
+	// TODO some vars
+	// TODO loadChunks1();
+	sub_11784();
+	// TODO video_clearVRAM();
+	// TODO zero_byte_2892D();
+	// TODO zero_byte_28836();
+	// TODO word_2AA8B = word_2AA8D;
+	loadLoadList(data_load_list_struct.next_load_list_id);
+	// TODO setColor1And2();
+	if (word_2AA8D != 0x25)
+		zero_word_288C4();
+	// TODO sub_117AD();
+	// TODO loadChunks3();
+	uint16_t di = seekLoadList();
+	di = loadPaletteList(di);
+	di = processLoadList(di);
+	di = loadChunkList(di);
+	// TODO
+}
+
+void test_read(uint16_t chunk_id) {
+	struct Local {
+		static void errReadData() {
+			errorQuit("\nUnable to read data file.\n", errno);
+		}
+	};
+
+	if (std::fseek(data_file, chunk_id * 4, SEEK_SET) != 0)
+		Local::errReadData();
+
+	if (std::fread(&chunk_offsets, sizeof(int32_t), 2, data_file) != 2)
+		Local::errReadData();
+	if (std::fseek(data_file, chunk_offsets[0], SEEK_SET) != 0)
+		Local::errReadData();
+	if (std::fread(&decoded_data_len, sizeof(uint16_t), 1, data_file) != 1)
+		Local::errReadData();
+
+	uint8_t planes[4][64*1024];
+	std::memset(planes, 0, sizeof(planes));
+
+	for (int i = 0; i < 4; ++i) {
+		if (std::fread(planes[i], decoded_data_len, 1, data_file) != 1)
+			Local::errReadData();
+	}
+
+	char tmpfn[30];
+	sprintf(tmpfn, "image%03x.bin", chunk_id);
+	std::FILE* df = std::fopen(tmpfn, "wb");
+	for (int i = 0; i < decoded_data_len; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			std::fputc(planes[j][i], df);
+		}
+	}
+	std::fclose(df);
+}
+
+
 int main() {
 	hookInts();
 	hwCheck();
 	allocMemAndLoadData();
+	initSound();
+	initVideo();
+	// TODO setSomeGlobals(); sub_12CA3
+	sub_108B8();
+	sub_11080(); // Logo fade in
 	// TODO
 }
