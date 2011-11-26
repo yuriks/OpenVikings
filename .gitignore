@@ -1,0 +1,11 @@
+/Debug/
+/Release/
+/ipch/
+/*.opensdf
+/openvikings.sdf
+/openvikings.suo
+/openvikings.vcxproj.user
+
+/chunks/
+/data.dat
+/vikings/
