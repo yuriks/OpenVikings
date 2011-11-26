@@ -1,0 +1,67 @@
+These are *some* (I missed several, was only paying attention to one function.)
+of the chunks that are loaded at startup.
+
+1cc
+209
+4
+6
+8
+a
+c
+e
+--delay--
+186
+185
+183
+1f0
+--fadein interplay fadeout--
+18a
+188
+187
+--silicon & synapse--
+17b
+3
+132
+--the lost vikings--
+--main menu--
+--fadeout--
+1a2
+ca
+b2
+b3
+3
+123
+e5
+11a
+12f
+12d
+de
+11e
+e8
+144
+12c
+dd
+--run for a short bit--
+e1
+e2
+11c
+142
+1d2
+--demo runs--
+--fadeout--
+186
+185
+183
+1f0
+--fadein interplay fadeout--
+18a
+18b
+189
+--silicon & synapse--
+17d
+3
+17f
+19d
+--the lost vikings--
+--select quit--
+--process finishes--

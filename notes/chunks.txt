@@ -1,0 +1,14 @@
+Formats:
+A - compressed, decompress with decompressChunk
+B - uncompressed planar VGA data
+
+0x001 - B: Vikings status bar
+0x180 - B: "The Lost Vikings" logo
+0x181 - A: palette for ???
+0x182 - A:
+0x183 - A:
+0x184 - A:
+0x185 - A:
+0x186 - A: Lots of stuff, including data load list for the title screen.
+0x211 - B: Some kind of alien/insect creature head. I don't remember this being in the game.
+0x215 - A: MT-32 instrument bank?
