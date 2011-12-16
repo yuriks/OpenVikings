@@ -402,7 +402,7 @@ void zero_word_288C4() {
 // addr seg00:08B8
 void sub_108B8() {
 	zero_word_288C4();
-	data_load_list_struct.next_load_list_id = 0x27;
+	level_header.next_level_id = 0x27;
 	// TODO word_288A2 = 0;
 }
 
@@ -413,26 +413,26 @@ void loadLoadList(uint16_t list_id) {
 		loaded_chunk0 = chunk_id;
 		decompressChunk(chunk_id, alloc_seg5);
 	}
-	decompressChunk(loadListChunksA[list_id], reinterpret_cast<uint8_t*>(&data_load_list_struct));
+	decompressChunk(loadListChunksA[list_id], reinterpret_cast<uint8_t*>(&level_header));
 }
 
 // addr seg00:1383
 uint16_t seekLoadList() {
 	uint16_t di;
-	for (di = 0; load16LE(&data_load_list[di]) != 0xFFFF; di += 14);
+	for (di = 0; load16LE(&level_header.data_load_list[di]) != 0xFFFF; di += 14);
 	return di + 2;
 }
 
 // addr seg00:12AE
 uint16_t loadPaletteList(uint16_t di) {
 	while (true) {
-		uint16_t ax = load16LE(&data_load_list[di]);
+		uint16_t ax = load16LE(&level_header.data_load_list[di]);
 		di += 2;
 
 		if (ax == 0xFFFF)
 			break;
 
-		uint16_t offset = data_load_list[di++];
+		uint16_t offset = level_header.data_load_list[di++];
 		decompressChunk(ax, reinterpret_cast<uint8_t*>(&palette1[offset]));
 	}
 
@@ -451,19 +451,19 @@ uint16_t loadPaletteList(uint16_t di) {
 
 // addr seg00:133A
 uint16_t processLoadList(uint16_t di) {
-	byte_2AA63 = data_load_list[di];
+	byte_2AA63 = level_header.data_load_list[di];
 	di += 2;
 
 	uint16_t si = 0;
 
 	uint8_t al;
-	while ((al = data_load_list[di++]) != 0) {
+	while ((al = level_header.data_load_list[di++]) != 0) {
 		byte_2AA64[si] = al;
 		byte_2AA6C[si] = al;
-		byte_2AA74[si] = data_load_list[di++ + 1];
-		byte_2AA7C[si] = data_load_list[di++ + 2];
+		byte_2AA74[si] = level_header.data_load_list[di++ + 1];
+		byte_2AA7C[si] = level_header.data_load_list[di++ + 2];
 
-		for (; load16LE(&data_load_list[di]) != 0xFFFF; di += 2);
+		for (; load16LE(&level_header.data_load_list[di]) != 0xFFFF; di += 2);
 		di += 2;
 
 		si += 1;
@@ -478,7 +478,7 @@ uint16_t loadChunkList(uint16_t di) {
 	uint8_t* bx = alloc_seg11;
 
 	while (true) {
-		uint16_t ax = load16LE(&data_load_list[di]);
+		uint16_t ax = load16LE(&level_header.data_load_list[di]);
 		di += 2;
 		if (ax == 0xFFFF)
 			break;
@@ -498,7 +498,7 @@ uint16_t loadChunkList2(uint16_t di) {
 	uint16_t si = 0;
 
 	while (true) {
-		uint16_t chunk_id = load16LE(&data_load_list[di]);
+		uint16_t chunk_id = load16LE(&level_header.data_load_list[di]);
 		if (chunk_id == 0xFFFF)
 			break;
 		loaded_chunks2[si] = chunk_id;
@@ -600,7 +600,7 @@ void sub_11080() {
 	// TODO zero_byte_2892D();
 	// TODO zero_byte_28836();
 	// TODO word_2AA8B = word_2AA8D;
-	loadLoadList(data_load_list_struct.next_load_list_id);
+	loadLoadList(level_header.next_level_id);
 	// TODO setColor1And2();
 	if (word_2AA8D != 0x25)
 		zero_word_288C4();

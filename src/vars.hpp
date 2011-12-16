@@ -65,13 +65,15 @@ DataHeader1 data_header1; // addr seg04:86B0
 
 FarPtr soundData; // addr seg04:992A
 
-struct DataLoadListStruct {
+struct LevelHeader {
 	uint8_t dummy1[22];
-	uint16_t next_load_list_id;
-	uint8_t dummy2[43];
+	uint16_t next_level_id;
+	uint8_t dummy2[4];
+	uint8_t level_id;
+	uint8_t dummy3[38];
 	uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
-} data_load_list_struct;
-auto& data_load_list = data_load_list_struct.data_load_list;
+};
+LevelHeader level_header; // addr seg04:25B3
 
 uint16_t did_init_timer; // addr seg04:A39A
 
