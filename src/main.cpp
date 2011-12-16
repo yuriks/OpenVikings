@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include "vars.hpp"
+#include "vga_emu.hpp"
 
 // TODO
 void hookKeyboard();
@@ -588,8 +589,30 @@ void sub_113B0() {
 }
 
 // addr seg00:0CD8
-void loadImage(uint16_t id, unsigned offset) {
-	// TODO
+void loadImage(uint16_t chunk_id, uint16_t offset) {
+	struct Local {
+		static void errReadData() {
+			errorQuit("\nUnable to read data file.\n", errno);
+		}
+	};
+
+	if (chunk_id == 0xFFFA)
+		return;
+
+	if (std::fseek(data_file, chunk_id * 4, SEEK_SET) != 0)
+		Local::errReadData();
+
+	if (std::fread(&chunk_offsets, sizeof(int32_t), 2, data_file) != 2)
+		Local::errReadData();
+	if (std::fseek(data_file, chunk_offsets[0], SEEK_SET) != 0)
+		Local::errReadData();
+	if (std::fread(&decoded_data_len, sizeof(uint16_t), 1, data_file) != 1)
+		Local::errReadData();
+
+	if (std::fread(ptr3.seg, decoded_data_len, 4, data_file) != 4)
+		Local::errReadData();
+
+	vga_copyPlanesToVRAM(ptr3.seg, offset, decoded_data_len);
 }
 
 // addr seg00:1204
