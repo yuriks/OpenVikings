@@ -15,9 +15,13 @@ void restoreErrorInt();
 uint32_t curSystemTime();
 
 // TODO
+// addr seg00:6528
 void hookKeyboard() {}
+// addr seg00:6546
 void unhookKeyboard() {}
+// addr seg00:686F
 void restoreVideo() {}
+// addr seg00:292F
 void restoreErrorInt() {}
 uint32_t curSystemTime() { return 0; }
 
@@ -25,6 +29,7 @@ inline uint16_t load16LE(uint8_t* d) {
 	return d[0] | d[1] << 8;
 }
 
+// addr seg00:2948
 void hookInts() {
 	// init memory and segments();
 
@@ -33,6 +38,7 @@ void hookInts() {
 	start_time = curSystemTime();
 }
 
+// addr seg00:0DBA
 void errorQuit(const char* msg, uint16_t error_code) {
 	unhookKeyboard();
 	// TODO ??? call
@@ -51,6 +57,7 @@ void errorQuit(const char* msg, uint16_t error_code) {
 	std::exit(0);
 }
 
+// addr seg00:2989
 void hwCheck() {
 	struct Local {
 		static void errReadData() {
@@ -110,6 +117,7 @@ void hwCheck() {
 	// calibrate joysticks here
 }
 
+// addr seg00:0E85
 void roundToNextSeg(uint8_t** seg, uint16_t* off) {
 	// What am I supposed to do here?
 	*seg += *off;
@@ -117,6 +125,7 @@ void roundToNextSeg(uint8_t** seg, uint16_t* off) {
 }
 
 // Note: Originally this function returned es:di on the end of the buffer. Now I just return the pointer to it
+// addr seg00:0982
 uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 	struct Local {
 		static void errBufOverrun() {
@@ -203,6 +212,7 @@ uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 	}
 }
 
+// addr seg00:2AB8
 void allocMemAndLoadData() {
 	alloc_seg1 = new uint8_t[0x8B80];
 	alloc_seg2 = new uint8_t[0x2000];
@@ -253,6 +263,7 @@ void allocMemAndLoadData() {
 	// TODO bunch of variable sets
 }
 
+// addr seg00:0E35
 void freeMemAndQuit() {
 	unhookKeyboard();
 	// TODO one call
@@ -272,8 +283,12 @@ void freeMemAndQuit() {
 	std::exit(0);
 }
 
-void clearSoundBuffers() {}
+// addr seg02:071A
+void clearSoundBuffers() {
+	// TODO
+}
 
+// addr seg00:7561
 void initSound() {
 	// Major TODO
 
@@ -289,11 +304,13 @@ void initSound() {
 	}
 }
 
+// addr seg00:67FF
 void initVideo() {
 	// TODO I probably want to do some limited form of VGA emulation here at
 	// least initially, but in a less convoluted manner, please.
 }
 
+// addr seg00:0F03
 void fadePal() {
 	Color c_and;
 	for (int c = 0; c < 3; ++c) {
@@ -316,7 +333,8 @@ void fadePal() {
 	}
 }
 
-void sub_16775() {
+// addr seg00:6775
+void updateVgaBuffer() {
 	uint16_t si = video_levelY + video_screenShakeY;
 	if (si > video_levelHeight)
 		si = video_levelY - video_screenShakeY;
@@ -338,6 +356,7 @@ void sub_16775() {
 	// TODO vars
 }
 
+// addr seg00:0E99
 void fadePalKeepFirst() {
 	Color c_and;
 	for (int c = 0; c < 3; ++c) {
@@ -365,6 +384,7 @@ void fadePalKeepFirst() {
 	}
 }
 
+// addr seg00:2CE4
 void zero_word_288C4() {
 	// TODO
 	//word_288F4 = 0;
@@ -379,12 +399,14 @@ void zero_word_288C4() {
 	//word_2890D = 0;
 }
 
+// addr seg00:08B8
 void sub_108B8() {
 	zero_word_288C4();
 	data_load_list_struct.next_load_list_id = 0x27;
 	// TODO word_288A2 = 0;
 }
 
+// addr seg00:11B1
 void loadLoadList(uint16_t list_id) {
 	uint16_t chunk_id = loadListChunksB[list_id];
 	if (chunk_id != 0xFFFF && chunk_id != loaded_chunk0) {
@@ -394,12 +416,14 @@ void loadLoadList(uint16_t list_id) {
 	decompressChunk(loadListChunksA[list_id], reinterpret_cast<uint8_t*>(&data_load_list_struct));
 }
 
+// addr seg00:1383
 uint16_t seekLoadList() {
 	uint16_t di;
 	for (di = 0; load16LE(&data_load_list[di]) != 0xFFFF; di += 14);
 	return di + 2;
 }
 
+// addr seg00:12AE
 uint16_t loadPaletteList(uint16_t di) {
 	while (true) {
 		uint16_t ax = load16LE(&data_load_list[di]);
@@ -425,6 +449,7 @@ uint16_t loadPaletteList(uint16_t di) {
 	return di;
 }
 
+// addr seg00:133A
 uint16_t processLoadList(uint16_t di) {
 	byte_2AA63 = data_load_list[di];
 	di += 2;
@@ -447,6 +472,7 @@ uint16_t processLoadList(uint16_t di) {
 	return di;
 }
 
+// addr seg00:167A
 uint16_t loadChunkList(uint16_t di) {
 	uint16_t si = 0;
 	uint8_t* bx = alloc_seg11;
@@ -467,6 +493,7 @@ uint16_t loadChunkList(uint16_t di) {
 	return di;
 }
 
+// addr seg00:16AE
 uint16_t loadChunkList2(uint16_t di) {
 	uint16_t si = 0;
 
@@ -486,30 +513,36 @@ uint16_t loadChunkList2(uint16_t di) {
 	return di;
 }
 
+// addr seg00:1784
 void sub_11784() {
 	// TODO word_288A2 = 0;
 	// TODO word_288A4 = 0;
 }
 
+// addr seg00:1397
 void sub_11397() {
 	// TODO word_28886 = byte_30A1E[word_2AAAB];
 	// TODO word_28888 = byte_30A24[word_2AAAB];
 }
 
+// addr seg00:37F1
 void sub_137F1() {
 	// TODO std::fill_n(word_29835, 20, 0);
 	// TODO std::fill_n(word_29EED, 20, 0xFFFF);
 }
 
+// addr seg00:2FB3
 void sub_12FB3() {
 	// TODO std::fill_n(word_2892D, 128, 0);
 }
 
 // TODO
+// addr seg00:3BBD
 bool sub_13BBD(uint16_t si, uint16_t di) {
 	return false;
 }
 
+// addr seg00:3BA5
 void sub_13BA5() {
 	// TODO word_28522 = 0xFFFF;
 	uint16_t si = 0;
@@ -521,11 +554,13 @@ void sub_13BA5() {
 	}
 }
 
+// addr seg00:3A0E
 void sub_13A0E() {
 	// TODO sub_139EF();
 	// TODO loc_13A94();
 }
 
+// addr seg00:15D2
 void sub_115D2() {
 	// TODO
 }
@@ -552,6 +587,7 @@ void sub_113B0() {
 	loc_16595(word_2AABC);
 }
 
+// addr seg00:1080
 void sub_11080() {
 	// TODO lotsa variables
 	// TODO doPalFade1();
@@ -627,7 +663,7 @@ void test_read(uint16_t chunk_id) {
 	std::fclose(df);
 }
 
-
+// addr seg00:0000
 int main() {
 	hookInts();
 	hwCheck();
