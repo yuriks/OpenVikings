@@ -214,19 +214,19 @@ void allocMemAndLoadData() {
 	// Load sound data if sound enabled
 	if (!(data_header1_snd1 && data_header1_snd2 && 0x8000)) {
 		uint8_t* buf = new uint8_t[0xE470];
-		ptr2_seg = buf;
-		ptr2_offset = 0;
+		soundData.seg = buf;
+		soundData.offset = 0;
 
 		// Note: roundToNextSeg not needed because segments are for 16-bit losers
 		// I'm not sure these are quite right, they seem to point to the end of the data
 		// but looking at the original that's effectively what happens?
-		sound_buffer0 = buf = decompressChunk(0x1C7 + data_header1.field_6, buf);
-		sound_buffer1 = buf = decompressChunk(0x20C + data_header1.field_8, buf);
-		sound_buffer2 = decompressChunk(0x207 + data_header1.field_8, buf);
+		soundData0End = buf = decompressChunk(0x1C7 + data_header1.field_6, buf);
+		soundData1End = buf = decompressChunk(0x20C + data_header1.field_8, buf);
+		soundData2End = decompressChunk(0x207 + data_header1.field_8, buf);
 	}
 
-	ptr3_seg = new uint8_t[0x2ABA0];
-	ptr3_offset = 0;
+	ptr3.seg = new uint8_t[0x2ABA0];
+	ptr3.offset = 0;
 
 	alloc_seg5 = new uint8_t[0xC000];
 
@@ -262,7 +262,7 @@ void freeMemAndQuit() {
 	delete[] alloc_seg2;
 	delete[] alloc_seg3;
 	delete[] alloc_seg5;
-	delete[] ptr3_seg;
+	delete[] ptr3.seg;
 
 	std::fclose(data_file);
 
@@ -277,15 +277,15 @@ void clearSoundBuffers() {}
 void initSound() {
 	// Major TODO
 
-	did_init_sound = 0;
+	did_init_timer = 0;
 	// TODO word_32858
 	clearSoundBuffers();
 
 	if (!(data_header1_snd1 && data_header1_snd2 && 0x8000)) {
 		// sound enabled
-		did_init_sound = 1;
+		did_init_timer = 1;
 	} else {
-		did_init_sound = 1;
+		did_init_timer = 1;
 	}
 }
 
@@ -317,20 +317,21 @@ void fadePal() {
 }
 
 void sub_16775() {
-	uint16_t si = word_28526 + word_28880;
-	if (si > word_2AA86)
-		si = word_28526 - word_28880;
+	uint16_t si = video_levelY + video_screenShakeY;
+	if (si > video_levelHeight)
+		si = video_levelY - video_screenShakeY;
 
-	uint16_t cx = word_30ED8[(si & 0xFFF8)/8 + word_317D9/2];
-	uint16_t bx = word_31338[7 & si] + cx;
+	uint16_t cx = heightTileMults[(si & 0xFFF8)/8 + word_317D9/2];
+	uint16_t bx = heightPixelMults[7 & si] + cx;
 
-	uint16_t ax = word_28524 + word_2887E;
-	if (ax > word_2AA84)
-		ax = word_28524 - word_2887E;
+	uint16_t ax = video_levelX + video_screenShakeX;
+	if (ax > video_levelWidth)
+		ax = video_levelX - video_screenShakeX;
 
-	byte_317CE = (ax & 3) * 2;
+	video_pixelPan = (ax & 3) * 2;
 	bx += (ax * 4) + 8;
 
+	// TODO
 	//vga_ports[0x3D4][0xD] = bx & 0xFF;
 	//vga_ports[0x3D4][0xC] = (bx >> 8) & 0xFF;
 
@@ -417,7 +418,7 @@ uint16_t loadPaletteList(uint16_t di) {
 		palette1[16*i].rgb[2] = 0;
 	}
 
-	byte_2AA88 = palette1[3];
+	stru_2AA88 = palette1[3];
 
 	fadePalKeepFirst();
 

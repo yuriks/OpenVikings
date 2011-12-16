@@ -1,46 +1,50 @@
 // Include this file only once
 // It's a temporary hack only
 
-uint16_t data_header1_snd1;
-uint16_t data_header1_snd2;
+struct FarPtr {
+	uint16_t offset;
+	uint8_t* seg;
+};
 
-uint16_t current_password[4];
+uint16_t data_header1_snd1; // addr seg04:0302
+uint16_t data_header1_snd2; // addr seg04:0304
 
-std::FILE* data_file = 0;
+uint16_t current_password[4]; // addr seg04:0310
 
-int32_t chunk_offsets[2];
+std::FILE* data_file = 0; // addr seg04:2BB2
 
-uint16_t decoded_data_len;
+int32_t chunk_offsets[2]; // addr seg04:2BB4
 
-uint8_t* alloc_seg0;
-uint8_t* alloc_seg1;
-uint8_t* alloc_seg2;
-uint8_t* alloc_seg3;
-uint8_t* alloc_seg5;
-uint8_t* alloc_seg6;
-uint8_t* sound_buffer2;
-uint8_t* sound_buffer1;
-uint8_t* sound_buffer0;
-uint16_t loaded_chunk0;
-uint8_t* alloc_seg11;
-uint16_t ptr3_offset;
-uint8_t* ptr3_seg;
-uint8_t* ptr1;
+uint16_t decoded_data_len; // addr seg04:2BBC
 
-uint8_t chunk_buffer0[0x300];
-uint8_t chunk_buffer1[0x300];
-uint8_t chunk_buffer2[0x300];
-uint8_t chunk_buffer3[0x300];
-uint8_t chunk_buffer4[0x300];
-uint8_t chunk_buffer5[0x300];
-uint8_t chunk_buffer6[0x300];
-uint8_t chunk_buffer7[0x300];
-uint8_t chunk_buffer8[0x300];
-uint8_t chunk_buffer9[0x700]; // TODO confirm size
-uint8_t chunk_buffer10[0x1800]; // TODO confirm size
-uint8_t chunk_buffer11[0x1800]; // TODO TODO TODO really confirm size (completely guessed)
+uint8_t* alloc_seg0; // addr seg04:2E5D
+uint8_t* alloc_seg1; // addr seg04:2E5F
+uint8_t* alloc_seg2; // addr seg04:2E61
+uint8_t* alloc_seg3; // addr seg04:2E63
+uint8_t* alloc_seg5; // addr seg04:2E67
+uint8_t* alloc_seg6; // addr seg04:2E69
+uint8_t* soundData2End; // addr seg04:2E6B
+uint8_t* soundData1End; // addr seg04:2E6D
+uint8_t* soundData0End; // addr seg04:2E6F
+uint16_t loaded_chunk0; // addr seg04:2E71
+uint8_t* alloc_seg11; // addr seg04:2E73
+FarPtr ptr3; // addr seg04:2E75
+uint8_t* ptr1; // addr seg04:2E79
 
-uint32_t start_time;
+uint8_t chunk_buffer0[0x300]; // addr seg04:2E7D
+uint8_t chunk_buffer1[0x300]; // addr seg04:317D
+uint8_t chunk_buffer2[0x300]; // addr seg04:347D
+uint8_t chunk_buffer3[0x300]; // addr seg04:377D
+uint8_t chunk_buffer4[0x300]; // addr seg04:3A7D
+uint8_t chunk_buffer5[0x300]; // addr seg04:3D7D
+uint8_t chunk_buffer6[0x300]; // addr seg04:407D
+uint8_t chunk_buffer7[0x300]; // addr seg04:437D
+uint8_t chunk_buffer8[0x300]; // addr seg04:467D
+uint8_t chunk_buffer9[0x700]; // addr seg04:497D TODO confirm size
+uint8_t chunk_buffer10[0x1800]; // addr seg04:507D TODO confirm size
+uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO TODO TODO really confirm size (completely guessed)
+
+uint32_t start_time; // addr seg04:8639
 
 struct DataHeader1 {
 	uint16_t dummy1;
@@ -57,44 +61,61 @@ struct DataHeader1 {
 
 	uint16_t dummy3[5];
 };
-DataHeader1 data_header1;
+DataHeader1 data_header1; // addr seg04:86B0
 
-uint16_t ptr2_offset;
-uint8_t* ptr2_seg;
+FarPtr soundData; // addr seg04:992A
 
 struct DataLoadListStruct {
 	uint8_t dummy1[22];
 	uint16_t next_load_list_id;
 	uint8_t dummy2[43];
-	uint8_t data_load_list[0x100]; // TODO TODO TODO verify size
+	uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
 } data_load_list_struct;
 auto& data_load_list = data_load_list_struct.data_load_list;
 
-uint16_t did_init_sound;
+uint16_t did_init_timer; // addr seg04:A39A
 
 struct Color {
 	uint8_t rgb[3];
 };
 
-Color palette1[0x100];
-Color palette2[0x100];
+Color palette1[0x100]; // addr seg04:7F02
+Color palette2[0x100]; // addr seg04:8202
 
-Color color1;
-Color color2;
+Color color1; // addr seg04:0342
+Color color2; // addr seg04:0345
 
-uint16_t word_28526;
-uint16_t word_28880;
-uint16_t word_2AA86;
-uint16_t word_317D9;
-uint16_t word_30ED8[1];
-uint16_t word_31338[1];
-uint16_t word_28524;
-uint16_t word_2887E;
-uint16_t word_2AA84;
-uint8_t byte_317CE;
+uint16_t video_levelY; // addr seg04:0046
+uint16_t video_screenShakeY; // addr seg04:03A0
+uint16_t video_levelHeight; // addr seg04:25A6
+uint16_t word_317D9; // addr seg04:92F9
 
-Color byte_2AA88;
+// addr seg04:89F8
+const uint16_t heightTileMults[24] = {
+	// in increments of 2B0
+	// 0x1600 + i * 0x2B0
+	0x1600, 0x18B0, 0x1B60, 0x1E10, // 0
+	0x20C0, 0x2370, 0x2620, 0x28D0, // 4
+	0x2B80, 0x2E30, 0x30E0, 0x3390, // 8
+	0x3640, 0x38F0, 0x3BA0, 0x3E50, // 12
+	0x4100, 0x43B0, 0x4660, 0x4910, // 16
+	0x4BC0, 0x4E70, 0x5120, 0x53D0, // 20
+};
 
+// addr seg04:8E58
+const uint16_t heightPixelMults[8] = {
+	86*0, 86*1, 86*2, 86*3,
+	86*4, 86*5, 86*6, 86*7
+};
+
+uint16_t video_levelX; // addr seg04:0044
+uint16_t video_screenShakeX; // addr seg04:039E
+uint16_t video_levelWidth; // addr seg04:25A4
+uint8_t video_pixelPan; // addr seg04:92EE
+
+Color stru_2AA88; // addr seg04:25A8
+
+// addr seg04:940C
 const uint16_t loadListChunksA[0x30] = {
 	0xC6,  0xC8,  0xCA,  0xCC,  0x28,  0x2A,  0x2C,  0x2E,
 	0x30,  0x32,  0x34,  0x4B,  0x4D,  0x4F,  0x51,  0x53,
@@ -104,6 +125,7 @@ const uint16_t loadListChunksA[0x30] = {
 	0x18C, 0x192, 0x17E, 0x1AF, 0x1B0, 0x1B1, 0x1B2, 0xDA
 };
 
+// addr seg04:946C
 const uint16_t loadListChunksB[0x30] = {
 	0x1C1, 0x1C1, 0x1C1, 0x1C1, 0x1C2, 0x1C2,  0x1C2, 0x1C2,
 	0x1C2, 0x1C2, 0x1C2, 0x1C3, 0x1C3, 0x1C3,  0x1C3, 0x1C3,
@@ -113,20 +135,17 @@ const uint16_t loadListChunksB[0x30] = {
 	0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6,  0x1C6, 0x1C6
 };
 
-uint8_t byte_2AA63;
-uint8_t byte_2AA64[8];
-uint8_t byte_2AA6C[8];
-uint8_t byte_2AA74[8];
-uint8_t byte_2AA7C[8];
+uint8_t byte_2AA63; // addr seg04:2583
+uint8_t byte_2AA64[8]; // addr seg04:2584
+uint8_t byte_2AA6C[8]; // addr seg04:258C
+uint8_t byte_2AA74[8]; // addr seg04:2594
+uint8_t byte_2AA7C[8]; // addr seg04:259C
 
-uint16_t loaded_chunks11[0x20];
-uint16_t loaded_chunks_end11[0x20];
+uint16_t loaded_chunks11[0x20]; // addr seg04:12AD
+uint16_t loaded_chunks_end11[0x20]; // addr seg04:12ED
 
-uint16_t loaded_chunks2[16];
-uint8_t* loaded_chunks2_ptr[16];
-
-uint16_t video_levelWidth; // addr seg04:25A4
-uint16_t video_levelHeight; // addr seg04:25A6
+uint16_t loaded_chunks2[16]; // addr seg04:124D
+uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
 
 uint16_t word_31448[0x100]; // addr seg04:8F68
 
@@ -135,4 +154,4 @@ uint16_t word_31648; // addr seg04:9168
 uint16_t word_2AABE; // addr seg04:25DE
 uint16_t word_3164A; // addr seg04:916A
 
-uint16_t word_2AA8D;
+uint16_t word_2AA8D; // addr seg04:25AD
