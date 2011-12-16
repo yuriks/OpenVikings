@@ -63,9 +63,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vga_emu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\vars.hpp" />
+    <ClInclude Include="src\vga_emu.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
