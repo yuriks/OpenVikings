@@ -21,6 +21,7 @@ uint8_t* alloc_seg0; // addr seg04:2E5D
 uint8_t* alloc_seg1; // addr seg04:2E5F
 uint8_t* alloc_seg2; // addr seg04:2E61
 uint8_t* alloc_seg3; // addr seg04:2E63
+uint8_t* alloc_seg3_end; // addr seg04:2E65
 uint8_t* alloc_seg5; // addr seg04:2E67
 uint8_t* alloc_seg6; // addr seg04:2E69
 uint8_t* soundData2End; // addr seg04:2E6B
@@ -65,13 +66,26 @@ DataHeader1 data_header1; // addr seg04:86B0
 
 FarPtr soundData; // addr seg04:992A
 
+enum LevelFlags {
+	LVLFLAG_BIT1 = 0x1,
+	LVLFLAG_BIT2 = 0x2,
+	LVLFLAG_BIT8 = 0x8,
+	LVLFLAG_BIT20 = 0x20,
+	LVLFLAG_BIT40 = 0x40,
+	LVLFLAG_BIT80 = 0x80
+};
+
 struct LevelHeader {
-	uint8_t dummy1[22];
-	uint16_t next_level_id;
-	uint8_t dummy2[4];
-	uint8_t level_id;
-	uint8_t dummy3[38];
-	uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
+	/* 0000 */ uint8_t dummy1[22];
+	/* 0016 */ uint16_t next_level_id;
+	/* 0018 */ uint8_t dummy2[4];
+	/* 001C */ LevelFlags level_flags;
+	/* 001D */ uint8_t dummy3[17];
+	/* 002E */ uint16_t anonymous_12;
+	/* 0030 */ uint16_t anonymous_13;
+	/* 0032 */ uint16_t anonymous_14;
+	/* 0034 */ uint8_t dummy4[15];
+	/* 0043 */ uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
 };
 LevelHeader level_header; // addr seg04:25B3
 

@@ -587,6 +587,38 @@ void sub_113B0() {
 	loc_16595(word_2AABC);
 }
 
+// addr seg00:0CD8
+void loadImage(uint16_t id, unsigned offset) {
+	// TODO
+}
+
+// addr seg00:1204
+void loadChunks3() {
+	if (level_header.level_flags & LVLFLAG_BIT2) {
+		loadImage(level_header.anonymous_12, 0x20C8);
+		loadImage(level_header.anonymous_12, 0x66A8);
+		loadImage(level_header.anonymous_12, 0xAC88);
+		loadImage(0x180, 0);
+	} else {
+		if (level_header.level_flags & LVLFLAG_BIT20) {
+			loadImage(0x211, 0);
+		} else {
+			if (level_header.level_flags & LVLFLAG_BIT40) {
+				loadImage(level_header.anonymous_12, 0x20C8);
+				loadImage(level_header.anonymous_12, 0x66A8);
+				loadImage(level_header.anonymous_12, 0xAC88);
+				loadImage(0x213, 0);
+				return;
+			}
+		}
+
+		decompressChunk(level_header.anonymous_13, alloc_seg1);
+		decompressChunk(level_header.anonymous_13 + 1, alloc_seg2);
+		alloc_seg3_end = decompressChunk(level_header.anonymous_12, alloc_seg3);
+		decompressChunk(level_header.anonymous_14, alloc_seg0);
+	}
+}
+
 // addr seg00:1080
 void sub_11080() {
 	// TODO lotsa variables
@@ -605,7 +637,7 @@ void sub_11080() {
 	if (word_2AA8D != 0x25)
 		zero_word_288C4();
 	// TODO sub_117AD();
-	// TODO loadChunks3();
+	loadChunks3();
 	uint16_t di = seekLoadList();
 	di = loadPaletteList(di);
 	di = processLoadList(di);
