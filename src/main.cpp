@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
+#include <algorithm>
 
 // TODO
 void hookKeyboard();
@@ -46,8 +47,7 @@ uint16_t loaded_chunk0;
 uint8_t* alloc_seg11;
 uint16_t ptr3_offset;
 uint8_t* ptr3_seg;
-uint16_t ptr1_offset;
-uint8_t* ptr1_seg;
+uint8_t* ptr1;
 
 uint8_t chunk_buffer0[0x300];
 uint8_t chunk_buffer1[0x300];
@@ -292,8 +292,8 @@ void allocMemAndLoadData() {
 		sound_buffer2 = decompressChunk(0x207 + data_header1.field_8, buf);
 	}
 
-	ptr3_seg = ptr1_seg = new uint8_t[0x2ABA0];
-	ptr3_offset = ptr1_offset = 0;
+	ptr3_seg = new uint8_t[0x2ABA0];
+	ptr3_offset = 0;
 
 	alloc_seg5 = new uint8_t[0xC000];
 
@@ -561,24 +561,45 @@ uint16_t processLoadList(uint16_t di) {
 	return di;
 }
 
-
+uint16_t loaded_chunks11[0x20];
+uint16_t loaded_chunks_end11[0x20];
 
 uint16_t loadChunkList(uint16_t di) {
 	uint16_t si = 0;
 	uint8_t* bx = alloc_seg11;
 
-	// TODO verify
 	while (true) {
 		uint16_t ax = load16LE(&data_load_list[di]);
 		di += 2;
 		if (ax == 0xFFFF)
 			break;
-		// TODO
-		//word_2978D[si] = ax;
-		//word_297CD[si] = (bx - alloc_seg11) + 1;
+		loaded_chunks11[si] = ax;
+		loaded_chunks_end11[si] = (bx - alloc_seg11) + 1;
 		bx = decompressChunk(ax, bx);
 
 		di += 4;
+		si++;
+	}
+
+	return di;
+}
+
+uint16_t loaded_chunks2[16];
+uint8_t* loaded_chunks2_ptr[16];
+
+uint16_t loadChunkList2(uint16_t di) {
+	uint16_t si = 0;
+
+	while (true) {
+		uint16_t chunk_id = load16LE(&data_load_list[di]);
+		if (chunk_id == 0xFFFF)
+			break;
+		loaded_chunks2[si] = chunk_id;
+
+		uint8_t* dest = ptr1;
+		loaded_chunks2_ptr[si] = dest;
+		ptr1 = decompressChunk(chunk_id, dest);
+		di += 5;
 		si++;
 	}
 
@@ -590,7 +611,79 @@ void sub_11784() {
 	// TODO word_288A4 = 0;
 }
 
+void sub_11397() {
+	// TODO word_28886 = byte_30A1E[word_2AAAB];
+	// TODO word_28888 = byte_30A24[word_2AAAB];
+}
+
+void sub_137F1() {
+	// TODO std::fill_n(word_29835, 20, 0);
+	// TODO std::fill_n(word_29EED, 20, 0xFFFF);
+}
+
+void sub_12FB3() {
+	// TODO std::fill_n(word_2892D, 128, 0);
+}
+
+// TODO
+bool sub_13BBD(uint16_t si, uint16_t di) {
+	return false;
+}
+
+void sub_13BA5() {
+	// TODO word_28522 = 0xFFFF;
+	uint16_t si = 0;
+	uint16_t di = 0;
+
+	while (sub_13BBD(si, di)) {
+		si++;
+		di += 14;
+	}
+}
+
+void sub_13A0E() {
+	// TODO sub_139EF();
+	// TODO loc_13A94();
+}
+
+void sub_115D2() {
+	// TODO
+}
+
+uint16_t video_levelWidth; // addr seg04:25A4
+uint16_t video_levelHeight; // addr seg04:25A6
+
+uint16_t word_31448[0x100]; // addr seg04:8F68
+
+// addr seg00:6595
+void loc_16595(uint16_t ax) {
+	for (uint16_t si = 0; si < 0x100; ++si) {
+		word_31448[si] = si*ax*2;
+	}
+}
+
+uint16_t word_2AABC; // addr seg04:25DC
+uint16_t word_31648; // addr seg04:9168
+uint16_t word_2AABE; // addr seg04:25DE
+uint16_t word_3164A; // addr seg04:916A
+
+// addr seg00:13B0
+void sub_113B0() {
+	uint16_t ax;
+	
+	ax = word_2AABC * 2;
+	word_31648 = ax;
+	video_levelWidth = ax * 8 - 320;
+
+	ax = word_2AABE * 2;
+	word_3164A = ax;
+	video_levelHeight = ax * 8 - 176; // viewport height
+
+	loc_16595(word_2AABC);
+}
+
 uint16_t word_2AA8D;
+
 
 void sub_11080() {
 	// TODO lotsa variables
@@ -614,7 +707,21 @@ void sub_11080() {
 	di = loadPaletteList(di);
 	di = processLoadList(di);
 	di = loadChunkList(di);
-	// TODO
+	di = loadChunkList2(di);
+	sub_11397();
+	sub_137F1();
+	sub_12FB3();
+	// ***? TODO sub_11446();
+	sub_113B0();
+	// TODO sub_113D8();
+	// TODO sub_17749();
+	// *** TODO sub_173C7();
+	// *** TODO sub_11439();
+	sub_13BA5();
+	sub_13A0E();
+	sub_115D2();
+	// TODO doPalFade2(); // Fade in
+	// TODO sub_12345();
 }
 
 void test_read(uint16_t chunk_id) {
