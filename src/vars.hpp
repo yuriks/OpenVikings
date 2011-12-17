@@ -80,11 +80,14 @@ struct LevelHeader {
 	/* 0016 */ uint16_t next_level_id;
 	/* 0018 */ uint8_t dummy2[4];
 	/* 001C */ LevelFlags level_flags;
-	/* 001D */ uint8_t dummy3[17];
+	/* 001D */ uint8_t dummy3[12];
+	/* 0029 */ uint16_t anonymous_10;
+	/* 002B */ uint16_t anonymous_11;
+	/* 002D */ uint8_t dummy4[1];
 	/* 002E */ uint16_t anonymous_12;
 	/* 0030 */ uint16_t anonymous_13;
 	/* 0032 */ uint16_t anonymous_14;
-	/* 0034 */ uint8_t dummy4[15];
+	/* 0034 */ uint8_t dummy5[15];
 	/* 0043 */ uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
 };
 LevelHeader level_header; // addr seg04:25B3
@@ -165,9 +168,7 @@ uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
 
 uint16_t word_31448[0x100]; // addr seg04:8F68
 
-uint16_t word_2AABC; // addr seg04:25DC
 uint16_t word_31648; // addr seg04:9168
-uint16_t word_2AABE; // addr seg04:25DE
 uint16_t word_3164A; // addr seg04:916A
 
 uint16_t word_2AA8D; // addr seg04:25AD

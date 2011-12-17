@@ -577,15 +577,15 @@ void loc_16595(uint16_t ax) {
 void sub_113B0() {
 	uint16_t ax;
 	
-	ax = word_2AABC * 2;
+	ax = level_header.anonymous_10 * 2;
 	word_31648 = ax;
 	video_levelWidth = ax * 8 - 320;
 
-	ax = word_2AABE * 2;
+	ax = level_header.anonymous_11 * 2;
 	word_3164A = ax;
 	video_levelHeight = ax * 8 - 176; // viewport height
 
-	loc_16595(word_2AABC);
+	loc_16595(level_header.anonymous_10);
 }
 
 // addr seg00:0CD8
