@@ -340,15 +340,15 @@ void updateVgaBuffer() {
 	if (si > video_levelHeight)
 		si = video_levelY - video_screenShakeY;
 
-	uint16_t cx = heightTileMults[(si & 0xFFF8)/8 + word_317D9/2];
-	uint16_t bx = heightPixelMults[7 & si] + cx;
+	uint16_t cx = heightTileMults[si / 8 + word_317D9 / 2];
+	uint16_t bx = heightPixelMults[si % 8] + cx;
 
 	uint16_t ax = video_levelX + video_screenShakeX;
 	if (ax > video_levelWidth)
 		ax = video_levelX - video_screenShakeX;
 
-	video_pixelPan = (ax & 3) * 2;
-	bx += (ax * 4) + 8;
+	video_pixelPan = (ax % 4) * 2;
+	bx += (ax / 4) + 8;
 
 	// TODO
 	//vga_ports[0x3D4][0xD] = bx & 0xFF;
