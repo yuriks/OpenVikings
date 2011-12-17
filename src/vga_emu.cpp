@@ -77,7 +77,7 @@ void vga_initialize() {
 	// Randomize initial memory contents. Just because.
 	std::srand(0xDEADBEEF);
 	for (int i = 0; i < 256; ++i) {
-		vga_palette[i] = (std::rand() & 0xFF) | (std::rand() & 0xFF) << 8 | (std::rand() & 0xFF) << 16;
+		vga_palette[i] = (std::rand() & 0xFC) | (std::rand() & 0xFC) << 8 | (std::rand() & 0xFC) << 16;
 	}
 
 	for (int p = 0; p < 4; ++p) {
