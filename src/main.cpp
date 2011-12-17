@@ -1,3 +1,5 @@
+#include "main.hpp"
+
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
