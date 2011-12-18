@@ -29,7 +29,7 @@ uint8_t* soundData1End; // addr seg04:2E6D
 uint8_t* soundData0End; // addr seg04:2E6F
 uint16_t loaded_chunk0; // addr seg04:2E71
 uint8_t* alloc_seg11; // addr seg04:2E73
-FarPtr ptr3; // addr seg04:2E75
+uint8_t* ptr3; // addr seg04:2E75
 uint8_t* ptr1; // addr seg04:2E79
 
 uint8_t chunk_buffer0[0x300]; // addr seg04:2E7D

@@ -262,8 +262,7 @@ void allocMemAndLoadData() {
 		soundData2End = decompressChunk(0x207 + data_header1.field_8, buf);
 	}
 
-	ptr3.seg = new uint8_t[0x2ABA0];
-	ptr3.offset = 0;
+	ptr3 = new uint8_t[0x2ABA0];
 
 	alloc_seg5 = new uint8_t[0xC000];
 
@@ -300,7 +299,7 @@ void freeMemAndQuit() {
 	delete[] alloc_seg2;
 	delete[] alloc_seg3;
 	delete[] alloc_seg5;
-	delete[] ptr3.seg;
+	delete[] ptr3;
 
 	std::fclose(data_file);
 
@@ -671,10 +670,10 @@ void loadImage(uint16_t chunk_id, uint16_t offset) {
 	if (std::fread(&decoded_data_len, sizeof(uint16_t), 1, data_file) != 1)
 		Local::errReadData();
 
-	if (std::fread(ptr3.seg, decoded_data_len, 4, data_file) != 4)
+	if (std::fread(ptr3, decoded_data_len, 4, data_file) != 4)
 		Local::errReadData();
 
-	vga_copyPlanesToVRAM(ptr3.seg, offset, decoded_data_len);
+	vga_copyPlanesToVRAM(ptr3, offset, decoded_data_len);
 }
 
 // addr seg00:1204
@@ -888,6 +887,7 @@ void loadNextLevel() {
 	// TODO sound_func1();
 	// TODO zero_byte_31A4C();
 	// TODO some vars
+	ptr1 = ptr3;
 	// TODO loadChunks1();
 	sub_11784();
 	// TODO video_clearVRAM();
