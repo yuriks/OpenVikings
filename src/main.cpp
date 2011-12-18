@@ -606,6 +606,35 @@ void sub_113B0() {
 	loc_16595(level_header.anonymous_10);
 }
 
+// addr seg00:73C7
+void sub_173C7() {
+	// TODO Clean this up and understand what it's doing
+
+	// TODO sets fs to allocSeg6 too
+	if (level_header.level_flags & (LVLFLAG_BIT2 | LVLFLAG_BIT40)) {
+		std::fill_n(reinterpret_cast<uint32_t*>(alloc_seg6), 0x3020, 0);
+	} else {
+		uint16_t y_max = level_header.anonymous_11;
+		uint16_t x_max = level_header.anonymous_10;
+
+		uint16_t bx = 0;
+		uint16_t di = 0;
+
+		for (uint16_t y = 0; y < y_max; ++y) {
+			for (uint16_t x = 0; x < x_max; ++x) {
+				uint16_t si = load16LE(&alloc_seg3[bx++ *2]) % 1024;
+
+				store32LE(&alloc_seg6[ di       *4], load32LE(&alloc_seg0[si*8  ]));
+				store32LE(&alloc_seg6[(di+x_max)*4], load32LE(&alloc_seg0[si*8+4]));
+				di++;
+			}
+			di += x_max;
+		}
+
+		std::copy_n(alloc_seg0, 0x78, alloc_seg3_end);
+	}
+}
+
 // addr seg00:0CD8
 void loadImage(uint16_t chunk_id, uint16_t offset) {
 	struct Local {
@@ -692,7 +721,7 @@ void loadNextLevel() {
 	sub_113B0();
 	// TODO sub_113D8();
 	// TODO sub_17749();
-	// *** TODO sub_173C7();
+	sub_173C7();
 	// *** TODO sub_11439();
 	sub_13BA5();
 	sub_13A0E();
