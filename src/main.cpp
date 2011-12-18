@@ -880,17 +880,23 @@ void sub_11439() {
 	updateVgaBuffer();
 }
 
+void video_clearVRAM() {
+	vga_fillVRAM(0xF, 0, 0, 0xFFFF);
+}
+
 // addr seg00:1080
 void loadNextLevel() {
 	// TODO lotsa variables
 	fadePalOut();
 	// TODO sound_func1();
 	// TODO zero_byte_31A4C();
-	// TODO some vars
+	video_backBufBase = 0;
+	video_frontBufBase = 52;
+	video_resvBufBase = 104;
 	ptr1 = ptr3;
 	// TODO loadChunks1();
 	sub_11784();
-	// TODO video_clearVRAM();
+	video_clearVRAM();
 	// TODO zero_byte_2892D();
 	// TODO zero_byte_28836();
 	previous_level = current_level;
