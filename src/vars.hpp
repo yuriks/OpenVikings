@@ -171,4 +171,5 @@ uint16_t word_31448[0x100]; // addr seg04:8F68
 uint16_t word_31648; // addr seg04:9168
 uint16_t word_3164A; // addr seg04:916A
 
-uint16_t word_2AA8D; // addr seg04:25AD
+uint16_t previous_level; // addr seg04:25AB
+uint16_t current_level; // addr seg04:25AD

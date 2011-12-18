@@ -314,7 +314,7 @@ void initVideo() {
 }
 
 // addr seg00:0F03
-void fadePal() {
+void fadePalStep() {
 	Color c_and;
 	for (int c = 0; c < 3; ++c) {
 		c_and.rgb[c] = color1.rgb[c] | color2.rgb[c];
@@ -645,9 +645,9 @@ void loadChunks3() {
 }
 
 // addr seg00:1080
-void sub_11080() {
+void loadNextLevel() {
 	// TODO lotsa variables
-	// TODO doPalFade1();
+	// TODO fadePalOut();
 	// TODO sound_func1();
 	// TODO zero_byte_31A4C();
 	// TODO some vars
@@ -656,10 +656,11 @@ void sub_11080() {
 	// TODO video_clearVRAM();
 	// TODO zero_byte_2892D();
 	// TODO zero_byte_28836();
-	// TODO word_2AA8B = word_2AA8D;
-	loadLoadList(level_header.next_level_id);
+	previous_level = current_level;
+	current_level = level_header.next_level_id;
+	loadLoadList(current_level);
 	// TODO setColor1And2();
-	if (word_2AA8D != 0x25)
+	if (current_level != 0x25)
 		zero_word_288C4();
 	// TODO sub_117AD();
 	loadChunks3();
@@ -680,7 +681,7 @@ void sub_11080() {
 	sub_13BA5();
 	sub_13A0E();
 	sub_115D2();
-	// TODO doPalFade2(); // Fade in
+	// TODO fadePalIn(); // Fade in
 	// TODO sub_12345();
 }
 
@@ -729,6 +730,6 @@ int main() {
 	initVideo();
 	// TODO setSomeGlobals(); sub_12CA3
 	sub_108B8();
-	sub_11080(); // Logo fade in
+	loadNextLevel(); // Logo fade in
 	// TODO
 }
