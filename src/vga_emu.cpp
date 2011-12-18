@@ -9,6 +9,8 @@
 uint8_t vga_framebuffer[4][0x10000];
 
 static uint32_t vga_palette[256];
+static uint16_t vga_start_address;
+
 static SDL_Window* vga_window = nullptr;
 static SDL_Renderer* vga_renderer = nullptr;
 static SDL_Texture* vga_texture = nullptr;
@@ -42,14 +44,28 @@ void vga_fillVRAM(int plane_mask, uint8_t value, uint16_t dest, uint16_t len) {
 	}
 }
 
-void vga_setPalette(const uint8_t* palette) {
+void vga_vramCopy(uint16_t source, uint16_t dest, uint16_t len) {
+	assert(source + len < 0x10000);
+	assert(dest   + len < 0x10000);
+
+	for (int i = 0; i < 4; ++i) {
+		std::copy_n(&vga_framebuffer[i][source], len, &vga_framebuffer[i][dest]);
+	}
+}
+
+void vga_setPalette(const Color* palette) {
 	for (int i = 0; i < 256; ++i) {
 		vga_palette[i] =
-			palette[0] << (16+2) |
-			palette[1] <<  (8+2) |
-			palette[2] <<  (0+2);
-		palette += 3;
+			palette->rgb[0] << (16+2) |
+			palette->rgb[1] <<  (8+2) |
+			palette->rgb[2] <<  (0+2);
+		palette++;
 	}
+}
+
+void vga_setStartAddress(uint16_t addr) {
+	vga_start_address = addr;
+	vga_present();
 }
 
 void vga_initialize() {
@@ -106,10 +122,11 @@ void vga_present() {
 
 	uint32_t* tex_pixels = reinterpret_cast<uint32_t*>(tex_pixels_raw);
 
-	uint16_t vram_offset = 0;
+	uint16_t vram_line_offset = vga_start_address;
 
-	// TODO this is incorrect and unlike the VGA :P
+	// TODO line compare
 	for (int y = 0; y < 240; ++y) {
+		uint16_t vram_offset = vram_line_offset;
 		for (int x = 0; x < 320; x += 4) {
 			tex_pixels[x+0] = vga_palette[vga_framebuffer[0][vram_offset]];
 			tex_pixels[x+1] = vga_palette[vga_framebuffer[1][vram_offset]];
@@ -117,7 +134,7 @@ void vga_present() {
 			tex_pixels[x+3] = vga_palette[vga_framebuffer[3][vram_offset]];
 			++vram_offset;
 		}
-		vram_offset += 0; // TODO find out the stride used by the game
+		vram_line_offset += 344/4;
 		tex_pixels += tex_pitch / sizeof(uint32_t);
 	}
 

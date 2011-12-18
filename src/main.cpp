@@ -6,9 +6,10 @@
 #include <cerrno>
 #include <cstring>
 #include <algorithm>
+#include <SDL_timer.h>
 
-#include "vars.hpp"
 #include "vga_emu.hpp"
+#include "vars.hpp"
 
 // TODO
 void hookKeyboard();
@@ -325,8 +326,15 @@ void initSound() {
 
 // addr seg00:67FF
 void initVideo() {
-	// TODO I probably want to do some limited form of VGA emulation here at
-	// least initially, but in a less convoluted manner, please.
+	// TODO call vga_initialize here
+
+	// Skip some mode initialization, It'll always work on planar mode
+
+	vga_setStartAddress(0x1600);
+	// Some is hardcoded
+	// TODO ? more mode setting
+
+	vga_fillVRAM(0xF, 0, 0, 0xFFFF);
 }
 
 // addr seg00:0F03
@@ -368,9 +376,7 @@ void updateVgaBuffer() {
 	video_pixelPan = (ax % 4) * 2;
 	bx += (ax / 4) + 8;
 
-	// TODO
-	//vga_ports[0x3D4][0xD] = bx & 0xFF;
-	//vga_ports[0x3D4][0xC] = (bx >> 8) & 0xFF;
+	vga_setStartAddress(bx);
 
 	// TODO vars
 }
@@ -768,6 +774,8 @@ void test_read(uint16_t chunk_id) {
 
 // addr seg00:0000
 int main() {
+	vga_initialize();
+
 	hookInts();
 	hwCheck();
 	allocMemAndLoadData();
@@ -777,4 +785,8 @@ int main() {
 	sub_108B8();
 	loadNextLevel(); // Logo fade in
 	// TODO
+
+	vga_present();
+	SDL_Delay(2500);
+	vga_deinitialize();
 }

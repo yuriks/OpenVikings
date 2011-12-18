@@ -98,10 +98,6 @@ LevelHeader level_header; // addr seg04:25B3
 
 uint16_t did_init_timer; // addr seg04:A39A
 
-struct Color {
-	uint8_t rgb[3];
-};
-
 Color palette1[0x100]; // addr seg04:7F02
 Color palette2[0x100]; // addr seg04:8202
 
