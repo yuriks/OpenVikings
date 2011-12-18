@@ -1,0 +1,17 @@
+00-03: Alien ship
+04-0a: Jungle
+0b-10: Desert
+11-18: Machine world
+19-20: Wacky world
+21-24: Alien ship reprise
+25: Respawn/sea screen
+26: Title screen & menu
+27: "Interplay" logo
+28: "Silicon & Synapse" logo
+29: World change cutscene (falling on galaxy looking thing)
+2a: Title screen again (???)
+2b: Intro cutscene part 1 (hunting)
+2c: Intro cutscene part 2 (abduction)
+2d: Ending cutscene part 1 (ship flying)
+2e: Ending cutscene part 2 (arriving home)
+2f: Credits (rock concert)
