@@ -66,7 +66,7 @@ DataHeader1 data_header1; // addr seg04:86B0
 
 FarPtr soundData; // addr seg04:992A
 
-enum LevelFlags {
+enum LevelFlags : uint8_t {
 	LVLFLAG_BIT1 = 0x1,
 	LVLFLAG_BIT2 = 0x2,
 	LVLFLAG_BIT8 = 0x8,
@@ -75,6 +75,7 @@ enum LevelFlags {
 	LVLFLAG_BIT80 = 0x80
 };
 
+#include "pack_enable.hpp"
 struct LevelHeader {
 	/* 0000 */ uint8_t dummy1[22];
 	/* 0016 */ uint16_t next_level_id;
@@ -89,7 +90,10 @@ struct LevelHeader {
 	/* 0032 */ uint16_t anonymous_14;
 	/* 0034 */ uint8_t dummy5[15];
 	/* 0043 */ uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
-};
+}
+#include "pack_disable.hpp"
+;
+
 LevelHeader level_header; // addr seg04:25B3
 
 uint16_t did_init_timer; // addr seg04:A39A

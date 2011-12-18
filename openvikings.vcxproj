@@ -69,6 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\main.hpp" />
+    <ClInclude Include="src\pack_disable.hpp" />
+    <ClInclude Include="src\pack_enable.hpp" />
     <ClInclude Include="src\vars.hpp" />
     <ClInclude Include="src\vga_emu.hpp" />
   </ItemGroup>

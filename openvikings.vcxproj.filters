@@ -32,5 +32,11 @@
     <ClInclude Include="src\main.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\pack_enable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pack_disable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
