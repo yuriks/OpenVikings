@@ -195,3 +195,6 @@ enum PaletteAction {
 PaletteAction palette_action = PALACT_NONE; // addr seg04:7EFE;
 
 Color* pal_pointer = palette1; // addr seg04:7F00
+
+uint8_t saved_video_mode;
+bool video_initialized; // addr seg04:92FF

@@ -14,7 +14,6 @@
 // TODO
 void hookKeyboard();
 void unhookKeyboard();
-void restoreVideo();
 void restoreErrorInt();
 uint32_t curSystemTime();
 
@@ -23,8 +22,16 @@ uint32_t curSystemTime();
 void hookKeyboard() {}
 // addr seg00:6546
 void unhookKeyboard() {}
+
 // addr seg00:686F
-void restoreVideo() {}
+void restoreVideo() {
+	if (saved_video_mode != 0xFF) {
+		// TODO vga_deinitialize();
+	}
+	video_initialized = false;
+}
+
+// TODO
 // addr seg00:292F
 void restoreErrorInt() {}
 uint32_t curSystemTime() { return 0; }
@@ -335,6 +342,8 @@ void initVideo() {
 	// TODO ? more mode setting
 
 	vga_fillVRAM(0xF, 0, 0, 0xFFFF);
+
+	video_initialized = true;
 }
 
 // addr seg00:0F03
