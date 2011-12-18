@@ -107,7 +107,16 @@ Color color2; // addr seg04:0345
 uint16_t video_levelY; // addr seg04:0046
 uint16_t video_screenShakeY; // addr seg04:03A0
 uint16_t video_levelHeight; // addr seg04:25A6
-uint16_t word_317D9; // addr seg04:92F9
+uint16_t video_backBufBase = 0; // addr seg04:92F7
+uint16_t video_frontBufBase = 52; // addr seg04:92F9
+uint16_t video_resvBufBase = 104; // addr seg04:92FB
+
+uint16_t video_frontBuffer; // addr seg04:9305
+uint16_t video_resvBuffer; // addr seg04:9307
+uint16_t video_backBuffer; // addr seg04:9309
+uint16_t video_backBufAddr; // addr seg04:930B
+uint16_t video_frontBufAddr; // addr seg04:930D
+uint16_t video_resvBufAddr; // addr seg04:930F
 
 // addr seg04:89F8
 const uint16_t heightTileMults[24] = {
@@ -131,6 +140,9 @@ uint16_t video_levelX; // addr seg04:0044
 uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_levelWidth; // addr seg04:25A4
 uint8_t video_pixelPan; // addr seg04:92EE
+
+uint16_t video_scroll_x_tiles; // addr seg04:257F
+uint16_t video_scroll_y_tiles; // addr seg04:2581
 
 Color stru_2AA88; // addr seg04:25A8
 
@@ -173,3 +185,13 @@ uint16_t word_3164A; // addr seg04:916A
 
 uint16_t previous_level; // addr seg04:25AB
 uint16_t current_level; // addr seg04:25AD
+
+enum PaletteAction {
+	PALACT_NONE = 0,
+	PALACT_UNK1 = 2,
+	PALACT_COPY = 4
+};
+
+PaletteAction palette_action = PALACT_NONE; // addr seg04:7EFE;
+
+Color* pal_pointer = palette1; // addr seg04:7F00

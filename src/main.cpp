@@ -366,7 +366,7 @@ void updateVgaBuffer() {
 	if (si > video_levelHeight)
 		si = video_levelY - video_screenShakeY;
 
-	uint16_t cx = heightTileMults[si / 8 + word_317D9 / 2];
+	uint16_t cx = heightTileMults[si / 8 + video_frontBufBase / 2];
 	uint16_t bx = heightPixelMults[si % 8] + cx;
 
 	uint16_t ax = video_levelX + video_screenShakeX;
@@ -695,10 +695,187 @@ void loadChunks3() {
 	}
 }
 
+// addr seg00:0130
+void waitForTimerInt() {
+	// TODO implement actual DOS-accurate timing
+	SDL_Delay(33);
+	//while (waitForTimerInt > 0);
+}
+
+// addr seg00:0FE6
+void loadPal2ToVga() {
+	palette_action = PALACT_NONE;
+	vga_setPalette(palette2);
+}
+
+// addr seg00:0FA0
+void fadePalOut() {
+	int8_t bx = 0;
+
+	do {
+		color1.rgb[0] = bx;
+		color1.rgb[1] = bx;
+		color1.rgb[2] = bx;
+		fadePalStep();
+
+		palette_action = PALACT_COPY;
+		// TODO dat hack
+		loadPal2ToVga();
+
+		pal_pointer = palette2;
+		updateVgaBuffer();
+		waitForTimerInt();
+	} while(++bx != 70);
+
+	color1.rgb[0] = 0;
+	color1.rgb[1] = 0;
+	color1.rgb[2] = 0;
+	pal_pointer = palette2;
+}
+
+// addr seg00:0F5D
+void fadePalIn() {
+	int8_t bx = 70;
+
+	do {
+		color1.rgb[0] = bx;
+		color1.rgb[1] = bx;
+		color1.rgb[2] = bx;
+		fadePalStep();
+
+		palette_action = PALACT_COPY;
+		pal_pointer = palette2;
+
+		updateVgaBuffer();
+
+		// TODO dat hack
+		loadPal2ToVga();
+		waitForTimerInt();
+	} while(--bx >= 0);
+
+	color1.rgb[0] = 0;
+	color1.rgb[1] = 0;
+	color1.rgb[2] = 0;
+	pal_pointer = palette1;
+}
+
+void drawTile(uint16_t tilegfx_off, uint16_t vram_off) {
+	uint8_t flips = (tilegfx_off >> 4) & 3;
+
+	tilegfx_off &= 0xFFC0;
+	uint8_t* gfx = &alloc_seg1[tilegfx_off];
+
+	if (flips == 0) { // No flip
+		for (int p = 0; p < 4; ++p) {
+			uint8_t* vram = &vga_framebuffer[p][vram_off];
+
+			for (int y = 0; y < 8; ++y) {
+				vram[0x56*y + 0] = *gfx++;
+				vram[0x56*y + 1] = *gfx++;
+			}
+		}
+	} else if (flips == 1) { // Horizontal flip
+		for (int p = 3; p >= 0; --p) {
+			uint8_t* vram = &vga_framebuffer[p][vram_off];
+
+			for (int y = 0; y < 8; ++y) {
+				vram[0x56*y + 1] = *gfx++;
+				vram[0x56*y + 0] = *gfx++;
+			}
+		}
+	} else if (flips == 2) { // Vertical flip
+		for (int p = 0; p < 4; ++p) {
+			uint8_t* vram = &vga_framebuffer[p][vram_off];
+
+			for (int y = 7; y >= 0; --y) {
+				vram[0x56*y + 0] = *gfx++;
+				vram[0x56*y + 1] = *gfx++;
+			}
+		}
+	} else /* flips == 2|1 */ { // Horizontal+Vertical flip
+		for (int p = 3; p >= 0; --p) {
+			uint8_t* vram = &vga_framebuffer[p][vram_off];
+
+			for (int y = 7; y >= 0; --y) {
+				vram[0x56*y + 1] = *gfx++;
+				vram[0x56*y + 0] = *gfx++;
+			}
+		}
+	}
+}
+
+void drawTilesLine(uint16_t tilemap_off, uint16_t vram_off) {
+	tilemap_off /= 2;
+
+	for (int i = 0; i < 43; ++i) {
+		drawTile(alloc_seg6[tilemap_off], vram_off);
+		tilemap_off++;
+		vram_off += 2; // 2 * 4 = 8 pixels
+	}
+}
+
+void cloneBackBuffer() {
+	vga_vramCopy(video_backBufAddr, video_frontBufAddr, 0x2B0);
+	vga_vramCopy(video_backBufAddr, video_resvBufAddr, 0x2B0);
+}
+
+// addr seg00:6DED
+void sub_16DED() {
+	int16_t di = video_scroll_y_tiles - 1;
+	if (di < 1)
+		di = 0;
+
+	uint16_t bx = word_31448[di];
+	video_frontBuffer = di*2 + video_frontBufBase;
+	video_resvBuffer  = di*2 + video_resvBufBase;
+	video_backBuffer  = di*2 + video_backBufBase;
+
+	int16_t dx = video_scroll_x_tiles - 1;
+	if (dx < 1)
+		dx = 0;
+
+	bx += dx;
+	dx += 4;
+
+	for (uint16_t cx = 0; cx < 25; ++cx) {
+		di = video_frontBuffer/2;
+		di = heightTileMults[di];
+		di += dx;
+		video_frontBufAddr = di*2;
+
+		di = video_resvBuffer/2;
+		di = heightTileMults[di];
+		di += dx;
+		video_resvBufAddr = di*2;
+
+		di = video_backBuffer/2;
+		di = heightTileMults[di];
+		di += dx;
+		video_backBufAddr = di*2;
+
+		drawTilesLine(bx*2, di*2);
+		cloneBackBuffer();
+
+		bx += word_31448[4/2]/2;
+
+		video_frontBuffer += 2;
+		video_resvBuffer += 2;
+		video_backBuffer += 2;
+	}
+}
+
+// addr seg00:1439
+void sub_11439() {
+	if (!(level_header.level_flags & (LVLFLAG_BIT2 | LVLFLAG_BIT40))) {
+		sub_16DED();
+	}
+	updateVgaBuffer();
+}
+
 // addr seg00:1080
 void loadNextLevel() {
 	// TODO lotsa variables
-	// TODO fadePalOut();
+	fadePalOut();
 	// TODO sound_func1();
 	// TODO zero_byte_31A4C();
 	// TODO some vars
@@ -728,11 +905,11 @@ void loadNextLevel() {
 	// TODO sub_113D8();
 	// TODO sub_17749();
 	sub_173C7();
-	// *** TODO sub_11439();
+	sub_11439();
 	sub_13BA5();
 	sub_13A0E();
 	sub_115D2();
-	// TODO fadePalIn(); // Fade in
+	fadePalIn();
 	// TODO sub_12345();
 }
 
