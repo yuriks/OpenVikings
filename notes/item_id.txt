@@ -1,0 +1,21 @@
+This list is complete, as far as I know. (Larger values give garbage.)
+
+0000: No item
+0001: Pointy red fruit
+0002: Tomato-looking red fruit
+0003: Screen-killer
+0004: Ham
+0005: Large ham slice
+0006: Red key
+0007: Blue key
+0008: Yellow key
+0009: Armour
+000A: Bomb
+000B: Fire arrow
+000C: Gravity boots
+000D: Torch
+000E: Tool kit
+000F: Lab flask
+0010: Wire reel
+0011: Steel block
+0012: Batteries
