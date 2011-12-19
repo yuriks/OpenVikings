@@ -830,7 +830,7 @@ void cloneBackBuffer() {
 }
 
 // addr seg00:6DED
-void sub_16DED() {
+void drawInitialBg() {
 	int16_t di = video_scroll_y_tiles - 1;
 	if (di < 1)
 		di = 0;
@@ -875,9 +875,10 @@ void sub_16DED() {
 }
 
 // addr seg00:1439
-void sub_11439() {
+// this is a horrible name
+void updateInitialBg() {
 	if (!(level_header.level_flags & (LVLFLAG_BIT2 | LVLFLAG_BIT40))) {
-		sub_16DED();
+		drawInitialBg();
 	}
 	updateVgaBuffer();
 }
@@ -922,7 +923,7 @@ void loadNextLevel() {
 	// TODO sub_113D8();
 	// TODO sub_17749();
 	sub_173C7();
-	sub_11439();
+	updateInitialBg();
 	sub_13BA5();
 	sub_13A0E();
 	sub_115D2();
