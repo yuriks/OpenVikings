@@ -119,16 +119,21 @@ uint16_t video_frontBufAddr; // addr seg04:930D
 uint16_t video_resvBufAddr; // addr seg04:930F
 
 // addr seg04:89F8
+/* use calcHeightTileMults instead!
 const uint16_t heightTileMults[24] = {
 	// in increments of 2B0
-	// 0x1600 + i * 0x2B0
+	// 0x1600 + (i % 78) * 0x2B0
+
 	0x1600, 0x18B0, 0x1B60, 0x1E10, // 0
 	0x20C0, 0x2370, 0x2620, 0x28D0, // 4
 	0x2B80, 0x2E30, 0x30E0, 0x3390, // 8
 	0x3640, 0x38F0, 0x3BA0, 0x3E50, // 12
 	0x4100, 0x43B0, 0x4660, 0x4910, // 16
 	0x4BC0, 0x4E70, 0x5120, 0x53D0, // 20
+	// and so on...
 };
+*/
+
 
 // addr seg04:8E58
 const uint16_t heightPixelMults[8] = {

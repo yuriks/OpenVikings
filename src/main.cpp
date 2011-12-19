@@ -368,13 +368,17 @@ void fadePalStep() {
 	}
 }
 
+inline uint16_t calcHeightTileMults(int i) {
+	return 0x1600 + (i % 78) * 0x2B0;
+}
+
 // addr seg00:6775
 void updateVgaBuffer() {
 	uint16_t si = video_levelY + video_screenShakeY;
 	if (si > video_levelHeight)
 		si = video_levelY - video_screenShakeY;
 
-	uint16_t cx = heightTileMults[si / 8 + video_frontBufBase / 2];
+	uint16_t cx = calcHeightTileMults(si / 8 + video_frontBufBase / 2);
 	uint16_t bx = heightPixelMults[si % 8] + cx;
 
 	uint16_t ax = video_levelX + video_screenShakeX;
@@ -813,11 +817,9 @@ void drawTile(uint16_t tilegfx_off, uint16_t vram_off) {
 }
 
 void drawTilesLine(uint16_t tilemap_off, uint16_t vram_off) {
-	tilemap_off /= 2;
-
 	for (int i = 0; i < 43; ++i) {
-		drawTile(alloc_seg6[tilemap_off], vram_off);
-		tilemap_off++;
+		drawTile(load16LE(&alloc_seg6[tilemap_off]), vram_off);
+		tilemap_off += 2;
 		vram_off += 2; // 2 * 4 = 8 pixels
 	}
 }
@@ -847,24 +849,24 @@ void sub_16DED() {
 
 	for (uint16_t cx = 0; cx < 25; ++cx) {
 		di = video_frontBuffer/2;
-		di = heightTileMults[di];
-		di += dx;
-		video_frontBufAddr = di*2;
+		di = calcHeightTileMults(di);
+		di += dx*2;
+		video_frontBufAddr = di;
 
 		di = video_resvBuffer/2;
-		di = heightTileMults[di];
-		di += dx;
-		video_resvBufAddr = di*2;
+		di = calcHeightTileMults(di);
+		di += dx*2;
+		video_resvBufAddr = di;
 
 		di = video_backBuffer/2;
-		di = heightTileMults[di];
-		di += dx;
-		video_backBufAddr = di*2;
+		di = calcHeightTileMults(di);
+		di += dx*2;
+		video_backBufAddr = di;
 
-		drawTilesLine(bx*2, di*2);
+		drawTilesLine(bx, di);
 		cloneBackBuffer();
 
-		bx += word_31448[4/2]/2;
+		bx += word_31448[4/2];
 
 		video_frontBuffer += 2;
 		video_resvBuffer += 2;
