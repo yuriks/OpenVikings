@@ -17,17 +17,17 @@ int32_t chunk_offsets[2]; // addr seg04:2BB4
 
 uint16_t decoded_data_len; // addr seg04:2BBC
 
-uint8_t* alloc_seg0; // addr seg04:2E5D
-uint8_t* alloc_seg1; // addr seg04:2E5F
+uint8_t* metatile_data; // addr seg04:2E5D
+uint8_t* tileset_data; // addr seg04:2E5F
 uint8_t* alloc_seg2; // addr seg04:2E61
-uint8_t* alloc_seg3; // addr seg04:2E63
-uint8_t* alloc_seg3_end; // addr seg04:2E65
-uint8_t* alloc_seg5; // addr seg04:2E67
+uint8_t* tilemap_data; // addr seg04:2E63
+uint8_t* tilemap_data_end; // addr seg04:2E65
+uint8_t* world_data; // addr seg04:2E67
 uint8_t* alloc_seg6; // addr seg04:2E69
 uint8_t* soundData2End; // addr seg04:2E6B
 uint8_t* soundData1End; // addr seg04:2E6D
 uint8_t* soundData0End; // addr seg04:2E6F
-uint16_t loaded_chunk0; // addr seg04:2E71
+uint16_t loaded_world_chunk; // addr seg04:2E71
 uint8_t* alloc_seg11; // addr seg04:2E73
 uint8_t* ptr3; // addr seg04:2E75
 uint8_t* ptr1; // addr seg04:2E79
@@ -82,12 +82,12 @@ struct LevelHeader {
 	/* 0018 */ uint8_t dummy2[4];
 	/* 001C */ LevelFlags level_flags;
 	/* 001D */ uint8_t dummy3[12];
-	/* 0029 */ uint16_t anonymous_10;
-	/* 002B */ uint16_t anonymous_11;
+	/* 0029 */ uint16_t level_width;
+	/* 002B */ uint16_t level_height;
 	/* 002D */ uint8_t dummy4[1];
-	/* 002E */ uint16_t anonymous_12;
-	/* 0030 */ uint16_t anonymous_13;
-	/* 0032 */ uint16_t anonymous_14;
+	/* 002E */ uint16_t tilemap_data_chunk;
+	/* 0030 */ uint16_t tileset_data_chunk;
+	/* 0032 */ uint16_t metatile_data_chunk;
 	/* 0034 */ uint8_t dummy5[15];
 	/* 0043 */ uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
 }
@@ -106,7 +106,7 @@ Color color2; // addr seg04:0345
 
 uint16_t video_levelY; // addr seg04:0046
 uint16_t video_screenShakeY; // addr seg04:03A0
-uint16_t video_levelHeight; // addr seg04:25A6
+uint16_t video_level_max_y; // addr seg04:25A6
 uint16_t video_backBufBase = 0; // addr seg04:92F7
 uint16_t video_frontBufBase = 52; // addr seg04:92F9
 uint16_t video_resvBufBase = 104; // addr seg04:92FB
@@ -143,7 +143,7 @@ const uint16_t heightPixelMults[8] = {
 
 uint16_t video_levelX; // addr seg04:0044
 uint16_t video_screenShakeX; // addr seg04:039E
-uint16_t video_levelWidth; // addr seg04:25A4
+uint16_t video_level_max_x; // addr seg04:25A4
 uint8_t video_pixelPan; // addr seg04:92EE
 
 uint16_t video_scroll_x_tiles; // addr seg04:257F
@@ -152,7 +152,7 @@ uint16_t video_scroll_y_tiles; // addr seg04:2581
 Color stru_2AA88; // addr seg04:25A8
 
 // addr seg04:940C
-const uint16_t loadListChunksA[0x30] = {
+const uint16_t levelTileChunks[0x30] = {
 	0xC6,  0xC8,  0xCA,  0xCC,  0x28,  0x2A,  0x2C,  0x2E,
 	0x30,  0x32,  0x34,  0x4B,  0x4D,  0x4F,  0x51,  0x53,
 	0x55,  0x72,  0x74,  0x76,  0x78,  0x7A,  0x7C,  0x7E,
@@ -162,7 +162,7 @@ const uint16_t loadListChunksA[0x30] = {
 };
 
 // addr seg04:946C
-const uint16_t loadListChunksB[0x30] = {
+const uint16_t levelWorldChunks[0x30] = {
 	0x1C1, 0x1C1, 0x1C1, 0x1C1, 0x1C2, 0x1C2,  0x1C2, 0x1C2,
 	0x1C2, 0x1C2, 0x1C2, 0x1C3, 0x1C3, 0x1C3,  0x1C3, 0x1C3,
 	0x1C3, 0x1C4, 0x1C4, 0x1C4, 0x1C4, 0x1C4,  0x1C4, 0x1C4,
@@ -185,8 +185,8 @@ uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
 
 uint16_t word_31448[0x100]; // addr seg04:8F68
 
-uint16_t word_31648; // addr seg04:9168
-uint16_t word_3164A; // addr seg04:916A
+uint16_t level_width_tiles; // addr seg04:9168
+uint16_t level_height_tiles; // addr seg04:916A
 
 uint16_t previous_level; // addr seg04:25AB
 uint16_t current_level; // addr seg04:25AD

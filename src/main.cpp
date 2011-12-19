@@ -241,10 +241,10 @@ uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 
 // addr seg00:2AB8
 void allocMemAndLoadData() {
-	alloc_seg1 = new uint8_t[0x8B80];
+	tileset_data = new uint8_t[0x8B80];
 	alloc_seg2 = new uint8_t[0x2000];
-	alloc_seg0 = new uint8_t[0x3600];
-	alloc_seg3 = new uint8_t[0x3130];
+	metatile_data = new uint8_t[0x3600];
+	tilemap_data = new uint8_t[0x3130];
 	alloc_seg6 = new uint8_t[0xC080];
 	alloc_seg11 = new uint8_t[0x7000];
 
@@ -264,10 +264,10 @@ void allocMemAndLoadData() {
 
 	ptr3 = new uint8_t[0x2ABA0];
 
-	alloc_seg5 = new uint8_t[0xC000];
+	world_data = new uint8_t[0xC000];
 
-	loaded_chunk0 = 0x1C6;
-	decompressChunk(loaded_chunk0, alloc_seg5);
+	loaded_world_chunk = 0x1C6;
+	decompressChunk(loaded_world_chunk, world_data);
 
 	decompressChunk(4, chunk_buffer0);
 	decompressChunk(5, chunk_buffer1);
@@ -294,11 +294,11 @@ void freeMemAndQuit() {
 	unhookKeyboard();
 	// TODO one call
 
-	delete[] alloc_seg1;
-	delete[] alloc_seg0;
+	delete[] tileset_data;
+	delete[] metatile_data;
 	delete[] alloc_seg2;
-	delete[] alloc_seg3;
-	delete[] alloc_seg5;
+	delete[] tilemap_data;
+	delete[] world_data;
 	delete[] ptr3;
 
 	std::fclose(data_file);
@@ -375,14 +375,14 @@ inline uint16_t calcHeightTileMults(int i) {
 // addr seg00:6775
 void updateVgaBuffer() {
 	uint16_t si = video_levelY + video_screenShakeY;
-	if (si > video_levelHeight)
+	if (si > video_level_max_y)
 		si = video_levelY - video_screenShakeY;
 
 	uint16_t cx = calcHeightTileMults(si / 8 + video_frontBufBase / 2);
 	uint16_t bx = heightPixelMults[si % 8] + cx;
 
 	uint16_t ax = video_levelX + video_screenShakeX;
-	if (ax > video_levelWidth)
+	if (ax > video_level_max_x)
 		ax = video_levelX - video_screenShakeX;
 
 	video_pixelPan = (ax % 4) * 2;
@@ -444,13 +444,13 @@ void sub_108B8() {
 }
 
 // addr seg00:11B1
-void loadLoadList(uint16_t list_id) {
-	uint16_t chunk_id = loadListChunksB[list_id];
-	if (chunk_id != 0xFFFF && chunk_id != loaded_chunk0) {
-		loaded_chunk0 = chunk_id;
-		decompressChunk(chunk_id, alloc_seg5);
+void loadLevelHeader(uint16_t level_id) {
+	uint16_t chunk_id = levelWorldChunks[level_id];
+	if (chunk_id != 0xFFFF && chunk_id != loaded_world_chunk) {
+		loaded_world_chunk = chunk_id;
+		decompressChunk(chunk_id, world_data);
 	}
-	decompressChunk(loadListChunksA[list_id], reinterpret_cast<uint8_t*>(&level_header));
+	decompressChunk(levelTileChunks[level_id], reinterpret_cast<uint8_t*>(&level_header));
 }
 
 // addr seg00:1383
@@ -611,45 +611,42 @@ void loc_16595(uint16_t ax) {
 
 // addr seg00:13B0
 void sub_113B0() {
-	uint16_t ax;
-	
-	ax = level_header.anonymous_10 * 2;
-	word_31648 = ax;
-	video_levelWidth = ax * 8 - 320;
 
-	ax = level_header.anonymous_11 * 2;
-	word_3164A = ax;
-	video_levelHeight = ax * 8 - 176; // viewport height
+	level_width_tiles = level_header.level_width * 2;
+	video_level_max_x = level_width_tiles * 8 - 320;
 
-	loc_16595(level_header.anonymous_10);
+	level_height_tiles = level_header.level_height * 2;
+	video_level_max_y = level_height_tiles * 8 - 176; // 176 = viewport height
+
+	loc_16595(level_header.level_width);
 }
 
 // addr seg00:73C7
-void sub_173C7() {
-	// TODO Clean this up and understand what it's doing
+void assembleLevelTiles() {
+	// TODO Clean this up
 
-	// TODO sets fs to allocSeg6 too
+	// sets fs to allocSeg6 too
 	if (level_header.level_flags & (LVLFLAG_BIT2 | LVLFLAG_BIT40)) {
 		std::fill_n(reinterpret_cast<uint32_t*>(alloc_seg6), 0x3020, 0);
 	} else {
-		uint16_t y_max = level_header.anonymous_11;
-		uint16_t x_max = level_header.anonymous_10;
+		uint16_t y_max = level_header.level_height;
+		uint16_t x_max = level_header.level_width;
 
 		uint16_t bx = 0;
 		uint16_t di = 0;
 
 		for (uint16_t y = 0; y < y_max; ++y) {
 			for (uint16_t x = 0; x < x_max; ++x) {
-				uint16_t si = load16LE(&alloc_seg3[bx++ *2]) % 1024;
+				uint16_t si = load16LE(&tilemap_data[bx++ *2]) % 1024;
 
-				store32LE(&alloc_seg6[ di       *4], load32LE(&alloc_seg0[si*8  ]));
-				store32LE(&alloc_seg6[(di+x_max)*4], load32LE(&alloc_seg0[si*8+4]));
+				store32LE(&alloc_seg6[ di       *4], load32LE(&metatile_data[si*8  ]));
+				store32LE(&alloc_seg6[(di+x_max)*4], load32LE(&metatile_data[si*8+4]));
 				di++;
 			}
 			di += x_max;
 		}
 
-		std::copy_n(alloc_seg0, 0x78, alloc_seg3_end);
+		std::copy_n(metatile_data, 15 * 4 * 2, tilemap_data_end);
 	}
 }
 
@@ -683,27 +680,27 @@ void loadImage(uint16_t chunk_id, uint16_t offset) {
 // addr seg00:1204
 void loadChunks3() {
 	if (level_header.level_flags & LVLFLAG_BIT2) {
-		loadImage(level_header.anonymous_12, 0x20C8);
-		loadImage(level_header.anonymous_12, 0x66A8);
-		loadImage(level_header.anonymous_12, 0xAC88);
+		loadImage(level_header.tilemap_data_chunk, 0x20C8);
+		loadImage(level_header.tilemap_data_chunk, 0x66A8);
+		loadImage(level_header.tilemap_data_chunk, 0xAC88);
 		loadImage(0x180, 0);
 	} else {
 		if (level_header.level_flags & LVLFLAG_BIT20) {
 			loadImage(0x211, 0);
 		} else {
 			if (level_header.level_flags & LVLFLAG_BIT40) {
-				loadImage(level_header.anonymous_12, 0x20C8);
-				loadImage(level_header.anonymous_12, 0x66A8);
-				loadImage(level_header.anonymous_12, 0xAC88);
+				loadImage(level_header.tilemap_data_chunk, 0x20C8);
+				loadImage(level_header.tilemap_data_chunk, 0x66A8);
+				loadImage(level_header.tilemap_data_chunk, 0xAC88);
 				loadImage(0x213, 0);
 				return;
 			}
 		}
 
-		decompressChunk(level_header.anonymous_13, alloc_seg1);
-		decompressChunk(level_header.anonymous_13 + 1, alloc_seg2);
-		alloc_seg3_end = decompressChunk(level_header.anonymous_12, alloc_seg3);
-		decompressChunk(level_header.anonymous_14, alloc_seg0);
+		decompressChunk(level_header.tileset_data_chunk, tileset_data);
+		decompressChunk(level_header.tileset_data_chunk + 1, alloc_seg2);
+		tilemap_data_end = decompressChunk(level_header.tilemap_data_chunk, tilemap_data);
+		decompressChunk(level_header.metatile_data_chunk, metatile_data);
 	}
 }
 
@@ -775,7 +772,7 @@ void drawTile(uint16_t tilegfx_off, uint16_t vram_off) {
 	uint8_t flips = (tilegfx_off >> 4) & 3;
 
 	tilegfx_off &= 0xFFC0;
-	uint8_t* gfx = &alloc_seg1[tilegfx_off];
+	uint8_t* gfx = &tileset_data[tilegfx_off];
 
 	if (flips == 0) { // No flip
 		for (int p = 0; p < 4; ++p) {
@@ -904,7 +901,7 @@ void loadNextLevel() {
 	// TODO zero_byte_28836();
 	previous_level = current_level;
 	current_level = level_header.next_level_id;
-	loadLoadList(current_level);
+	loadLevelHeader(current_level);
 	// TODO setColor1And2();
 	if (current_level != 0x25)
 		zero_word_288C4();
@@ -922,7 +919,7 @@ void loadNextLevel() {
 	sub_113B0();
 	// TODO sub_113D8();
 	// TODO sub_17749();
-	sub_173C7();
+	assembleLevelTiles();
 	updateInitialBg();
 	sub_13BA5();
 	sub_13A0E();
