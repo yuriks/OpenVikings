@@ -40,7 +40,7 @@ inline uint16_t load16LE(const uint8_t* d) {
 	return d[0] | d[1] << 8;
 }
 
-inline uint16_t load32LE(const uint8_t* d) {
+inline uint32_t load32LE(const uint8_t* d) {
 	return d[0] | d[1] << 8 | d[2] << 16 | d[3] << 24;
 }
 
