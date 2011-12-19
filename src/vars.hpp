@@ -6,15 +6,73 @@ struct FarPtr {
 	uint8_t* seg;
 };
 
+uint16_t video_levelX; // addr seg04:0044
+uint16_t video_levelY; // addr seg04:0046
+
 uint16_t data_header1_snd1; // addr seg04:0302
 uint16_t data_header1_snd2; // addr seg04:0304
 
 uint16_t current_password[4]; // addr seg04:0310
 
+Color color1; // addr seg04:0342
+Color color2; // addr seg04:0345
+
+uint16_t video_screenShakeX; // addr seg04:039E
+uint16_t video_screenShakeY; // addr seg04:03A0
+
+uint16_t loaded_chunks2[16]; // addr seg04:124D
+uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
+uint16_t loaded_chunks11[0x20]; // addr seg04:12AD
+uint16_t loaded_chunks_end11[0x20]; // addr seg04:12ED
+
+uint16_t video_scroll_x_tiles; // addr seg04:257F
+uint16_t video_scroll_y_tiles; // addr seg04:2581
+
+uint8_t byte_2AA63; // addr seg04:2583
+uint8_t byte_2AA64[8]; // addr seg04:2584
+uint8_t byte_2AA6C[8]; // addr seg04:258C
+uint8_t byte_2AA74[8]; // addr seg04:2594
+uint8_t byte_2AA7C[8]; // addr seg04:259C
+
+uint16_t video_level_max_x; // addr seg04:25A4
+uint16_t video_level_max_y; // addr seg04:25A6
+
+Color stru_2AA88; // addr seg04:25A8
+
+uint16_t previous_level; // addr seg04:25AB
+uint16_t current_level; // addr seg04:25AD
+
+enum LevelFlags : uint8_t {
+	LVLFLAG_BIT1 = 0x1,
+	LVLFLAG_BIT2 = 0x2,
+	LVLFLAG_BIT8 = 0x8,
+	LVLFLAG_BIT20 = 0x20,
+	LVLFLAG_BIT40 = 0x40,
+	LVLFLAG_BIT80 = 0x80
+};
+
+#include "pack_enable.hpp"
+struct LevelHeader {
+	/* 0000 */ uint8_t dummy1[22];
+	/* 0016 */ uint16_t next_level_id;
+	/* 0018 */ uint8_t dummy2[4];
+	/* 001C */ LevelFlags level_flags;
+	/* 001D */ uint8_t dummy3[12];
+	/* 0029 */ uint16_t level_width;
+	/* 002B */ uint16_t level_height;
+	/* 002D */ uint8_t dummy4[1];
+	/* 002E */ uint16_t tilemap_data_chunk;
+	/* 0030 */ uint16_t tileset_data_chunk;
+	/* 0032 */ uint16_t metatile_data_chunk;
+	/* 0034 */ uint8_t dummy5[15];
+	/* 0043 */ uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
+}
+#include "pack_disable.hpp"
+;
+LevelHeader level_header; // addr seg04:25B3
+
 std::FILE* data_file = 0; // addr seg04:2BB2
-
 int32_t chunk_offsets[2]; // addr seg04:2BB4
-
 uint16_t decoded_data_len; // addr seg04:2BBC
 
 uint8_t* metatile_data; // addr seg04:2E5D
@@ -45,6 +103,18 @@ uint8_t chunk_buffer9[0x700]; // addr seg04:497D TODO confirm size
 uint8_t chunk_buffer10[0x1800]; // addr seg04:507D TODO confirm size
 uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO TODO TODO really confirm size (completely guessed)
 
+enum PaletteAction {
+	PALACT_NONE = 0,
+	PALACT_UNK1 = 2,
+	PALACT_COPY = 4
+};
+
+PaletteAction palette_action = PALACT_NONE; // addr seg04:7EFE;
+extern Color palette1[0x100];
+Color* pal_pointer = palette1; // addr seg04:7F00
+Color palette1[0x100]; // addr seg04:7F02
+Color palette2[0x100]; // addr seg04:8202
+
 uint32_t start_time; // addr seg04:8639
 
 struct DataHeader1 {
@@ -64,60 +134,6 @@ struct DataHeader1 {
 };
 DataHeader1 data_header1; // addr seg04:86B0
 
-FarPtr soundData; // addr seg04:992A
-
-enum LevelFlags : uint8_t {
-	LVLFLAG_BIT1 = 0x1,
-	LVLFLAG_BIT2 = 0x2,
-	LVLFLAG_BIT8 = 0x8,
-	LVLFLAG_BIT20 = 0x20,
-	LVLFLAG_BIT40 = 0x40,
-	LVLFLAG_BIT80 = 0x80
-};
-
-#include "pack_enable.hpp"
-struct LevelHeader {
-	/* 0000 */ uint8_t dummy1[22];
-	/* 0016 */ uint16_t next_level_id;
-	/* 0018 */ uint8_t dummy2[4];
-	/* 001C */ LevelFlags level_flags;
-	/* 001D */ uint8_t dummy3[12];
-	/* 0029 */ uint16_t level_width;
-	/* 002B */ uint16_t level_height;
-	/* 002D */ uint8_t dummy4[1];
-	/* 002E */ uint16_t tilemap_data_chunk;
-	/* 0030 */ uint16_t tileset_data_chunk;
-	/* 0032 */ uint16_t metatile_data_chunk;
-	/* 0034 */ uint8_t dummy5[15];
-	/* 0043 */ uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
-}
-#include "pack_disable.hpp"
-;
-
-LevelHeader level_header; // addr seg04:25B3
-
-uint16_t did_init_timer; // addr seg04:A39A
-
-Color palette1[0x100]; // addr seg04:7F02
-Color palette2[0x100]; // addr seg04:8202
-
-Color color1; // addr seg04:0342
-Color color2; // addr seg04:0345
-
-uint16_t video_levelY; // addr seg04:0046
-uint16_t video_screenShakeY; // addr seg04:03A0
-uint16_t video_level_max_y; // addr seg04:25A6
-uint16_t video_backBufBase = 0; // addr seg04:92F7
-uint16_t video_frontBufBase = 52; // addr seg04:92F9
-uint16_t video_resvBufBase = 104; // addr seg04:92FB
-
-uint16_t video_frontBuffer; // addr seg04:9305
-uint16_t video_resvBuffer; // addr seg04:9307
-uint16_t video_backBuffer; // addr seg04:9309
-uint16_t video_backBufAddr; // addr seg04:930B
-uint16_t video_frontBufAddr; // addr seg04:930D
-uint16_t video_resvBufAddr; // addr seg04:930F
-
 // addr seg04:89F8
 /* use calcHeightTileMults instead!
 const uint16_t heightTileMults[24] = {
@@ -134,22 +150,33 @@ const uint16_t heightTileMults[24] = {
 };
 */
 
-
 // addr seg04:8E58
 const uint16_t heightPixelMults[8] = {
 	86*0, 86*1, 86*2, 86*3,
 	86*4, 86*5, 86*6, 86*7
 };
 
-uint16_t video_levelX; // addr seg04:0044
-uint16_t video_screenShakeX; // addr seg04:039E
-uint16_t video_level_max_x; // addr seg04:25A4
+uint16_t word_31448[0x100]; // addr seg04:8F68
+
+uint16_t level_width_tiles; // addr seg04:9168
+uint16_t level_height_tiles; // addr seg04:916A
+
 uint8_t video_pixelPan; // addr seg04:92EE
 
-uint16_t video_scroll_x_tiles; // addr seg04:257F
-uint16_t video_scroll_y_tiles; // addr seg04:2581
+uint16_t video_backBufBase = 0; // addr seg04:92F7
+uint16_t video_frontBufBase = 52; // addr seg04:92F9
+uint16_t video_resvBufBase = 104; // addr seg04:92FB
 
-Color stru_2AA88; // addr seg04:25A8
+bool video_initialized; // addr seg04:92FF
+uint8_t saved_video_mode; // addr seg04:9300
+
+uint16_t video_frontBuffer; // addr seg04:9305
+uint16_t video_resvBuffer; // addr seg04:9307
+uint16_t video_backBuffer; // addr seg04:9309
+
+uint16_t video_backBufAddr; // addr seg04:930B
+uint16_t video_frontBufAddr; // addr seg04:930D
+uint16_t video_resvBufAddr; // addr seg04:930F
 
 // addr seg04:940C
 const uint16_t levelTileChunks[0x30] = {
@@ -171,35 +198,6 @@ const uint16_t levelWorldChunks[0x30] = {
 	0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6,  0x1C6, 0x1C6
 };
 
-uint8_t byte_2AA63; // addr seg04:2583
-uint8_t byte_2AA64[8]; // addr seg04:2584
-uint8_t byte_2AA6C[8]; // addr seg04:258C
-uint8_t byte_2AA74[8]; // addr seg04:2594
-uint8_t byte_2AA7C[8]; // addr seg04:259C
+FarPtr soundData; // addr seg04:992A
 
-uint16_t loaded_chunks11[0x20]; // addr seg04:12AD
-uint16_t loaded_chunks_end11[0x20]; // addr seg04:12ED
-
-uint16_t loaded_chunks2[16]; // addr seg04:124D
-uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
-
-uint16_t word_31448[0x100]; // addr seg04:8F68
-
-uint16_t level_width_tiles; // addr seg04:9168
-uint16_t level_height_tiles; // addr seg04:916A
-
-uint16_t previous_level; // addr seg04:25AB
-uint16_t current_level; // addr seg04:25AD
-
-enum PaletteAction {
-	PALACT_NONE = 0,
-	PALACT_UNK1 = 2,
-	PALACT_COPY = 4
-};
-
-PaletteAction palette_action = PALACT_NONE; // addr seg04:7EFE;
-
-Color* pal_pointer = palette1; // addr seg04:7F00
-
-uint8_t saved_video_mode;
-bool video_initialized; // addr seg04:92FF
+uint16_t did_init_timer; // addr seg04:A39A
