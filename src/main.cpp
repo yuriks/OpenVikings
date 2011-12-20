@@ -932,42 +932,6 @@ void loadNextLevel() {
 	// TODO sub_12345();
 }
 
-void test_read(uint16_t chunk_id) {
-	struct Local {
-		static void errReadData() {
-			errorQuit("\nUnable to read data file.\n", errno);
-		}
-	};
-
-	if (std::fseek(data_file, chunk_id * 4, SEEK_SET) != 0)
-		Local::errReadData();
-
-	if (std::fread(&chunk_offsets, sizeof(int32_t), 2, data_file) != 2)
-		Local::errReadData();
-	if (std::fseek(data_file, chunk_offsets[0], SEEK_SET) != 0)
-		Local::errReadData();
-	if (std::fread(&decoded_data_len, sizeof(uint16_t), 1, data_file) != 1)
-		Local::errReadData();
-
-	uint8_t planes[4][64*1024];
-	std::memset(planes, 0, sizeof(planes));
-
-	for (int i = 0; i < 4; ++i) {
-		if (std::fread(planes[i], decoded_data_len, 1, data_file) != 1)
-			Local::errReadData();
-	}
-
-	char tmpfn[30];
-	sprintf(tmpfn, "image%03x.bin", chunk_id);
-	std::FILE* df = std::fopen(tmpfn, "wb");
-	for (int i = 0; i < decoded_data_len; ++i) {
-		for (int j = 0; j < 4; ++j) {
-			std::fputc(planes[j][i], df);
-		}
-	}
-	std::fclose(df);
-}
-
 // addr seg00:0000
 int main() {
 	vga_initialize();
