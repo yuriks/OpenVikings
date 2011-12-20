@@ -342,6 +342,7 @@ void initVideo() {
 	// Skip some mode initialization, It'll always work on planar mode
 
 	vga_setStartAddress(0x1600);
+	vga_setLineCompare(0x15F);
 	// Some is hardcoded
 	// TODO ? more mode setting
 

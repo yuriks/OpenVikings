@@ -15,6 +15,7 @@ void vga_vramCopy(uint16_t source, uint16_t dest, uint16_t len);
 void vga_setPalette(const Color* palette);
 
 void vga_setStartAddress(uint16_t addr);
+void vga_setLineCompare(unsigned int scanline);
 
 void vga_initialize();
 void vga_deinitialize();

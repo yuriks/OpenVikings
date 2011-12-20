@@ -10,6 +10,7 @@ uint8_t vga_framebuffer[4][0x10000];
 
 static uint32_t vga_palette[256];
 static uint16_t vga_start_address;
+static unsigned int vga_line_compare = -1;
 
 static SDL_Window* vga_window = nullptr;
 static SDL_Renderer* vga_renderer = nullptr;
@@ -65,6 +66,12 @@ void vga_setPalette(const Color* palette) {
 
 void vga_setStartAddress(uint16_t addr) {
 	vga_start_address = addr;
+	vga_present();
+}
+
+void vga_setLineCompare(unsigned int scanline) {
+	// Divide by 2 because this VGA video mode uses doubled lines
+	vga_line_compare = scanline / 2;
 	vga_present();
 }
 
@@ -124,9 +131,12 @@ void vga_present() {
 
 	uint16_t vram_line_offset = vga_start_address;
 
-	// TODO line compare
 	for (int y = 0; y < 240; ++y) {
+		if (y == vga_line_compare)
+			vram_line_offset = 0;
+
 		uint16_t vram_offset = vram_line_offset;
+
 		for (int x = 0; x < 320; x += 4) {
 			tex_pixels[x+0] = vga_palette[vga_framebuffer[0][vram_offset]];
 			tex_pixels[x+1] = vga_palette[vga_framebuffer[1][vram_offset]];
