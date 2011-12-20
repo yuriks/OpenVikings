@@ -603,14 +603,14 @@ void sub_115D2() {
 }
 
 // addr seg00:6595
-void loc_16595(uint16_t ax) {
+void calculateRowOffsets(uint16_t level_width) {
 	for (uint16_t si = 0; si < 0x100; ++si) {
-		word_31448[si] = si*ax*2;
+		levelRowOffsets[si] = si*level_width*2;
 	}
 }
 
 // addr seg00:13B0
-void sub_113B0() {
+void calcLevelSize() {
 
 	level_width_tiles = level_header.level_width * 2;
 	video_level_max_x = level_width_tiles * 8 - 320;
@@ -618,7 +618,7 @@ void sub_113B0() {
 	level_height_tiles = level_header.level_height * 2;
 	video_level_max_y = level_height_tiles * 8 - 176; // 176 = viewport height
 
-	loc_16595(level_header.level_width);
+	calculateRowOffsets(level_header.level_width);
 }
 
 // addr seg00:73C7
@@ -832,7 +832,7 @@ void drawInitialBg() {
 	if (di < 1)
 		di = 0;
 
-	uint16_t bx = word_31448[di];
+	uint16_t bx = levelRowOffsets[di];
 	video_frontBuffer = di*2 + video_frontBufBase;
 	video_resvBuffer  = di*2 + video_resvBufBase;
 	video_backBuffer  = di*2 + video_backBufBase;
@@ -863,7 +863,7 @@ void drawInitialBg() {
 		drawTilesLine(bx, di);
 		cloneBackBuffer();
 
-		bx += word_31448[4/2];
+		bx += levelRowOffsets[2];
 
 		video_frontBuffer += 2;
 		video_resvBuffer += 2;
@@ -916,7 +916,7 @@ void loadNextLevel() {
 	sub_137F1();
 	sub_12FB3();
 	// ***? TODO sub_11446();
-	sub_113B0();
+	calcLevelSize();
 	// TODO sub_113D8();
 	// TODO sub_17749();
 	assembleLevelTiles();

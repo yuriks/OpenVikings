@@ -156,7 +156,7 @@ const uint16_t heightPixelMults[8] = {
 	86*4, 86*5, 86*6, 86*7
 };
 
-uint16_t word_31448[0x100]; // addr seg04:8F68
+uint16_t levelRowOffsets[0x100]; // addr seg04:8F68
 
 uint16_t level_width_tiles; // addr seg04:9168
 uint16_t level_height_tiles; // addr seg04:916A
