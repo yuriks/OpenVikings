@@ -75,18 +75,26 @@ std::FILE* data_file = 0; // addr seg04:2BB2
 int32_t chunk_offsets[2]; // addr seg04:2BB4
 uint16_t decoded_data_len; // addr seg04:2BBC
 
+static const size_t metatile_data_size = 0x3600;
 uint8_t* metatile_data; // addr seg04:2E5D
+static const size_t tileset_data_size = 0x8B80;
 uint8_t* tileset_data; // addr seg04:2E5F
+static const size_t alloc_seg2_size = 0x2000;
 uint8_t* alloc_seg2; // addr seg04:2E61
+static const size_t tilemap_data_size = 0x3130;
 uint8_t* tilemap_data; // addr seg04:2E63
 uint8_t* tilemap_data_end; // addr seg04:2E65
+static const size_t world_data_size = 0xC000;
 uint8_t* world_data; // addr seg04:2E67
+static const size_t alloc_seg6_size = 0xC080;
 uint8_t* alloc_seg6; // addr seg04:2E69
 uint8_t* soundData2End; // addr seg04:2E6B
 uint8_t* soundData1End; // addr seg04:2E6D
 uint8_t* soundData0End; // addr seg04:2E6F
 uint16_t loaded_world_chunk; // addr seg04:2E71
+static const size_t alloc_seg11_size = 0x7000;
 uint8_t* alloc_seg11; // addr seg04:2E73
+static const size_t ptr3_size = 0x2ABA0;
 uint8_t* ptr3; // addr seg04:2E75
 uint8_t* ptr1; // addr seg04:2E79
 
@@ -198,6 +206,7 @@ const uint16_t levelWorldChunks[0x30] = {
 	0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6,  0x1C6, 0x1C6
 };
 
+static const size_t soundData_size = 0xE470;
 FarPtr soundData; // addr seg04:992A
 
 uint16_t did_init_timer; // addr seg04:A39A

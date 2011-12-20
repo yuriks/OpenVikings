@@ -178,8 +178,8 @@ uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 	if (std::fread(&decoded_data_len, sizeof(uint16_t), 1, data_file) != 1)
 		Local::errReadData();
 
-	int read_size = chunk_offsets[1] - chunk_offsets[0];
-	if (read_size >= 0xB080)
+	size_t read_size = chunk_offsets[1] - chunk_offsets[0];
+	if (read_size + 0x1000 >= alloc_seg6_size)
 		Local::errBufOverrun();
 
 	if (std::fread(alloc_seg6 + 0x1000, read_size, 1, data_file) != 1)
@@ -241,16 +241,16 @@ uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 
 // addr seg00:2AB8
 void allocMemAndLoadData() {
-	tileset_data = new uint8_t[0x8B80];
-	alloc_seg2 = new uint8_t[0x2000];
-	metatile_data = new uint8_t[0x3600];
-	tilemap_data = new uint8_t[0x3130];
-	alloc_seg6 = new uint8_t[0xC080];
-	alloc_seg11 = new uint8_t[0x7000];
+	tileset_data = new uint8_t[tileset_data_size];
+	alloc_seg2 = new uint8_t[alloc_seg2_size];
+	metatile_data = new uint8_t[metatile_data_size];
+	tilemap_data = new uint8_t[tilemap_data_size];
+	alloc_seg6 = new uint8_t[alloc_seg6_size];
+	alloc_seg11 = new uint8_t[alloc_seg11_size];
 
 	// Load sound data if sound enabled
 	if (!(data_header1_snd1 && data_header1_snd2 && 0x8000)) {
-		uint8_t* buf = new uint8_t[0xE470];
+		uint8_t* buf = new uint8_t[soundData_size];
 		soundData.seg = buf;
 		soundData.offset = 0;
 
@@ -262,9 +262,9 @@ void allocMemAndLoadData() {
 		soundData2End = decompressChunk(0x207 + data_header1.field_8, buf);
 	}
 
-	ptr3 = new uint8_t[0x2ABA0];
+	ptr3 = new uint8_t[ptr3_size];
 
-	world_data = new uint8_t[0xC000];
+	world_data = new uint8_t[world_data_size];
 
 	loaded_world_chunk = 0x1C6;
 	decompressChunk(loaded_world_chunk, world_data);
