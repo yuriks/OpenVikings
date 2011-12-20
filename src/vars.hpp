@@ -65,7 +65,9 @@ struct LevelHeader {
 	/* 0030 */ uint16_t tileset_data_chunk;
 	/* 0032 */ uint16_t metatile_data_chunk;
 	/* 0034 */ uint8_t dummy5[15];
-	/* 0043 */ uint8_t data_load_list[0x180]; // addr seg04:25F6 TODO verify size
+	// NOTE: I've 'optimized' the size of this array until it loaded
+	// all levels in the game. I'm not sure what's the original size.
+	/* 0043 */ uint8_t data_load_list[0x561]; // addr seg04:25F6
 }
 #include "pack_disable.hpp"
 ;
