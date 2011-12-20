@@ -65,7 +65,7 @@ struct LevelHeader {
 	/* 0030 */ uint16_t tileset_data_chunk;
 	/* 0032 */ uint16_t metatile_data_chunk;
 	/* 0034 */ uint8_t dummy5[15];
-	/* 0043 */ uint8_t data_load_list[0x100]; // addr seg04:25F6 TODO TODO TODO verify size
+	/* 0043 */ uint8_t data_load_list[0x180]; // addr seg04:25F6 TODO verify size
 }
 #include "pack_disable.hpp"
 ;
@@ -109,7 +109,7 @@ uint8_t chunk_buffer7[0x300]; // addr seg04:437D
 uint8_t chunk_buffer8[0x300]; // addr seg04:467D
 uint8_t chunk_buffer9[0x700]; // addr seg04:497D TODO confirm size
 uint8_t chunk_buffer10[0x1800]; // addr seg04:507D TODO confirm size
-uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO TODO TODO really confirm size (completely guessed)
+uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO really confirm size (completely guessed)
 
 enum PaletteAction {
 	PALACT_NONE = 0,

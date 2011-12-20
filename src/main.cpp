@@ -153,7 +153,7 @@ void roundToNextSeg(uint8_t** seg, uint16_t* off) {
 
 // Note: Originally this function returned es:di on the end of the buffer. Now I just return the pointer to it
 // addr seg00:0982
-uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
+uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst, size_t dst_size) {
 	struct Local {
 		static void errBufOverrun() {
 			errorQuit("\nGlobal buffer overrun on file read.\n", 0);
@@ -177,6 +177,9 @@ uint8_t* decompressChunk(uint16_t chunk_id, uint8_t* dst) {
 		Local::errReadData();
 	if (std::fread(&decoded_data_len, sizeof(uint16_t), 1, data_file) != 1)
 		Local::errReadData();
+
+	if (decoded_data_len > dst_size)
+		Local::errBufOverrun();
 
 	size_t read_size = chunk_offsets[1] - chunk_offsets[0];
 	if (read_size + 0x1000 >= alloc_seg6_size)
@@ -250,16 +253,18 @@ void allocMemAndLoadData() {
 
 	// Load sound data if sound enabled
 	if (!(data_header1_snd1 && data_header1_snd2 && 0x8000)) {
-		uint8_t* buf = new uint8_t[soundData_size];
+		uint8_t *const buf_base = new uint8_t[soundData_size];
+		uint8_t* buf = buf_base;
+
 		soundData.seg = buf;
 		soundData.offset = 0;
 
 		// Note: roundToNextSeg not needed because segments are for 16-bit losers
 		// I'm not sure these are quite right, they seem to point to the end of the data
 		// but looking at the original that's effectively what happens?
-		soundData0End = buf = decompressChunk(0x1C7 + data_header1.field_6, buf);
-		soundData1End = buf = decompressChunk(0x20C + data_header1.field_8, buf);
-		soundData2End = decompressChunk(0x207 + data_header1.field_8, buf);
+		soundData0End = buf = decompressChunk(0x1C7 + data_header1.field_6, buf, soundData_size - (buf - buf_base));
+		soundData1End = buf = decompressChunk(0x20C + data_header1.field_8, buf, soundData_size - (buf - buf_base));
+		soundData2End =       decompressChunk(0x207 + data_header1.field_8, buf, soundData_size - (buf - buf_base));
 	}
 
 	ptr3 = new uint8_t[ptr3_size];
@@ -267,20 +272,20 @@ void allocMemAndLoadData() {
 	world_data = new uint8_t[world_data_size];
 
 	loaded_world_chunk = 0x1C6;
-	decompressChunk(loaded_world_chunk, world_data);
+	decompressChunk(loaded_world_chunk, world_data, world_data_size);
 
-	decompressChunk(4, chunk_buffer0);
-	decompressChunk(5, chunk_buffer1);
-	decompressChunk(6, chunk_buffer2);
-	decompressChunk(7, chunk_buffer3);
-	decompressChunk(8, chunk_buffer4);
-	decompressChunk(9, chunk_buffer5);
-	decompressChunk(10, chunk_buffer6);
-	decompressChunk(11, chunk_buffer7);
-	decompressChunk(12, chunk_buffer8);
-	decompressChunk(13, chunk_buffer9);
-	decompressChunk(14, chunk_buffer10);
-	decompressChunk(2, chunk_buffer11);
+	decompressChunk(4,  chunk_buffer0,  sizeof(chunk_buffer0));
+	decompressChunk(5,  chunk_buffer1,  sizeof(chunk_buffer1));
+	decompressChunk(6,  chunk_buffer2,  sizeof(chunk_buffer2));
+	decompressChunk(7,  chunk_buffer3,  sizeof(chunk_buffer3));
+	decompressChunk(8,  chunk_buffer4,  sizeof(chunk_buffer4));
+	decompressChunk(9,  chunk_buffer5,  sizeof(chunk_buffer5));
+	decompressChunk(10, chunk_buffer6,  sizeof(chunk_buffer6));
+	decompressChunk(11, chunk_buffer7,  sizeof(chunk_buffer7));
+	decompressChunk(12, chunk_buffer8,  sizeof(chunk_buffer8));
+	decompressChunk(13, chunk_buffer9,  sizeof(chunk_buffer9));
+	decompressChunk(14, chunk_buffer10, sizeof(chunk_buffer10));
+	decompressChunk(2,  chunk_buffer11, sizeof(chunk_buffer11));
 
 	current_password[0] = 'S';
 	current_password[1] = 'T';
@@ -448,9 +453,9 @@ void loadLevelHeader(uint16_t level_id) {
 	uint16_t chunk_id = levelWorldChunks[level_id];
 	if (chunk_id != 0xFFFF && chunk_id != loaded_world_chunk) {
 		loaded_world_chunk = chunk_id;
-		decompressChunk(chunk_id, world_data);
+		decompressChunk(chunk_id, world_data, world_data_size);
 	}
-	decompressChunk(levelTileChunks[level_id], reinterpret_cast<uint8_t*>(&level_header));
+	decompressChunk(levelTileChunks[level_id], reinterpret_cast<uint8_t*>(&level_header), sizeof(level_header));
 }
 
 // addr seg00:1383
@@ -470,7 +475,7 @@ uint16_t loadPaletteList(uint16_t di) {
 			break;
 
 		uint16_t offset = level_header.data_load_list[di++];
-		decompressChunk(ax, reinterpret_cast<uint8_t*>(&palette1[offset]));
+		decompressChunk(ax, reinterpret_cast<uint8_t*>(&palette1[offset]), sizeof(palette1) - sizeof(*palette1)*offset);
 	}
 
 	for (int i = 0; i < 16; ++i) {
@@ -521,7 +526,7 @@ uint16_t loadChunkList(uint16_t di) {
 			break;
 		loaded_chunks11[si] = ax;
 		loaded_chunks_end11[si] = (bx - alloc_seg11) + 1;
-		bx = decompressChunk(ax, bx);
+		bx = decompressChunk(ax, bx, alloc_seg11_size - (bx - alloc_seg11));
 
 		di += 4;
 		si++;
@@ -540,9 +545,8 @@ uint16_t loadChunkList2(uint16_t di) {
 			break;
 		loaded_chunks2[si] = chunk_id;
 
-		uint8_t* dest = ptr1;
-		loaded_chunks2_ptr[si] = dest;
-		ptr1 = decompressChunk(chunk_id, dest);
+		loaded_chunks2_ptr[si] = ptr1;
+		ptr1 = decompressChunk(chunk_id, ptr1, ptr3_size - (ptr1 - ptr3));
 		di += 5;
 		si++;
 	}
@@ -697,10 +701,10 @@ void loadChunks3() {
 			}
 		}
 
-		decompressChunk(level_header.tileset_data_chunk, tileset_data);
-		decompressChunk(level_header.tileset_data_chunk + 1, alloc_seg2);
-		tilemap_data_end = decompressChunk(level_header.tilemap_data_chunk, tilemap_data);
-		decompressChunk(level_header.metatile_data_chunk, metatile_data);
+		decompressChunk(level_header.tileset_data_chunk, tileset_data, tileset_data_size);
+		decompressChunk(level_header.tileset_data_chunk + 1, alloc_seg2, alloc_seg2_size);
+		tilemap_data_end = decompressChunk(level_header.tilemap_data_chunk, tilemap_data, tilemap_data_size);
+		decompressChunk(level_header.metatile_data_chunk, metatile_data, metatile_data_size);
 	}
 }
 
