@@ -1122,7 +1122,7 @@ void loadNextLevel() {
 	video_resvBufBase = 104;
 	ptr1 = ptr3;
 	// TODO loadChunks1();
-	sub_11784();
+	sub_11784(); // TODO
 	video_clearVRAM();
 	// TODO zero_byte_2892D();
 	// TODO zero_byte_28836();
@@ -1131,7 +1131,7 @@ void loadNextLevel() {
 	loadLevelHeader(current_level);
 	// TODO setColor1And2();
 	if (current_level != 0x25)
-		zero_word_288C4();
+		zero_word_288C4(); // TODO
 	drawStatusbar();
 	loadChunks3();
 	uint16_t di = seekLoadList();
@@ -1139,18 +1139,18 @@ void loadNextLevel() {
 	di = processLoadList(di);
 	di = loadChunkList(di);
 	di = loadChunkList2(di);
-	sub_11397();
-	sub_137F1();
-	sub_12FB3();
+	sub_11397(); // TODO
+	sub_137F1(); // TODO
+	sub_12FB3(); // TODO
 	// ***? TODO sub_11446();
 	calcLevelSize();
 	// TODO sub_113D8();
 	// TODO sub_17749();
 	assembleLevelTiles();
 	updateInitialBg();
-	sub_13BA5();
-	sub_13A0E();
-	sub_115D2();
+	sub_13BA5(); // TODO
+	sub_13A0E(); // TODO
+	sub_115D2(); // TODO
 	fadePalIn();
 	// TODO sub_12345();
 }
