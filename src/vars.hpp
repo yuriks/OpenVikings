@@ -20,6 +20,11 @@ Color color2; // addr seg04:0345
 uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_screenShakeY; // addr seg04:03A0
 
+uint16_t inventory_items[12]; // addr seg04:03E4
+uint16_t inventory_cur_icons[12]; // addr seg04:03FC
+
+uint16_t word_288F4[3]; // addr seg04:0414
+
 uint16_t loaded_chunks2[16]; // addr seg04:124D
 uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
 uint16_t loaded_chunks11[0x20]; // addr seg04:12AD
@@ -124,6 +129,14 @@ extern Color palette1[0x100];
 Color* pal_pointer = palette1; // addr seg04:7F00
 Color palette1[0x100]; // addr seg04:7F02
 Color palette2[0x100]; // addr seg04:8202
+
+// addr seg04:8562
+const uint16_t statusbarIconPos[13] = {
+	0x061F, 0x0623, 0x0B7F, 0x0B83, // Erik
+	0x0631, 0x0635, 0x0B91, 0x0B95, // Baleog
+	0x0643, 0x0647, 0x0BA3, 0x0BA7, // Olaf
+	0x064B // Trashcan
+};
 
 uint32_t start_time; // addr seg04:8639
 

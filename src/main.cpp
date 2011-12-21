@@ -890,6 +890,227 @@ void video_clearVRAM() {
 	vga_fillVRAM(0xF, 0, 0, 0xFFFF);
 }
 
+// addr seg00:183D
+void drawInventoryItem(uint16_t item_id, uint16_t slot) {
+	if (slot == 12 && item_id == 0) {
+		item_id = 23; // Trashcan
+	}
+
+	uint8_t* icon_data = &chunk_buffer10[item_id * 16*16];
+
+	for (int pi = 0; pi < 4; ++pi) {
+		static const int pmap[4] = {3, 0, 1, 2};
+		static const int poff[4] = {0, 1, 1, 1};
+		int p = pmap[pi];
+
+		uint16_t vid_pos = statusbarIconPos[slot] + poff[pi];
+
+		for (int y = 0; y < 16; ++y) {
+			for (int x = 0; x < 4; ++x) {
+				vga_framebuffer[p][vid_pos++] = *icon_data++;
+			}
+			vid_pos += (344 - 16) / 4;
+		}
+	}
+
+	vga_present();
+}
+
+// addr seg00:201D
+void drawInventory() {
+	for (int i = 0; i < 12; ++i) {
+		inventory_cur_icons[i] = inventory_items[i];
+		drawInventoryItem(inventory_items[i], i);
+	}
+}
+
+// addr seg00:18AD
+void drawInventoryReticle(int slot) {
+	uint8_t* icon_data = &chunk_buffer10[0x1300];
+	uint16_t vid_pos = statusbarIconPos[slot];
+
+	for (int pi = 0; pi < 4; ++pi) {
+		static const int pmap[4] = {3, 0, 1, 2};
+		int p = pmap[pi];
+
+		if (pi == 0) {
+			vga_framebuffer[p][vid_pos]       = icon_data[0];
+			vga_framebuffer[p][vid_pos+1]     = icon_data[1];
+			vga_framebuffer[p][vid_pos+3]     = icon_data[3];
+			vga_framebuffer[p][vid_pos+0x56]  = icon_data[4];
+			vga_framebuffer[p][vid_pos+0x57]  = icon_data[5];
+			vga_framebuffer[p][vid_pos+0x59]  = icon_data[7];
+			vga_framebuffer[p][vid_pos+0xAC]  = icon_data[8];
+			vga_framebuffer[p][vid_pos+0x102] = icon_data[0xC];
+			vga_framebuffer[p][vid_pos+0x158] = icon_data[0x10];
+			vga_framebuffer[p][vid_pos+0x3B2] = icon_data[0x2C];
+			vga_framebuffer[p][vid_pos+0x408] = icon_data[0x30];
+			vga_framebuffer[p][vid_pos+0x45E] = icon_data[0x34];
+			vga_framebuffer[p][vid_pos+0x4B4] = icon_data[0x38];
+			vga_framebuffer[p][vid_pos+0x4B5] = icon_data[0x39];
+			vga_framebuffer[p][vid_pos+0x4B7] = icon_data[0x3B];
+			vga_framebuffer[p][vid_pos+0x50A] = icon_data[0x3C];
+			vga_framebuffer[p][vid_pos+0x50B] = icon_data[0x3D];
+			vga_framebuffer[p][vid_pos+0x50D] = icon_data[0x3F];
+		} else if (pi == 1) {
+			vga_framebuffer[p][vid_pos+1]     = icon_data[0x40];
+			vga_framebuffer[p][vid_pos+4]     = icon_data[0x43];
+			vga_framebuffer[p][vid_pos+0x57]  = icon_data[0x44];
+			vga_framebuffer[p][vid_pos+0x5A]  = icon_data[0x47];
+			vga_framebuffer[p][vid_pos+0xAD]  = icon_data[0x48];
+			vga_framebuffer[p][vid_pos+0x103] = icon_data[0x4C];
+			vga_framebuffer[p][vid_pos+0x159] = icon_data[0x50];
+			vga_framebuffer[p][vid_pos+0x3B3] = icon_data[0x6C];
+			vga_framebuffer[p][vid_pos+0x409] = icon_data[0x70];
+			vga_framebuffer[p][vid_pos+0x45F] = icon_data[0x74];
+			vga_framebuffer[p][vid_pos+0x4B5] = icon_data[0x78];
+			vga_framebuffer[p][vid_pos+0x4B8] = icon_data[0x7B];
+			vga_framebuffer[p][vid_pos+0x50B] = icon_data[0x7C];
+			vga_framebuffer[p][vid_pos+0x50E] = icon_data[0x7F];
+		} else if (pi == 2) {
+			vga_framebuffer[p][vid_pos+1]     = icon_data[0x80];
+			vga_framebuffer[p][vid_pos+4]     = icon_data[0x83];
+			vga_framebuffer[p][vid_pos+0x57]  = icon_data[0x84];
+			vga_framebuffer[p][vid_pos+0x5A]  = icon_data[0x87];
+			vga_framebuffer[p][vid_pos+0xB0]  = icon_data[0x8B];
+			vga_framebuffer[p][vid_pos+0x106] = icon_data[0x8F];
+			vga_framebuffer[p][vid_pos+0x15C] = icon_data[0x93];
+			vga_framebuffer[p][vid_pos+0x3B6] = icon_data[0xAF];
+			vga_framebuffer[p][vid_pos+0x40C] = icon_data[0xB3];
+			vga_framebuffer[p][vid_pos+0x462] = icon_data[0xB7];
+			vga_framebuffer[p][vid_pos+0x4B5] = icon_data[0xB8];
+			vga_framebuffer[p][vid_pos+0x4B8] = icon_data[0xBB];
+			vga_framebuffer[p][vid_pos+0x50B] = icon_data[0xBC];
+			vga_framebuffer[p][vid_pos+0x50E] = icon_data[0xBF];
+		} else if (pi == 3) {
+			vga_framebuffer[p][vid_pos+1]     = icon_data[0xC0];
+			vga_framebuffer[p][vid_pos+3]     = icon_data[0xC2];
+			vga_framebuffer[p][vid_pos+4]     = icon_data[0xC3];
+			vga_framebuffer[p][vid_pos+0x57]  = icon_data[0xC4];
+			vga_framebuffer[p][vid_pos+0x59]  = icon_data[0xC6];
+			vga_framebuffer[p][vid_pos+0x5A]  = icon_data[0xC7];
+			vga_framebuffer[p][vid_pos+0xB0]  = icon_data[0xCB];
+			vga_framebuffer[p][vid_pos+0x106] = icon_data[0xCF];
+			vga_framebuffer[p][vid_pos+0x15C] = icon_data[0xD3];
+			vga_framebuffer[p][vid_pos+0x3B6] = icon_data[0xEF];
+			vga_framebuffer[p][vid_pos+0x40C] = icon_data[0xF3];
+			vga_framebuffer[p][vid_pos+0x462] = icon_data[0xF7];
+			vga_framebuffer[p][vid_pos+0x4B5] = icon_data[0xF8];
+			vga_framebuffer[p][vid_pos+0x4B7] = icon_data[0xFA];
+			vga_framebuffer[p][vid_pos+0x4B8] = icon_data[0xFB];
+			vga_framebuffer[p][vid_pos+0x50B] = icon_data[0xFC];
+			vga_framebuffer[p][vid_pos+0x50D] = icon_data[0xFE];
+			vga_framebuffer[p][vid_pos+0x50E] = icon_data[0xFF];
+		}
+	}
+
+	vga_present();
+}
+
+#if 0
+void drawInventoryReticle(int slot) {
+	uint8_t* icon_data = &chunk_buffer10[0x1300];
+	uint16_t vid_pos = statusbarIconPos[slot] * 4;
+	const int line = 344;
+	const int line2 = 64;
+
+	vga_setPixel(vid_pos + line* 0+ 3, icon_data[line2*0 + 0x0]);
+	vga_setPixel(vid_pos + line* 0+ 4, icon_data[line2*1 + 0x0]);
+	vga_setPixel(vid_pos + line* 0+ 5, icon_data[line2*2 + 0x0]);
+	vga_setPixel(vid_pos + line* 0+ 6, icon_data[line2*3 + 0x0]);
+	vga_setPixel(vid_pos + line* 0+ 7, icon_data[line2*0 + 0x1]);
+	vga_setPixel(vid_pos + line* 0+14, icon_data[line2*3 + 0x2]);
+	vga_setPixel(vid_pos + line* 0+15, icon_data[line2*0 + 0x3]);
+	vga_setPixel(vid_pos + line* 0+16, icon_data[line2*1 + 0x3]);
+	vga_setPixel(vid_pos + line* 0+17, icon_data[line2*2 + 0x3]);
+	vga_setPixel(vid_pos + line* 0+18, icon_data[line2*3 + 0x3]);
+
+	vga_setPixel(vid_pos + line* 1+ 3, icon_data[line2*0 + 0x4]);
+	vga_setPixel(vid_pos + line* 1+ 4, icon_data[line2*1 + 0x4]);
+	vga_setPixel(vid_pos + line* 1+ 5, icon_data[line2*2 + 0x4]);
+	vga_setPixel(vid_pos + line* 1+ 6, icon_data[line2*3 + 0x4]);
+	vga_setPixel(vid_pos + line* 1+ 7, icon_data[line2*0 + 0x5]);
+	vga_setPixel(vid_pos + line* 1+14, icon_data[line2*3 + 0x6]);
+	vga_setPixel(vid_pos + line* 1+15, icon_data[line2*0 + 0x7]);
+	vga_setPixel(vid_pos + line* 1+16, icon_data[line2*1 + 0x7]);
+	vga_setPixel(vid_pos + line* 1+17, icon_data[line2*2 + 0x7]);
+	vga_setPixel(vid_pos + line* 1+18, icon_data[line2*3 + 0x7]);
+
+	vga_setPixel(vid_pos + line* 2+ 3, icon_data[line2*0 + 0x8]);
+	vga_setPixel(vid_pos + line* 2+ 4, icon_data[line2*1 + 0x8]);
+	vga_setPixel(vid_pos + line* 2+17, icon_data[line2*2 + 0xB]);
+	vga_setPixel(vid_pos + line* 2+18, icon_data[line2*3 + 0xB]);
+
+	vga_setPixel(vid_pos + line* 3+ 3, icon_data[line2*0 + 0x0]);
+	vga_setPixel(vid_pos + line* 3+ 4, icon_data[line2*1 + 0xC]);
+	vga_setPixel(vid_pos + line* 3+17, icon_data[line2*2 + 0xF]);
+	vga_setPixel(vid_pos + line* 3+18, icon_data[line2*3 + 0xF]);
+
+	vga_setPixel(vid_pos + line* 4+ 3, icon_data[line2*0 + 0x10]);
+	vga_setPixel(vid_pos + line* 4+ 4, icon_data[line2*1 + 0x10]);
+	vga_setPixel(vid_pos + line* 4+17, icon_data[line2*2 + 0x13]);
+	vga_setPixel(vid_pos + line* 4+18, icon_data[line2*3 + 0x13]);
+
+	vga_setPixel(vid_pos + line*11+ 3, icon_data[line2*0 + 0x2C]);
+	vga_setPixel(vid_pos + line*11+ 4, icon_data[line2*1 + 0x2C]);
+	vga_setPixel(vid_pos + line*11+17, icon_data[line2*2 + 0x2F]);
+	vga_setPixel(vid_pos + line*11+18, icon_data[line2*3 + 0x2F]);
+
+	vga_setPixel(vid_pos + line*12+ 3, icon_data[line2*0 + 0x30]);
+	vga_setPixel(vid_pos + line*12+ 4, icon_data[line2*1 + 0x30]);
+	vga_setPixel(vid_pos + line*12+17, icon_data[line2*2 + 0x33]);
+	vga_setPixel(vid_pos + line*12+18, icon_data[line2*3 + 0x33]);
+
+	vga_setPixel(vid_pos + line*13+ 3, icon_data[line2*0 + 0x34]);
+	vga_setPixel(vid_pos + line*13+ 4, icon_data[line2*1 + 0x34]);
+	vga_setPixel(vid_pos + line*13+17, icon_data[line2*2 + 0x37]);
+	vga_setPixel(vid_pos + line*13+18, icon_data[line2*3 + 0x37]);
+
+	vga_setPixel(vid_pos + line*14+ 3, icon_data[line2*0 + 0x38]);
+	vga_setPixel(vid_pos + line*14+ 4, icon_data[line2*1 + 0x38]);
+	vga_setPixel(vid_pos + line*14+ 5, icon_data[line2*2 + 0x38]);
+	vga_setPixel(vid_pos + line*14+ 6, icon_data[line2*3 + 0x38]);
+	vga_setPixel(vid_pos + line*14+ 7, icon_data[line2*0 + 0x39]);
+	vga_setPixel(vid_pos + line*14+14, icon_data[line2*3 + 0x3A]);
+	vga_setPixel(vid_pos + line*14+15, icon_data[line2*0 + 0x3B]);
+	vga_setPixel(vid_pos + line*14+16, icon_data[line2*1 + 0x3B]);
+	vga_setPixel(vid_pos + line*14+17, icon_data[line2*2 + 0x3B]);
+	vga_setPixel(vid_pos + line*14+18, icon_data[line2*3 + 0x3B]);
+
+	vga_setPixel(vid_pos + line*15+ 3, icon_data[line2*0 + 0x3C]);
+	vga_setPixel(vid_pos + line*15+ 4, icon_data[line2*1 + 0x3C]);
+	vga_setPixel(vid_pos + line*15+ 5, icon_data[line2*2 + 0x3C]);
+	vga_setPixel(vid_pos + line*15+ 6, icon_data[line2*3 + 0x3C]);
+	vga_setPixel(vid_pos + line*15+ 7, icon_data[line2*0 + 0x3D]);
+	vga_setPixel(vid_pos + line*15+14, icon_data[line2*3 + 0x3E]);
+	vga_setPixel(vid_pos + line*15+15, icon_data[line2*0 + 0x3F]);
+	vga_setPixel(vid_pos + line*15+16, icon_data[line2*1 + 0x3F]);
+	vga_setPixel(vid_pos + line*15+17, icon_data[line2*2 + 0x3F]);
+	vga_setPixel(vid_pos + line*15+18, icon_data[line2*3 + 0x3F]);
+
+	vga_present();
+}
+#endif
+
+// addr seg00:20D1
+void drawInventorySelections() {
+	for (int i = 0; i < 3; ++i) {
+		drawInventoryReticle(word_288F4[i] + 4*i);
+	}
+}
+
+// addr seg00:17AD
+void drawStatusbar() {
+	// TODO word_28820 = 2;
+	if (level_header.level_flags & LVLFLAG_BIT1) {
+		loadImage(1, 0);
+		// TODO sub_1200A
+		drawInventory();
+		// TODO sub_12034
+		drawInventorySelections();
+	}
+}
+
 // addr seg00:1080
 void loadNextLevel() {
 	// TODO lotsa variables
@@ -911,7 +1132,7 @@ void loadNextLevel() {
 	// TODO setColor1And2();
 	if (current_level != 0x25)
 		zero_word_288C4();
-	// TODO sub_117AD();
+	drawStatusbar();
 	loadChunks3();
 	uint16_t di = seekLoadList();
 	di = loadPaletteList(di);
