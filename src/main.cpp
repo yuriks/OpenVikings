@@ -885,6 +885,7 @@ void updateInitialBg() {
 	updateVgaBuffer();
 }
 
+// addr seg00:6880
 void video_clearVRAM() {
 	vga_fillVRAM(0xF, 0, 0, 0xFFFF);
 }

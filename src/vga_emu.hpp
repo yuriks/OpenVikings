@@ -14,6 +14,10 @@ void vga_fillVRAM(int plane_mask, uint8_t value, uint16_t dest, uint16_t len);
 void vga_vramCopy(uint16_t source, uint16_t dest, uint16_t len);
 void vga_setPalette(const Color* palette);
 
+inline void vga_setPixel(uint16_t dest_lfb, uint8_t color) {
+	vga_framebuffer[dest_lfb % 4][dest_lfb / 4] = color;
+}
+
 void vga_setStartAddress(uint16_t addr);
 void vga_setLineCompare(unsigned int scanline);
 
