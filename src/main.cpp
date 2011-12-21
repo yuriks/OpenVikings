@@ -396,7 +396,12 @@ void updateVgaBuffer() {
 
 	vga_setStartAddress(bx);
 
-	// TODO vars
+	timer_wait_count = 1;
+
+	word_2AA5B = video_levelX;
+	word_2AA5D = video_levelY;
+	word_317CF = video_scroll_x_tiles;
+	word_317D1 = video_scroll_y_tiles;
 }
 
 // addr seg00:0E99
@@ -1111,6 +1116,50 @@ void drawStatusbar() {
 	}
 }
 
+// addr seg00:13D8
+void setInitialScreenPos() {
+	uint16_t si = 0;
+	if (level_header.anonymous_3 != 0) {
+		si = word_288A2;
+	}
+
+	int16_t ax = word_29C1D[si/2];
+	if (ax < 320 / 2)
+		ax = 0;
+	else
+		ax -= 320 / 2;
+
+	if (ax > video_level_max_x)
+		ax = video_level_max_x;
+
+	video_levelX = ax;
+	word_2AA5B = ax;
+
+	ax *= 8;
+	video_scroll_x_tiles = ax;
+	word_317CF = ax;
+	ax *= 2;
+	word_317D3 = ax;
+
+	ax = word_29C45[si/2];
+	if (ax < 176 / 2)
+		ax = 0;
+	else
+		ax -= 176 / 2;
+
+	if (ax > video_level_max_y)
+		ax = video_level_max_y;
+
+	video_levelX = ax;
+	word_2AA5D = ax;
+
+	ax *= 8;
+	video_scroll_y_tiles;
+	word_317D1 = ax;
+	ax *= 2;
+	word_317D5 = ax;
+}
+
 // addr seg00:1080
 void loadNextLevel() {
 	// TODO lotsa variables
@@ -1144,7 +1193,7 @@ void loadNextLevel() {
 	sub_12FB3(); // TODO
 	// ***? TODO sub_11446();
 	calcLevelSize();
-	// TODO sub_113D8();
+	setInitialScreenPos();
 	// TODO sub_17749();
 	assembleLevelTiles();
 	updateInitialBg();

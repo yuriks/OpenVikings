@@ -20,6 +20,8 @@ Color color2; // addr seg04:0345
 uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_screenShakeY; // addr seg04:03A0
 
+uint16_t word_288A2; // addr seg04:03C2
+
 uint16_t inventory_items[12]; // addr seg04:03E4
 uint16_t inventory_cur_icons[12]; // addr seg04:03FC
 
@@ -30,6 +32,12 @@ uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
 uint16_t loaded_chunks11[0x20]; // addr seg04:12AD
 uint16_t loaded_chunks_end11[0x20]; // addr seg04:12ED
 
+uint16_t word_29C1D[20]; // addr seg04:173D
+uint16_t word_29C45[20]; // addr seg04:1765
+
+uint16_t word_2AA5B; // addr seg04:257B
+
+uint16_t word_2AA5D; // addr seg04:257D
 uint16_t video_scroll_x_tiles; // addr seg04:257F
 uint16_t video_scroll_y_tiles; // addr seg04:2581
 
@@ -58,18 +66,20 @@ enum LevelFlags : uint8_t {
 
 #include "pack_enable.hpp"
 struct LevelHeader {
-	/* 0000 */ uint8_t dummy1[22];
+	/* 0000 */ uint8_t dummy1[7];
+	/* 0007 */ uint8_t anonymous_3;
+	/* 0008 */ uint8_t dummy2[14];
 	/* 0016 */ uint16_t next_level_id;
-	/* 0018 */ uint8_t dummy2[4];
+	/* 0018 */ uint8_t dummy3[4];
 	/* 001C */ LevelFlags level_flags;
-	/* 001D */ uint8_t dummy3[12];
+	/* 001D */ uint8_t dummy4[12];
 	/* 0029 */ uint16_t level_width;
 	/* 002B */ uint16_t level_height;
-	/* 002D */ uint8_t dummy4[1];
+	/* 002D */ uint8_t dummy5[1];
 	/* 002E */ uint16_t tilemap_data_chunk;
 	/* 0030 */ uint16_t tileset_data_chunk;
 	/* 0032 */ uint16_t metatile_data_chunk;
-	/* 0034 */ uint8_t dummy5[15];
+	/* 0034 */ uint8_t dummy6[15];
 	// NOTE: I've 'optimized' the size of this array until it loaded
 	// all levels in the game. I'm not sure what's the original size.
 	/* 0043 */ uint8_t data_load_list[0x561]; // addr seg04:25F6
@@ -185,6 +195,11 @@ uint16_t level_width_tiles; // addr seg04:9168
 uint16_t level_height_tiles; // addr seg04:916A
 
 uint8_t video_pixelPan; // addr seg04:92EE
+uint16_t word_317CF; // addr seg04:92EF
+
+uint16_t word_317D1; // addr seg04:92F1
+uint16_t word_317D3; // addr seg04:92F3
+uint16_t word_317D5; // addr seg04:92F5
 
 uint16_t video_backBufBase = 0; // addr seg04:92F7
 uint16_t video_frontBufBase = 52; // addr seg04:92F9
@@ -225,3 +240,4 @@ static const size_t soundData_size = 0xE470;
 FarPtr soundData; // addr seg04:992A
 
 uint16_t did_init_timer; // addr seg04:A39A
+uint16_t timer_wait_count; // addr seg04:A39C
