@@ -78,7 +78,7 @@ void vga_setLineCompare(unsigned int scanline) {
 void vga_initialize() {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		errorQuit(SDL_GetError(), 0);
-	
+
 	vga_window = SDL_CreateWindow(
 		"OpenVikings",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,

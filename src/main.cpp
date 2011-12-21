@@ -123,12 +123,12 @@ void hwCheck() {
 
 	if (std::fread(&data_header1, sizeof(DataHeader1), 1, data_file) != 1)
 		Local::errReadData();
-	
+
 	if (data_header1.magic != 0x6969)
 		Local::errCorruptData();
 
 	// insert funky system/BIOS checksum here
-	
+
 	if (false /* systemChecksum != data_header1.copy_checksum */)
 		Local::errCopyprotect();
 
