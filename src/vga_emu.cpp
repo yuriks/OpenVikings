@@ -6,6 +6,8 @@
 #include <cassert>
 #include <SDL.h>
 
+//#define VRAM_DEBUG
+
 uint8_t vga_framebuffer[4][0x10000];
 
 static uint32_t vga_palette[256];
@@ -15,6 +17,14 @@ static unsigned int vga_line_compare = -1;
 static SDL_Window* vga_window = nullptr;
 static SDL_Renderer* vga_renderer = nullptr;
 static SDL_Texture* vga_texture = nullptr;
+
+static const int line_stride = 344;
+static const int win_width = 320;
+#ifndef VRAM_DEBUG
+static const int win_height = 240;
+#else
+static const int win_height = 0x10000 / (line_stride/4);
+#endif
 
 void vga_copyToVRAM(int plane_mask, uint8_t* source, uint16_t dest, uint16_t len) {
 	assert(dest + len < 0x10000);
@@ -82,7 +92,7 @@ void vga_initialize() {
 	vga_window = SDL_CreateWindow(
 		"OpenVikings",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		320, 240,
+		win_width, win_height,
 		0);
 	if (vga_window == nullptr)
 		errorQuit(SDL_GetError(), 0);
@@ -93,7 +103,7 @@ void vga_initialize() {
 
 	vga_texture = SDL_CreateTexture(
 		vga_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING,
-		320, 240);
+		win_width, win_height);
 	if (vga_texture == nullptr)
 		errorQuit(SDL_GetError(), 0);
 
@@ -129,22 +139,28 @@ void vga_present() {
 
 	uint32_t* tex_pixels = reinterpret_cast<uint32_t*>(tex_pixels_raw);
 
+#ifndef VRAM_DEBUG
 	uint16_t vram_line_offset = vga_start_address;
+#else
+	uint16_t vram_line_offset = 0;
+#endif
 
-	for (int y = 0; y < 240; ++y) {
+	for (int y = 0; y < win_height; ++y) {
+#ifndef VRAM_DEBUG
 		if (y == vga_line_compare)
 			vram_line_offset = 0;
+#endif
 
 		uint16_t vram_offset = vram_line_offset;
 
-		for (int x = 0; x < 320; x += 4) {
+		for (int x = 0; x < win_width; x += 4) {
 			tex_pixels[x+0] = vga_palette[vga_framebuffer[0][vram_offset]];
 			tex_pixels[x+1] = vga_palette[vga_framebuffer[1][vram_offset]];
 			tex_pixels[x+2] = vga_palette[vga_framebuffer[2][vram_offset]];
 			tex_pixels[x+3] = vga_palette[vga_framebuffer[3][vram_offset]];
 			++vram_offset;
 		}
-		vram_line_offset += 344/4;
+		vram_line_offset += line_stride/4;
 		tex_pixels += tex_pitch / sizeof(uint32_t);
 	}
 
