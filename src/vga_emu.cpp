@@ -158,6 +158,13 @@ void vga_present() {
 			tex_pixels[x+1] = vga_palette[vga_framebuffer[1][vram_offset]];
 			tex_pixels[x+2] = vga_palette[vga_framebuffer[2][vram_offset]];
 			tex_pixels[x+3] = vga_palette[vga_framebuffer[3][vram_offset]];
+#ifdef VRAM_DEBUG
+			if (vram_line_offset < vga_start_address ||
+				vram_line_offset >= vga_start_address + (line_stride/4)*vga_line_compare) {
+				for (int i = 0; i < 4; ++i)
+					tex_pixels[x+i] >>= 2;
+			}
+#endif
 			++vram_offset;
 		}
 		vram_line_offset += line_stride/4;
