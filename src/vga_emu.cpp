@@ -19,10 +19,11 @@ static SDL_Renderer* vga_renderer = nullptr;
 static SDL_Texture* vga_texture = nullptr;
 
 static const int line_stride = 344;
-static const int win_width = 320;
 #ifndef VRAM_DEBUG
+static const int win_width = 320;
 static const int win_height = 240;
 #else
+static const int win_width = line_stride;
 static const int win_height = 0x10000 / (line_stride/4);
 #endif
 
@@ -143,6 +144,7 @@ void vga_present() {
 	uint16_t vram_line_offset = vga_start_address;
 #else
 	uint16_t vram_line_offset = 0;
+	unsigned int debug_cur_line = 0;
 #endif
 
 	for (int y = 0; y < win_height; ++y) {
@@ -159,10 +161,17 @@ void vga_present() {
 			tex_pixels[x+2] = vga_palette[vga_framebuffer[2][vram_offset]];
 			tex_pixels[x+3] = vga_palette[vga_framebuffer[3][vram_offset]];
 #ifdef VRAM_DEBUG
-			if (vram_line_offset < vga_start_address ||
-				vram_line_offset >= vga_start_address + (line_stride/4)*vga_line_compare) {
+			if (debug_cur_line < vga_line_compare &&
+				vram_offset >= vga_start_address + (line_stride/4)*debug_cur_line + 320/4)
+			{
+				debug_cur_line++;
+			}
+
+			if (debug_cur_line >= vga_line_compare ||
+				vram_offset < vga_start_address + (line_stride/4)*debug_cur_line)
+			{
 				for (int i = 0; i < 4; ++i)
-					tex_pixels[x+i] >>= 2;
+					tex_pixels[x+i] >>= 1;
 			}
 #endif
 			++vram_offset;
