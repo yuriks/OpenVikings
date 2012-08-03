@@ -185,4 +185,5 @@ void vga_present() {
 	SDL_RenderCopy(vga_renderer, vga_texture, nullptr, nullptr);
 
 	SDL_RenderPresent(vga_renderer);
+	SDL_PumpEvents();
 }

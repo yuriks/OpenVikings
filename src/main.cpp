@@ -7,6 +7,7 @@
 #include <cstring>
 #include <algorithm>
 #include <SDL_timer.h>
+#include <SDL_events.h>
 
 #include "vga_emu.hpp"
 #include "vars.hpp"
@@ -1219,6 +1220,24 @@ int main() {
 	// TODO
 
 	vga_present();
-	SDL_Delay(2500);
+
+	// Game main loop
+	bool run_game = true;
+	while (run_game)
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+			case SDL_QUIT:
+				run_game = false;
+				break;
+			}
+		}
+
+		SDL_Delay(1000/60);
+	}
+
 	vga_deinitialize();
 }
