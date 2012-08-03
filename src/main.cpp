@@ -57,6 +57,9 @@ inline void store32LE(uint8_t* d, uint32_t val) {
 	d[3] = (val >> 24) & 0xFF;
 }
 
+#define BIT(i) (1 << (i))
+#define RANGE(x) (std::begin(x)), (std::end(x))
+
 // addr seg00:2948
 void hookInts() {
 	// init memory and segments();
@@ -86,6 +89,7 @@ void errorQuit(const char* msg, uint16_t error_code) {
 }
 
 // addr seg00:2989
+// Loads data file and initializes misc. hardware.
 void hwCheck() {
 	struct Local {
 		static void errReadData() {
@@ -434,23 +438,17 @@ void fadePalKeepFirst() {
 }
 
 // addr seg00:2CE4
-void zero_word_288C4() {
+void zeroInventory() {
 	// TODO
-	//word_288F4 = 0;
-	//word_288F6 = 0;
-	//word_288F8 = 0;
-	//std::memset(word_288C4, 0, 0x18);
-	//word_28903 = 6;
-	//word_28905 = 6;
-	//word_28907 = 6;
-	//word_28909 = 0;
-	//word_2890B = 0;
-	//word_2890D = 0;
+	std::fill(RANGE(word_288F4), 0);
+	std::fill(RANGE(inventory_items), 0);
+	std::fill(RANGE(word_28903), 6);
+	std::fill(RANGE(word_28909), 0);
 }
 
 // addr seg00:08B8
-void sub_108B8() {
-	zero_word_288C4();
+void initGameState() {
+	zeroInventory();
 	level_header.next_level_id = 0x27;
 	// TODO word_288A2 = 0;
 }
@@ -563,8 +561,8 @@ uint16_t loadChunkList2(uint16_t di) {
 
 // addr seg00:1784
 void sub_11784() {
-	// TODO word_288A2 = 0;
-	// TODO word_288A4 = 0;
+	word_288A2 = 0;
+	word_288A4 = 0;
 }
 
 // addr seg00:1397
@@ -1172,7 +1170,7 @@ void loadNextLevel() {
 	video_resvBufBase = 104;
 	ptr1 = ptr3;
 	// TODO loadChunks1();
-	sub_11784(); // TODO
+	sub_11784();
 	video_clearVRAM();
 	// TODO zero_byte_2892D();
 	// TODO zero_byte_28836();
@@ -1181,7 +1179,7 @@ void loadNextLevel() {
 	loadLevelHeader(current_level);
 	// TODO setColor1And2();
 	if (current_level != 0x25)
-		zero_word_288C4(); // TODO
+		zeroInventory();
 	drawStatusbar();
 	loadChunks3();
 	uint16_t di = seekLoadList();
@@ -1215,7 +1213,7 @@ int main() {
 	initSound();
 	initVideo();
 	// TODO setSomeGlobals(); sub_12CA3
-	sub_108B8();
+	initGameState();
 	loadNextLevel(); // Logo fade in
 	// TODO
 

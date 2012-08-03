@@ -21,11 +21,15 @@ uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_screenShakeY; // addr seg04:03A0
 
 uint16_t word_288A2; // addr seg04:03C2
+uint16_t word_288A4; // addr seg04:03C4
 
 uint16_t inventory_items[12]; // addr seg04:03E4
 uint16_t inventory_cur_icons[12]; // addr seg04:03FC
 
 uint16_t word_288F4[3]; // addr seg04:0414
+
+uint16_t word_28903[3]; // addr seg04:0423
+uint16_t word_28909[3]; // addr seg04:0429
 
 uint16_t loaded_chunks2[16]; // addr seg04:124D
 uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
