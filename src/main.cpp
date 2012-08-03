@@ -296,7 +296,28 @@ void allocMemAndLoadData() {
 	current_password[1] = 'T';
 	current_password[2] = 'R';
 	current_password[3] = 'T';
-	// TODO bunch of variable sets
+
+	// TODO these don't seem to ever be read, investigate further
+	// word_3175C = 0x800;
+	// word_31762 = 0x200;
+	// word_31766 = 0x100;
+	// word_31764 = 0x400;
+	// word_3176C = 0x400;
+	// word_31706 = 0x20;
+	// word_3175A = 0x20;
+	// word_31770 = 0x10;
+	// word_3175E = 0x10;
+	// word_316CE = 0x1000;
+	// word_316FE = 0x1000;
+	// word_31740 = 0x2000;
+	// word_316EA = 0x2000;
+	// word_3170A = 0x80;
+	// word_3170E = 0x8000;
+	// word_3173E = 0x8000;
+	// word_31704 = 0x8000;
+	// word_31768 = 0x8000;
+	// word_316F0 = 0x40;
+	// word_3170C = 0x4000;
 }
 
 // addr seg00:0E35
