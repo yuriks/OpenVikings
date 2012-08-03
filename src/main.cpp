@@ -1471,6 +1471,23 @@ void loadNextLevel() {
 	// TODO sub_12345();
 }
 
+// addr seg00:2352
+// Reads keyboard or similar
+void updateInput()
+{
+	uint16_t ax = 0;
+	if (word_30BBA != 0)
+	{
+		// TODO sub_12EF8();
+		ax = word_30BBC;
+	}
+	ax |= word_30BBE;
+
+	keys_down = ax;
+	keys_pressed = (ax ^ keys_previous) & ax;
+	keys_previous = ax;
+}
+
 // addr seg00:0000
 int main() {
 	vga_initialize();
@@ -1500,7 +1517,7 @@ int main() {
 			}
 		}
 
-		// TODO sub_12352();
+		updateInput();
 		// TODO sub_12D72
 		// TODO sub_102AD
 		// TODO sub_1041C

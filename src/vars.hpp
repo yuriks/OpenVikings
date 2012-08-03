@@ -42,6 +42,30 @@ uint16_t word_28854; // addr seg04:0374
 uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_screenShakeY; // addr seg04:03A0
 
+enum Keys
+{
+	KEYS_UNK0        = 0x0001,
+	KEYS_UNK1        = 0x0002,
+	KEYS_UNK2        = 0x0004,
+	KEYS_UNK3        = 0x0008,
+	KEYS_NEXTCHAR    = 0x0010,
+	KEYS_PREVCHAR    = 0x0020,
+	KEYS_USEITEM     = 0x0040,
+	KEYS_ACTIVATE    = 0x0080,
+	KEYS_RIGHT       = 0x0100,
+	KEYS_LEFT        = 0x0200,
+	KEYS_DOWN        = 0x0400,
+	KEYS_UP          = 0x0800,
+	KEYS_PAUSE       = 0x1000,
+	KEYS_INVENTORY   = 0x2000,
+	KEYS_SPECIAL     = 0x4000,
+	KEYS_ATTACK      = 0x8000
+};
+
+uint16_t keys_down; // addr seg04:03B6
+uint16_t keys_pressed; // addr seg04:03B8
+uint16_t keys_previous; // addr seg04:03BA
+
 uint16_t word_288A2; // addr seg04:03C2
 uint16_t word_288A4; // addr seg04:03C4
 
@@ -264,6 +288,10 @@ struct DataHeader1 {
 	uint16_t dummy3[5];
 };
 DataHeader1 data_header1; // addr seg04:86B0
+
+uint16_t word_30BBA; // addr seg04:86DA
+uint16_t word_30BBC; // addr seg04:86DC
+uint16_t word_30BBE; // addr seg04:86DE
 
 // addr seg04:89F8
 /* use calcHeightTileMults instead!
