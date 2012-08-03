@@ -594,6 +594,7 @@ void sub_13BA5() {
 	uint16_t si = 0;
 	uint16_t di = 0;
 
+	// TODO sub_13BBD
 	while (sub_13BBD(si, di)) {
 		si++;
 		di += 14;
@@ -1187,7 +1188,7 @@ void setInitialScreenPos() {
 	if (ax > video_level_max_y)
 		ax = video_level_max_y;
 
-	video_levelX = ax;
+	video_levelY = ax;
 	word_2AA5D = ax;
 
 	ax *= 8;
