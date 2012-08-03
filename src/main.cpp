@@ -450,7 +450,7 @@ void zeroInventory() {
 void initGameState() {
 	zeroInventory();
 	level_header.next_level_id = 0x27;
-	// TODO word_288A2 = 0;
+	word_288A2 = 0;
 }
 
 // addr seg00:11B1
@@ -573,24 +573,24 @@ void sub_11397() {
 
 // addr seg00:37F1
 void sub_137F1() {
-	// TODO std::fill_n(word_29835, 20, 0);
-	// TODO std::fill_n(word_29EED, 20, 0xFFFF);
+	std::fill(RANGE(word_29835), nullptr);
+	std::fill(RANGE(word_29EED), 0xFFFF);
 }
 
 // addr seg00:2FB3
 void sub_12FB3() {
-	// TODO std::fill_n(word_2892D, 128, 0);
+	std::fill(RANGE(word_2892D), 0);
 }
 
-// TODO
 // addr seg00:3BBD
 bool sub_13BBD(uint16_t si, uint16_t di) {
+	// TODO
 	return false;
 }
 
 // addr seg00:3BA5
 void sub_13BA5() {
-	// TODO word_28522 = 0xFFFF;
+	word_28522 = 0xFFFF;
 	uint16_t si = 0;
 	uint16_t di = 0;
 
@@ -600,10 +600,48 @@ void sub_13BA5() {
 	}
 }
 
+// addr seg00:39EF
+void sub_139EF()
+{
+	word_28514 = video_levelX - 16;
+	word_28516 = video_levelX - 16 + 352;
+
+	word_28518 = video_levelY - 16;
+	word_2851A = video_levelY - 16 + 208;
+}
+
+// addr seg00:3A94
+void sub_13A94()
+{
+	if (word_28514 < 0)
+		word_28514 = 0;
+
+	if (word_28516 < 0)
+		word_28516 = 0;
+
+	if (word_28518 < 0)
+		word_28518 = 0;
+
+	if (word_2851A < 0)
+		word_2851A = 0;
+
+	word_28522 = 0xFFFF;
+
+	uint16_t si = 0;
+	uint16_t di = 0;
+	/* TODO
+	while (sub_13AE0(...))
+	{
+		si++;
+		di += 14;
+	}
+	*/
+}
+
 // addr seg00:3A0E
 void sub_13A0E() {
-	// TODO sub_139EF();
-	// TODO loc_13A94();
+	sub_139EF();
+	sub_13A94();
 }
 
 // addr seg00:15D2
@@ -1159,6 +1197,214 @@ void setInitialScreenPos() {
 	word_317D5 = ax;
 }
 
+// addr seg00:3D30
+bool sub_13D30(uint16_t di)
+{
+	if (word_2880F != 0)
+	{
+		return true;
+	}
+
+	if (di == 0xFFFF)
+	{
+		return false;
+	}
+
+	if (byte_28836[di / 8] & BIT(di % 8))
+		return true;
+	else
+		return false;
+}
+
+// addr seg00:3D52
+// Finds a free slot in word_29835 and returns it's index. Else returns -1.
+int findFreeWord29835()
+{
+	for (int i = 0; i < 20; ++i)
+	{
+		if (word_29835[i] == 0)
+			return i;
+	}
+
+	return -1;
+}
+
+// addr seg00:2F82
+int sub_12F82(uint16_t ax, uint16_t* out_ax)
+{
+	if (ax == 0xFFFF)
+	{
+		*out_ax = 0;
+		return true;
+	}
+	
+	if (ax == 0xFFFE)
+	{
+		word_28854 += 1;
+		*out_ax = 0;
+		return true;
+	}
+
+	for (int di = 0; di < 32; ++di)
+	{
+		if (ax == loaded_chunks11[di])
+		{
+			*out_ax = loaded_chunks_end11[di];
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// addr seg00:3E52
+bool sub_13E52(uint16_t si, uint16_t bx)
+{
+	word_29BCD[si] = word_28514;
+	word_29BA5[si] = word_28516;
+	word_29A65[si] = word_28518;
+	word_29B7D[si] = word_28854;
+	word_28854 = 0;
+
+	WorldData* world_data_entry = reinterpret_cast<WorldData*>(world_data + bx*21);
+
+	if (!sub_12F82(world_data_entry->field_0, &word_29D35[si]))
+		return false;
+
+	uint8_t ax = world_data_entry->field_2;
+	if ((ax & 0x80) != 0)
+		word_28854 += 2;
+
+	word_29FB5[si] = ax & 0x7F;
+	word_2980D[si] = world_data_entry->field_3 + 3;
+	word_29835[si] = world_data;
+	word_29A8D[si] = world_data_entry->field_7;
+	word_29925[si] = world_data_entry->field_9;
+	word_2994D[si] = world_data_entry->field_A;
+	word_29AB5[si] = world_data_entry->field_B;
+	word_29ADD[si] = world_data_entry->field_D;
+	word_29B05[si] = world_data_entry->field_F;
+	word_29C6D[si] = world_data_entry->field_11;
+	word_29C95[si] = world_data_entry->field_13;
+
+	word_29885[si] = word_29C1D[si] = word_2854C;
+	word_298AD[si] = word_29C45[si] = word_2854E;
+	word_29CE5[si] = word_28522;
+
+	word_29E9D[si] = 0;
+	word_29EC5[si] = 0;
+	word_29BF5[si] = 0;
+	word_29B2D[si] = 0;
+	word_29B55[si] = 0;
+	word_29E25[si] = 0;
+	word_29E4D[si] = 0;
+	word_29CBD[si] = 0;
+	word_29D85[si] = 0;
+	word_29DAD[si] = 0;
+	word_29DFD[si] = 0xFFFF;
+	word_29D5D[si] = 0;
+	word_29DD5[si] = 0;
+	word_29D0D[si] = 0xFFFF;
+	word_29EED[si] = 0xFFFF;
+	word_298FD[si] = 0xFFFF;
+
+	uint16_t dx = word_29C1D[si] - (word_29925[si] / 2);
+	word_29A15[si] = dx;
+	word_29A3D[si] = dx + word_29925[si] - 1;
+
+	dx = word_29C45[si] - (word_2994D[si] / 2);
+	word_299C5[si] = dx;
+	word_299ED[si] = dx + word_2994D[si] - 1;
+
+	int16_t ax2 = word_288C0;
+	if (ax2 < 0)
+	{
+		word_288C2 = word_2994D[si] / 2;
+		ax2 = word_29925[si] / 2;
+	}
+
+	word_2999D[si] = ax2;
+
+	word_29975[si] = word_288C2;
+	return true;
+}
+
+// addr seg00:3809
+bool sub_13809(int16_t ax, uint16_t di, uint16_t si, uint16_t* out_di)
+{
+	word_28514 = ax;
+	word_28516 = di;
+	word_28518 = si;
+	if (sub_13D30(di))
+	{
+		*out_di = 0;
+		return false;
+	}
+
+	si = findFreeWord29835();
+	if (si == -1)
+	{
+		*out_di = 0;
+		return false;
+	}
+
+	if (!sub_13E52(si, word_28514))
+	{
+		word_29835[si] = 0;
+		*out_di = 0;
+		return false;
+	}
+
+	if (word_29FB5[si] != 0)
+	{
+		// TODO sub_13D68
+		if (!true)
+		{
+			word_29835[si] = 0;
+			*out_di = 0;
+			return false;
+		}
+
+		word_29F65[si] = word_2851A;
+		word_29F8D[si] = word_28518;
+		// TODO sub_13DD6(si);
+		// TODO sub_13E15(si);
+	}
+
+	if (si >= word_28852)
+	{
+		word_28852 = si;
+		word_28852 += 1;
+	}
+
+	*out_di = si;
+	return true;
+}
+
+// addr seg00:1446
+void sub_11446()
+{
+	word_2881C = 0;
+
+	if (level_header.anonymous_3 == 0)
+	{
+		word_28854 = level_header.anonymous_8;
+		word_2854C = level_header.anonymous_4;
+		word_2854E = level_header.anonymous_5;
+		word_28522 = 0xFFFF;
+
+		uint16_t di;
+		sub_13809(level_header.anonymous_6, 0xFFFF, level_header.anonymous_7, &di);
+
+		word_2881C = 2;
+		return;
+	}
+	else
+	{
+		// TODO
+	}
+}
+
 // addr seg00:1080
 void loadNextLevel() {
 	// TODO lotsa variables
@@ -1188,9 +1434,9 @@ void loadNextLevel() {
 	di = loadChunkList(di);
 	di = loadChunkList2(di);
 	sub_11397(); // TODO
-	sub_137F1(); // TODO
-	sub_12FB3(); // TODO
-	// ***? TODO sub_11446();
+	sub_137F1();
+	sub_12FB3();
+	sub_11446();
 	calcLevelSize();
 	setInitialScreenPos();
 	// TODO sub_17749();

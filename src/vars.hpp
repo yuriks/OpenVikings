@@ -6,16 +6,34 @@ struct FarPtr {
 	uint8_t* seg;
 };
 
+int16_t word_28514; // addr seg04:0034
+int16_t word_28516; // addr seg04:0036
+uint16_t word_28518; // addr seg04:0038
+int16_t word_2851A; // addr seg04:003A
+
+uint16_t word_28522; // addr seg04:0042
 uint16_t video_levelX; // addr seg04:0044
 uint16_t video_levelY; // addr seg04:0046
+
+uint16_t word_2854C; // addr seg04:006C
+uint16_t word_2854E; // addr seg04:006E
 
 uint16_t data_header1_snd1; // addr seg04:0302
 uint16_t data_header1_snd2; // addr seg04:0304
 
 uint16_t current_password[4]; // addr seg04:0310
 
+uint16_t word_2880F; // addr seg04:032F
+
+uint16_t word_2881C; // addr seg04:033C
+
 Color color1; // addr seg04:0342
 Color color2; // addr seg04:0345
+
+uint8_t byte_28836[16]; // addr seg04:0356
+
+uint16_t word_28852; // addr seg04:0372
+uint16_t word_28854; // addr seg04:0374
 
 uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_screenShakeY; // addr seg04:03A0
@@ -23,6 +41,8 @@ uint16_t video_screenShakeY; // addr seg04:03A0
 uint16_t word_288A2; // addr seg04:03C2
 uint16_t word_288A4; // addr seg04:03C4
 
+int16_t word_288C0; // addr seg04:03E0
+uint16_t word_288C2; // addr seg04:03E2
 uint16_t inventory_items[12]; // addr seg04:03E4
 uint16_t inventory_cur_icons[12]; // addr seg04:03FC
 
@@ -31,16 +51,61 @@ uint16_t word_288F4[3]; // addr seg04:0414
 uint16_t word_28903[3]; // addr seg04:0423
 uint16_t word_28909[3]; // addr seg04:0429
 
+uint16_t word_2892D[128]; // addr seg04:044D
+
 uint16_t loaded_chunks2[16]; // addr seg04:124D
 uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
-uint16_t loaded_chunks11[0x20]; // addr seg04:12AD
-uint16_t loaded_chunks_end11[0x20]; // addr seg04:12ED
-
+uint16_t loaded_chunks11[32]; // addr seg04:12AD
+uint16_t loaded_chunks_end11[32]; // addr seg04:12ED
+uint16_t word_2980D[20]; // addr seg04:132D
+uint8_t* word_29835[20]; // addr seg04:1355
+uint16_t word_29885[20]; // addr seg04:13A5
+uint16_t word_298AD[20]; // addr seg04:13CD
+uint16_t word_298D5[20]; // addr seg04:13F5
+uint16_t word_298FD[20]; // addr seg04:141D
+int16_t word_29925[20]; // addr seg04:1445
+uint16_t word_2994D[20]; // addr seg04:146D
+uint16_t word_29975[20]; // addr seg04:1495
+int16_t word_2999D[20]; // addr seg04:14BD
+uint16_t word_299C5[20]; // addr seg04:14E5
+uint16_t word_299ED[20]; // addr seg04:150D
+uint16_t word_29A15[20]; // addr seg04:1535
+uint16_t word_29A3D[20]; // addr seg04:155D
+uint16_t word_29A65[20]; // addr seg04:1585
+uint16_t word_29A8D[20]; // addr seg04:15AD
+uint16_t word_29AB5[20]; // addr seg04:15D5
+uint16_t word_29ADD[20]; // addr seg04:15FD
+uint16_t word_29B05[20]; // addr seg04:1625
+uint16_t word_29B2D[20]; // addr seg04:164D
+uint16_t word_29B55[20]; // addr seg04:1675
+int16_t word_29BA5[20]; // addr seg04:16C5
+int16_t word_29BCD[20]; // addr seg04:16ED
+uint16_t word_29B7D[20]; // addr seg04:169D
+uint16_t word_29BF5[20]; // addr seg04:1715
 uint16_t word_29C1D[20]; // addr seg04:173D
 uint16_t word_29C45[20]; // addr seg04:1765
-
+uint16_t word_29C6D[20]; // addr seg04:178D
+uint16_t word_29C95[20]; // addr seg04:17B5
+uint16_t word_29CBD[20]; // addr seg04:17DD
+uint16_t word_29CE5[20]; // addr seg04:1805
+uint16_t word_29D0D[20]; // addr seg04:182D
+uint16_t word_29D35[20]; // addr seg04:1855
+uint16_t word_29D5D[20]; // addr seg04:187D
+uint16_t word_29D85[20]; // addr seg04:18A5
+uint16_t word_29DAD[20]; // addr seg04:18CD
+uint16_t word_29DD5[20]; // addr seg04:18F5
+uint16_t word_29DFD[20]; // addr seg04:191D
+uint16_t word_29E25[20]; // addr seg04:1945
+uint16_t word_29E4D[20]; // addr seg04:196D
+uint16_t word_29E9D[20]; // addr seg04:19BD
+uint16_t word_29EC5[20]; // addr seg04:19E5
+uint16_t word_29EED[20]; // addr seg04:1A0D
+//---
+int16_t word_29F65[20]; // addr seg04:1A85
+int16_t word_29F8D[20]; // addr seg04:1AAD
+uint16_t word_29FB5[20]; // addr seg04:1AD5
+//---
 uint16_t word_2AA5B; // addr seg04:257B
-
 uint16_t word_2AA5D; // addr seg04:257D
 uint16_t video_scroll_x_tiles; // addr seg04:257F
 uint16_t video_scroll_y_tiles; // addr seg04:2581
@@ -72,7 +137,12 @@ enum LevelFlags : uint8_t {
 struct LevelHeader {
 	/* 0000 */ uint8_t dummy1[7];
 	/* 0007 */ uint8_t anonymous_3;
-	/* 0008 */ uint8_t dummy2[14];
+	/* 0008 */ uint16_t anonymous_4;
+	/* 000A */ uint16_t anonymous_5;
+	/* 000C */ uint16_t anonymous_6;
+	/* 000E */ uint16_t anonymous_7;
+	/* 0010 */ uint16_t anonymous_8;
+	/* 0012 */ uint8_t dummy0012[4];
 	/* 0016 */ uint16_t next_level_id;
 	/* 0018 */ uint8_t dummy3[4];
 	/* 001C */ LevelFlags level_flags;
@@ -105,6 +175,26 @@ uint8_t* alloc_seg2; // addr seg04:2E61
 static const size_t tilemap_data_size = 0x3130;
 uint8_t* tilemap_data; // addr seg04:2E63
 uint8_t* tilemap_data_end; // addr seg04:2E65
+
+#include "pack_enable.hpp"
+struct WorldData
+{
+	/* 0000 */ uint16_t field_0;
+	/* 0002 */ uint8_t field_2;
+	/* 0003 */ uint16_t field_3;
+	/* 0005 */ uint16_t field_5;
+	/* 0007 */ uint16_t field_7;
+	/* 0009 */ uint8_t field_9;
+	/* 000A */ uint8_t field_A;
+	/* 000B */ uint16_t field_B;
+	/* 000D */ uint16_t field_D;
+	/* 000F */ uint16_t field_F;
+	/* 0011 */ uint16_t field_11;
+	/* 0013 */ uint16_t field_13;
+}
+#include "pack_disable.hpp"
+;
+
 static const size_t world_data_size = 0xC000;
 uint8_t* world_data; // addr seg04:2E67
 static const size_t alloc_seg6_size = 0xC080;
