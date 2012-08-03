@@ -148,11 +148,6 @@ void vga_present() {
 #endif
 
 	for (int y = 0; y < win_height; ++y) {
-#ifndef VRAM_DEBUG
-		if (y == vga_line_compare)
-			vram_line_offset = 0;
-#endif
-
 		uint16_t vram_offset = vram_line_offset;
 
 		for (int x = 0; x < win_width; x += 4) {
@@ -178,6 +173,11 @@ void vga_present() {
 		}
 		vram_line_offset += line_stride/4;
 		tex_pixels += tex_pitch / sizeof(uint32_t);
+
+#ifndef VRAM_DEBUG
+		if (y == vga_line_compare)
+			vram_line_offset = 0;
+#endif
 	}
 
 	SDL_UnlockTexture(vga_texture);
