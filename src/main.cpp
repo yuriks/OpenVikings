@@ -57,7 +57,6 @@ inline void store32LE(uint8_t* d, uint32_t val) {
 	d[3] = (val >> 24) & 0xFF;
 }
 
-#define BIT(i) (1 << (i))
 #define RANGE(x) (std::begin(x)), (std::end(x))
 
 // addr seg00:2948

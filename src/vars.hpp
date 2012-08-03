@@ -1,6 +1,8 @@
 // Include this file only once
 // It's a temporary hack only
 
+#define BIT(i) (1 << (i))
+
 struct FarPtr {
 	uint16_t offset;
 	uint8_t* seg;
@@ -44,22 +46,22 @@ uint16_t video_screenShakeY; // addr seg04:03A0
 
 enum Keys
 {
-	KEYS_UNK0        = 0x0001,
-	KEYS_UNK1        = 0x0002,
-	KEYS_UNK2        = 0x0004,
-	KEYS_UNK3        = 0x0008,
-	KEYS_NEXTCHAR    = 0x0010,
-	KEYS_PREVCHAR    = 0x0020,
-	KEYS_USEITEM     = 0x0040,
-	KEYS_ACTIVATE    = 0x0080,
-	KEYS_RIGHT       = 0x0100,
-	KEYS_LEFT        = 0x0200,
-	KEYS_DOWN        = 0x0400,
-	KEYS_UP          = 0x0800,
-	KEYS_PAUSE       = 0x1000,
-	KEYS_INVENTORY   = 0x2000,
-	KEYS_SPECIAL     = 0x4000,
-	KEYS_ATTACK      = 0x8000
+	KEYS_UNK0        = BIT(0),
+	KEYS_UNK1        = BIT(1),
+	KEYS_UNK2        = BIT(2),
+	KEYS_UNK3        = BIT(3),
+	KEYS_NEXTCHAR    = BIT(4),
+	KEYS_PREVCHAR    = BIT(5),
+	KEYS_USEITEM     = BIT(6),
+	KEYS_ACTIVATE    = BIT(7),
+	KEYS_RIGHT       = BIT(8),
+	KEYS_LEFT        = BIT(9),
+	KEYS_DOWN        = BIT(10),
+	KEYS_UP          = BIT(11),
+	KEYS_PAUSE       = BIT(12),
+	KEYS_INVENTORY   = BIT(13),
+	KEYS_SPECIAL     = BIT(14),
+	KEYS_ATTACK      = BIT(15)
 };
 
 uint16_t keys_down; // addr seg04:03B6
