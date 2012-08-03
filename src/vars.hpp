@@ -18,12 +18,16 @@ uint16_t video_levelY; // addr seg04:0046
 uint16_t word_2854C; // addr seg04:006C
 uint16_t word_2854E; // addr seg04:006E
 
+uint16_t word_286E2; // addr seg04:0202
+
 uint16_t data_header1_snd1; // addr seg04:0302
 uint16_t data_header1_snd2; // addr seg04:0304
 
 uint16_t current_password[4]; // addr seg04:0310
 
 uint16_t word_2880F; // addr seg04:032F
+
+uint16_t word_28814; // addr seg04:0334
 
 uint16_t word_2881C; // addr seg04:033C
 
@@ -287,6 +291,9 @@ uint16_t levelRowOffsets[0x100]; // addr seg04:8F68
 
 uint16_t level_width_tiles; // addr seg04:9168
 uint16_t level_height_tiles; // addr seg04:916A
+
+uint8_t byte_3168B; // addr seg04:91AB
+uint8_t byte_3168C; // addr seg04:91AC
 
 uint8_t video_pixelPan; // addr seg04:92EE
 uint16_t word_317CF; // addr seg04:92EF

@@ -1483,9 +1483,7 @@ int main() {
 	// TODO setSomeGlobals(); sub_12CA3
 	initGameState();
 	loadNextLevel(); // Logo fade in
-	// TODO
-
-	vga_present();
+	timer_wait_count = 1;
 
 	// Game main loop
 	bool run_game = true;
@@ -1502,7 +1500,84 @@ int main() {
 			}
 		}
 
-		SDL_Delay(1000/60);
+		// TODO sub_12352();
+		// TODO sub_12D72
+		// TODO sub_102AD
+		// TODO sub_1041C
+		// TODO sub_10138();
+		// TODO sub_11BA5
+		// TODO sub_12E79
+		// TODO sub_10813
+		// TODO sub_1673C
+		// TODO sub_14207
+		// TODO sub_1386B
+		// TODO sub_1625D
+		// TODO sub_15546
+		// TODO sub_13916
+		// TODO sub_1064B
+		// TODO sub_12FC6
+		waitForTimerInt();
+		// TODO sub_1DE05
+		// TODO sub_165AA
+		// TODO sub_16661
+		// TODO sub_1406D
+		// TODO sub_1DD9C
+		// TODO mov     ax, 0FFFEh
+		// TODO sub_1C8F1
+		// TODO sub_1E0C7
+		updateVgaBuffer();
+		// TODO sub_12E16
+		// TODO sub_15530
+		// TODO sub_10704
+		// TODO sub_12FCB
+		// TODO loc_12D2C
+		waitForTimerInt();
+		// TODO sub_1DE05
+		// TODO sub_165AA
+		// TODO sub_16661
+		// TODO sub_1406D
+		// TODO sub_1DD9C
+		// TODO mov     ax, 0FFFEh
+		// TODO sub_1C8F1
+		// TODO sub_1E0C7
+		updateVgaBuffer();
+		// TODO sub_10753
+		// TODO sub_13C0C
+		// TODO sub_12FD0
+		// TODO sub_11792
+		// TODO sub_101BE
+		waitForTimerInt();
+		// TODO sub_1DE05
+		// TODO sub_165AA
+		// TODO sub_16661
+		// TODO sub_1DD9C
+		// TODO mov     ax, 0FFFEh
+		// TODO sub_1C8F1
+		// TODO sub_1E0C7
+		updateVgaBuffer();
+		// TODO mov     word_30C14, 0
+		// TODO sub_108C8
+		// TODO sub_10350
+		// TODO sub_1086F
+
+		if (current_level < 0x25 && word_286E2 != 0)
+		{
+			if (byte_3168B != 1)
+			{
+				if (byte_3168C == 1)
+					word_28814 |= 1;
+			}
+			else
+			{
+				word_28814 |= 1;
+
+				int next_level = current_level - 1;
+				if (next_level < 0)
+					next_level = 0;
+
+				level_header.next_level_id = next_level;
+			}
+		}
 	}
 
 	vga_deinitialize();
