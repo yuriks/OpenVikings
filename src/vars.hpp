@@ -372,3 +372,24 @@ FarPtr soundData; // addr seg04:992A
 
 uint16_t did_init_timer; // addr seg04:A39A
 uint16_t timer_wait_count; // addr seg04:A39C
+
+enum SpecialLevels
+{
+	LEVEL_SPACESHIP = 0x00,
+	LEVEL_JUNGLE    = 0x04,
+	LEVEL_DESERT    = 0x0B,
+	LEVEL_MACHINE   = 0x11,
+	LEVEL_WACKY     = 0x19,
+	LEVEL_ENDSHIP   = 0x21,
+	LEVEL_RESPAWN   = 0x25,
+	LEVEL_MAINMENU  = 0x26,
+	LEVEL_INTERPLAY = 0x27,
+	LEVEL_BLIZZARD  = 0x28,
+	LEVEL_WARP      = 0x29,
+	LEVEL_MAINMENU2 = 0x2A,
+	LEVEL_INTRO1    = 0x2B,
+	LEVEL_INTRO2    = 0x2C,
+	LEVEL_ENDING1   = 0x2D,
+	LEVEL_ENDING2   = 0x2E,
+	LEVEL_CREDITS   = 0x2F
+};
