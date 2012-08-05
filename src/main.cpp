@@ -1480,11 +1480,11 @@ void updateInput()
 		// TODO sub_12EF8();
 		ax = word_30BBC;
 	}
-	ax |= word_30BBE;
+	ax |= pressed_buttons;
 
-	keys_down = ax;
-	keys_pressed = (ax ^ keys_previous) & ax;
-	keys_previous = ax;
+	buttons_down = ax;
+	buttons_pressed = (ax ^ buttons_previous) & ax;
+	buttons_previous = ax;
 }
 
 // addr seg00:0138
@@ -1495,7 +1495,8 @@ void sub_10138()
 	if (ax & BIT(2))
 	{
 		word_28814 &= ~BIT(2);
-		while (updateInput(), (keys_pressed & (KEYS_USEITEM | KEYS_ACTIVATE | KEYS_SPECIAL | KEYS_ATTACK)) == 0)
+		while (updateInput(), (buttons_pressed &
+			(BUTTON_USEITEM | BUTTON_ACTIVATE | BUTTON_SPECIAL | BUTTON_ATTACK)) == 0)
 		{
 			// TODO sub_101BE();
 			updateVgaBuffer();

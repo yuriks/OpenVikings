@@ -50,29 +50,29 @@ uint16_t word_28870; // addr seg04:0390
 uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_screenShakeY; // addr seg04:03A0
 
-enum Keys
+enum Buttons
 {
-	KEYS_UNK0        = BIT(0),
-	KEYS_UNK1        = BIT(1),
-	KEYS_UNK2        = BIT(2),
-	KEYS_UNK3        = BIT(3),
-	KEYS_NEXTCHAR    = BIT(4),
-	KEYS_PREVCHAR    = BIT(5),
-	KEYS_USEITEM     = BIT(6),
-	KEYS_ACTIVATE    = BIT(7),
-	KEYS_RIGHT       = BIT(8),
-	KEYS_LEFT        = BIT(9),
-	KEYS_DOWN        = BIT(10),
-	KEYS_UP          = BIT(11),
-	KEYS_PAUSE       = BIT(12),
-	KEYS_INVENTORY   = BIT(13),
-	KEYS_SPECIAL     = BIT(14),
-	KEYS_ATTACK      = BIT(15)
+	BUTTON_UNK0        = BIT(0),
+	BUTTON_UNK1        = BIT(1),
+	BUTTON_UNK2        = BIT(2),
+	BUTTON_UNK3        = BIT(3),
+	BUTTON_NEXTCHAR    = BIT(4),
+	BUTTON_PREVCHAR    = BIT(5),
+	BUTTON_USEITEM     = BIT(6),
+	BUTTON_ACTIVATE    = BIT(7),
+	BUTTON_RIGHT       = BIT(8),
+	BUTTON_LEFT        = BIT(9),
+	BUTTON_DOWN        = BIT(10),
+	BUTTON_UP          = BIT(11),
+	BUTTON_PAUSE       = BIT(12),
+	BUTTON_INVENTORY   = BIT(13),
+	BUTTON_SPECIAL     = BIT(14),
+	BUTTON_ATTACK      = BIT(15)
 };
 
-uint16_t keys_down; // addr seg04:03B6
-uint16_t keys_pressed; // addr seg04:03B8
-uint16_t keys_previous; // addr seg04:03BA
+uint16_t buttons_down; // addr seg04:03B6
+uint16_t buttons_pressed; // addr seg04:03B8
+uint16_t buttons_previous; // addr seg04:03BA
 
 uint16_t word_288A2; // addr seg04:03C2
 uint16_t word_288A4; // addr seg04:03C4
@@ -299,7 +299,7 @@ DataHeader1 data_header1; // addr seg04:86B0
 
 uint16_t word_30BBA; // addr seg04:86DA
 uint16_t word_30BBC; // addr seg04:86DC
-uint16_t word_30BBE; // addr seg04:86DE
+uint16_t pressed_buttons; // addr seg04:86DE
 
 // addr seg04:89F8
 /* use calcHeightTileMults instead!
