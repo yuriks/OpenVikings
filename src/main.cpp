@@ -1,3 +1,4 @@
+#include "vikings.hpp"
 #include "main.hpp"
 
 #include <cstdio>

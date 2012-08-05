@@ -1,4 +1,5 @@
 #pragma once
+#include "vikings.hpp"
 
 #include <cstdint>
 #include <cstdio>
@@ -14,8 +15,6 @@
 #define extern_ extern
 #define INIT(x)
 #endif
-
-#define BIT(i) (1 << (i))
 
 struct FarPtr {
 	uint16_t offset;

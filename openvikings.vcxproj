@@ -74,6 +74,7 @@
     <ClInclude Include="src\pack_enable.hpp" />
     <ClInclude Include="src\vars.hpp" />
     <ClInclude Include="src\vga_emu.hpp" />
+    <ClInclude Include="src\vikings.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
