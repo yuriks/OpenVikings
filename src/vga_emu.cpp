@@ -1,10 +1,11 @@
 #include "vga_emu.hpp"
 
-#include "main.hpp"
-
 #include <algorithm>
 #include <cassert>
 #include <SDL.h>
+#include "input.hpp"
+#include "main.hpp"
+
 
 //#define VRAM_DEBUG
 
@@ -185,5 +186,5 @@ void vga_present() {
 	SDL_RenderCopy(vga_renderer, vga_texture, nullptr, nullptr);
 
 	SDL_RenderPresent(vga_renderer);
-	SDL_PumpEvents();
+	handleSDLEvents();
 }

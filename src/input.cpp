@@ -1,5 +1,7 @@
 #include "input.hpp"
 
+#include <cstdlib>
+#include <SDL_events.h>
 #include "vars.hpp"
 
 uint16_t last_typed_key; // addr seg04:028C
@@ -196,7 +198,7 @@ void updateInput()
 }
 
 // addr seg00:6440
-void keyboardHandler(const SDL_KeyboardEvent& ev)
+static void keyboardHandler(const SDL_KeyboardEvent& ev)
 {
 	uint8_t scancode = sdlToXTScancode(ev.keysym.scancode);
 
@@ -233,6 +235,25 @@ void keyboardHandler(const SDL_KeyboardEvent& ev)
 		{
 			pressed_buttons &= ~button_key_assignments[scancode];
 			pressed_keys[scancode] = 0;
+		}
+	}
+}
+
+void handleSDLEvents()
+{
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+		case SDL_KEYDOWN:
+		case SDL_KEYUP:
+			keyboardHandler(event.key);
+			break;
+		case SDL_QUIT:
+			// TODO make it invoke the Alt-X handler
+			std::exit(0);
+			break;
 		}
 	}
 }

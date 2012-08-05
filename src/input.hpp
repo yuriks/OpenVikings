@@ -2,7 +2,6 @@
 #include "vars.hpp"
 
 #include <cstdint>
-#include <SDL_events.h>
 
 enum Buttons
 {
@@ -71,4 +70,4 @@ extern uint8_t pressed_keys[128]; // addr seg04:916C
 extern uint16_t button_key_assignments[128]; // addr seg04:91EC
 
 void updateInput();
-void keyboardHandler(const SDL_KeyboardEvent& ev);
+void handleSDLEvents();

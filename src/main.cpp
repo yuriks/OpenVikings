@@ -8,7 +8,6 @@
 #include <cstring>
 #include <algorithm>
 #include <SDL_timer.h>
-#include <SDL_events.h>
 
 #include "vga_emu.hpp"
 #include "input.hpp"
@@ -1593,25 +1592,11 @@ int main() {
 	timer_wait_count = 1;
 
 	// Game main loop
-	bool run_game = true;
-	while (run_game)
+	while (true)
 	{
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-			case SDL_KEYDOWN:
-			case SDL_KEYUP:
-				keyboardHandler(event.key);
-				break;
-			case SDL_QUIT:
-				run_game = false;
-				break;
-			}
-		}
-
+		handleSDLEvents();
 		updateInput();
+
 		// TODO sub_12D72
 		// TODO sub_102AD
 		// TODO sub_1041C
