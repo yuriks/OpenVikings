@@ -40,6 +40,12 @@ uint8_t byte_28836[16]; // addr seg04:0356
 
 uint16_t word_28852; // addr seg04:0372
 uint16_t word_28854; // addr seg04:0374
+uint16_t word_28856; // addr seg04:0376
+uint8_t word_28858[20]; // addr seg04:0378
+
+uint16_t word_2886E; // addr seg04:038E
+
+uint16_t word_28870; // addr seg04:0390
 
 uint16_t video_screenShakeX; // addr seg04:039E
 uint16_t video_screenShakeY; // addr seg04:03A0

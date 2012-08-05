@@ -1487,6 +1487,112 @@ void updateInput()
 	keys_previous = ax;
 }
 
+// addr seg00:0138
+void sub_10138()
+{
+	uint16_t ax = word_28814;
+
+	if (ax & BIT(2))
+	{
+		word_28814 &= ~BIT(2);
+		while (updateInput(), (keys_pressed & (KEYS_USEITEM | KEYS_ACTIVATE | KEYS_SPECIAL | KEYS_ATTACK)) == 0)
+		{
+			// TODO sub_101BE();
+			updateVgaBuffer();
+			waitForTimerInt();
+			// TODO sub_108C8();
+			updateVgaBuffer();
+			waitForTimerInt();
+			// TODO sub_108C8();
+			updateVgaBuffer();
+			waitForTimerInt();
+		}
+
+		updateInput();
+	}
+	else if (ax & (BIT(0) | BIT(1)))
+	{
+		if (ax & BIT(1))
+		{
+			level_header.next_level_id = LEVEL_RESPAWN;
+		}
+
+		word_28814 = 0;
+		// TODO sub_1774F();
+		word_2880F++;
+		// TODO sub_14207();
+		loadNextLevel();
+	}
+
+}
+
+// addr seg00:5517
+void sub_15517()
+{
+	// Any particular reason this loop is reversed?
+	for (int si = word_28852 - 1; si >= 0; --si)
+	{
+		word_29E25[si] = 0;
+		word_29E4D[si] = 0;
+	}
+}
+
+// addr seg00:424C
+void sub_1424C(int si)
+{
+	if (word_29835[si] == nullptr)
+		return;
+
+	if ((word_29A65[si] & BIT(12)) && word_29BF5[si] != 0)
+	{
+		word_29BF5[si]--;
+	}
+
+	word_28522 = si;
+	word_2886E = 0;
+	uint8_t* es = word_29835[si];
+
+	if ((word_29A65[si] & BIT(9)) || word_2880F != 0)
+	{
+		if (word_29BCD[si] & BIT(15))
+			return;
+
+		int bx = word_29BCD[si];
+		WorldData* world_data_entry = reinterpret_cast<WorldData*>(world_data + bx*21);
+
+		word_2980D[si] = world_data_entry->field_3;
+	}
+
+	/* TODO vm loop
+	int bx = word_2980D[si];
+	do
+	{
+		si =
+	} while
+	*/
+}
+
+// addr seg00:4207
+void sub_14207()
+{
+	sub_15517();
+	word_28856 = 0;
+	word_28870 = 0;
+
+	for (int si = 0; si < word_28852; ++si)
+	{
+		sub_1424C(si);
+		if (word_28856 != 0)
+		{
+			for (int di = 0; di < word_28856; ++di)
+			{
+				sub_1424C(word_28858[di]);
+			}
+			word_28856 = 0;
+		}
+	}
+}
+
 // addr seg00:0000
 int main() {
 	vga_initialize();
@@ -1520,12 +1626,12 @@ int main() {
 		// TODO sub_12D72
 		// TODO sub_102AD
 		// TODO sub_1041C
-		// TODO sub_10138();
+		sub_10138();
 		// TODO sub_11BA5
 		// TODO sub_12E79
 		// TODO sub_10813
 		// TODO sub_1673C
-		// TODO sub_14207
+		sub_14207();
 		// TODO sub_1386B
 		// TODO sub_1625D
 		// TODO sub_15546
