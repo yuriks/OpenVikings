@@ -64,11 +64,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vars.cpp" />
     <ClCompile Include="src\vga_emu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\input.hpp" />
     <ClInclude Include="src\main.hpp" />
     <ClInclude Include="src\pack_disable.hpp" />
     <ClInclude Include="src\pack_enable.hpp" />

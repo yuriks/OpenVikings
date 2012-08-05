@@ -11,19 +11,12 @@
 #include <SDL_events.h>
 
 #include "vga_emu.hpp"
+#include "input.hpp"
 #include "vars.hpp"
 
 // TODO
-void hookKeyboard();
-void unhookKeyboard();
 void restoreErrorInt();
 uint32_t curSystemTime();
-
-// TODO
-// addr seg00:6528
-void hookKeyboard() {}
-// addr seg00:6546
-void unhookKeyboard() {}
 
 // addr seg00:686F
 void restoreVideo() {
@@ -64,14 +57,14 @@ inline void store32LE(uint8_t* d, uint32_t val) {
 void hookInts() {
 	// init memory and segments();
 
-	hookKeyboard();
+	//hookKeyboard(); // Not used anymore.
 
 	start_time = curSystemTime();
 }
 
 // addr seg00:0DBA
 void errorQuit(const char* msg, uint16_t error_code) {
-	unhookKeyboard();
+	//unhookKeyboard(); // Not used anymore.
 	// TODO ??? call
 
 	std::fclose(data_file);
@@ -292,37 +285,38 @@ void allocMemAndLoadData() {
 	decompressChunk(14, chunk_buffer10, sizeof(chunk_buffer10));
 	decompressChunk(2,  chunk_buffer11, sizeof(chunk_buffer11));
 
+	// Set level 1 password as default
 	current_password[0] = 'S';
 	current_password[1] = 'T';
 	current_password[2] = 'R';
 	current_password[3] = 'T';
 
-	// TODO these don't seem to ever be read, investigate further
-	// word_3175C = 0x800;
-	// word_31762 = 0x200;
-	// word_31766 = 0x100;
-	// word_31764 = 0x400;
-	// word_3176C = 0x400;
-	// word_31706 = 0x20;
-	// word_3175A = 0x20;
-	// word_31770 = 0x10;
-	// word_3175E = 0x10;
-	// word_316CE = 0x1000;
-	// word_316FE = 0x1000;
-	// word_31740 = 0x2000;
-	// word_316EA = 0x2000;
-	// word_3170A = 0x80;
-	// word_3170E = 0x8000;
-	// word_3173E = 0x8000;
-	// word_31704 = 0x8000;
-	// word_31768 = 0x8000;
-	// word_316F0 = 0x40;
-	// word_3170C = 0x4000;
+	// Setup initial button assignments
+	button_key_assignments[SCAN_KP8_UP]     = BUTTON_UP;
+	button_key_assignments[SCAN_KP4_LEFT]   = BUTTON_LEFT;
+	button_key_assignments[SCAN_KP6_RIGHT]  = BUTTON_RIGHT;
+	button_key_assignments[SCAN_KP5]        = BUTTON_DOWN;
+	button_key_assignments[SCAN_KP2_DOWN]   = BUTTON_DOWN;
+	button_key_assignments[SCAN_CTRL]       = BUTTON_PREVCHAR;
+	button_key_assignments[SCAN_KP7_HOME]   = BUTTON_PREVCHAR;
+	button_key_assignments[SCAN_KP0_INSERT] = BUTTON_NEXTCHAR;
+	button_key_assignments[SCAN_KP9_PAGEUP] = BUTTON_NEXTCHAR;
+	button_key_assignments[SCAN_ESCAPE]     = BUTTON_PAUSE;
+	button_key_assignments[SCAN_P]          = BUTTON_PAUSE;
+	button_key_assignments[SCAN_CAPSLOCK]   = BUTTON_INVENTORY;
+	button_key_assignments[SCAN_TAB]        = BUTTON_INVENTORY;
+	button_key_assignments[SCAN_S]          = BUTTON_ACTIVATE;
+	button_key_assignments[SCAN_F]          = BUTTON_ATTACK;
+	button_key_assignments[SCAN_SPACEBAR]   = BUTTON_ATTACK;
+	button_key_assignments[SCAN_RETURN]     = BUTTON_ATTACK;
+	button_key_assignments[SCAN_KPPLUS]     = BUTTON_ATTACK;
+	button_key_assignments[SCAN_E]          = BUTTON_USEITEM;
+	button_key_assignments[SCAN_D]          = BUTTON_SPECIAL;
 }
 
 // addr seg00:0E35
 void freeMemAndQuit() {
-	unhookKeyboard();
+	//unhookKeyboard(); // Not used anymore.
 	// TODO one call
 
 	delete[] tileset_data;
@@ -1430,6 +1424,12 @@ void sub_11446()
 // addr seg00:1080
 void loadNextLevel() {
 	// TODO lotsa variables
+
+	pressed_buttons = 0;
+	word_30BBC = 0;
+	buttons_down = 0;
+	buttons_pressed = 0;
+
 	fadePalOut();
 	// TODO sound_func1();
 	// TODO zero_byte_31A4C();
@@ -1469,23 +1469,6 @@ void loadNextLevel() {
 	sub_115D2(); // TODO
 	fadePalIn();
 	// TODO sub_12345();
-}
-
-// addr seg00:2352
-// Reads keyboard or similar
-void updateInput()
-{
-	uint16_t ax = 0;
-	if (word_30BBA != 0)
-	{
-		// TODO sub_12EF8();
-		ax = word_30BBC;
-	}
-	ax |= pressed_buttons;
-
-	buttons_down = ax;
-	buttons_pressed = (ax ^ buttons_previous) & ax;
-	buttons_previous = ax;
 }
 
 // addr seg00:0138
@@ -1618,6 +1601,10 @@ int main() {
 		{
 			switch (event.type)
 			{
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
+				keyboardHandler(event.key);
+				break;
 			case SDL_QUIT:
 				run_game = false;
 				break;

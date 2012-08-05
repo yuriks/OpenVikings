@@ -63,32 +63,10 @@ extern_ uint16_t word_28870; // addr seg04:0390
 extern_ uint16_t video_screenShakeX; // addr seg04:039E
 extern_ uint16_t video_screenShakeY; // addr seg04:03A0
 
-enum Buttons
-{
-	BUTTON_UNK0        = BIT(0),
-	BUTTON_UNK1        = BIT(1),
-	BUTTON_UNK2        = BIT(2),
-	BUTTON_UNK3        = BIT(3),
-	BUTTON_NEXTCHAR    = BIT(4),
-	BUTTON_PREVCHAR    = BIT(5),
-	BUTTON_USEITEM     = BIT(6),
-	BUTTON_ACTIVATE    = BIT(7),
-	BUTTON_RIGHT       = BIT(8),
-	BUTTON_LEFT        = BIT(9),
-	BUTTON_DOWN        = BIT(10),
-	BUTTON_UP          = BIT(11),
-	BUTTON_PAUSE       = BIT(12),
-	BUTTON_INVENTORY   = BIT(13),
-	BUTTON_SPECIAL     = BIT(14),
-	BUTTON_ATTACK      = BIT(15)
-};
-
-extern_ uint16_t buttons_down; // addr seg04:03B6
-extern_ uint16_t buttons_pressed; // addr seg04:03B8
-extern_ uint16_t buttons_previous; // addr seg04:03BA
-
 extern_ uint16_t word_288A2; // addr seg04:03C2
 extern_ uint16_t word_288A4; // addr seg04:03C4
+
+extern_ uint16_t word_288AC; // addr seg04:03CC
 
 extern_ int16_t word_288C0; // addr seg04:03E0
 extern_ uint16_t word_288C2; // addr seg04:03E2
@@ -313,10 +291,6 @@ struct DataHeader1 {
 	uint16_t dummy3[5];
 };
 extern_ DataHeader1 data_header1; // addr seg04:86B0
-
-extern_ uint16_t word_30BBA; // addr seg04:86DA
-extern_ uint16_t word_30BBC; // addr seg04:86DC
-extern_ uint16_t pressed_buttons; // addr seg04:86DE
 
 // addr seg04:89F8
 /* use calcHeightTileMults instead!

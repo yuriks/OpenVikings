@@ -24,6 +24,9 @@
     <ClCompile Include="src\vars.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\vars.hpp">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\pack_disable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vikings.hpp">
