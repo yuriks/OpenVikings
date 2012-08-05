@@ -65,6 +65,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vars.cpp" />
     <ClCompile Include="src\vga_emu.cpp" />
   </ItemGroup>
   <ItemGroup>
