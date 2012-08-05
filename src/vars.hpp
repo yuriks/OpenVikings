@@ -8,9 +8,10 @@
 // variables instead of declaring them extern.
 
 #ifdef VARS_HPP_DEFINITIONS
-#define extern
+#define extern_
 #define INIT(x) x
 #else
+#define extern_ extern
 #define INIT(x)
 #endif
 
@@ -21,47 +22,47 @@ struct FarPtr {
 	uint8_t* seg;
 };
 
-extern int16_t word_28514; // addr seg04:0034
-extern int16_t word_28516; // addr seg04:0036
-extern uint16_t word_28518; // addr seg04:0038
-extern int16_t word_2851A; // addr seg04:003A
+extern_ int16_t word_28514; // addr seg04:0034
+extern_ int16_t word_28516; // addr seg04:0036
+extern_ uint16_t word_28518; // addr seg04:0038
+extern_ int16_t word_2851A; // addr seg04:003A
 
-extern uint16_t word_28522; // addr seg04:0042
-extern uint16_t video_levelX; // addr seg04:0044
-extern uint16_t video_levelY; // addr seg04:0046
+extern_ uint16_t word_28522; // addr seg04:0042
+extern_ uint16_t video_levelX; // addr seg04:0044
+extern_ uint16_t video_levelY; // addr seg04:0046
 
-extern uint16_t word_2854C; // addr seg04:006C
-extern uint16_t word_2854E; // addr seg04:006E
+extern_ uint16_t word_2854C; // addr seg04:006C
+extern_ uint16_t word_2854E; // addr seg04:006E
 
-extern uint16_t word_286E2; // addr seg04:0202
+extern_ uint16_t word_286E2; // addr seg04:0202
 
-extern uint16_t data_header1_snd1; // addr seg04:0302
-extern uint16_t data_header1_snd2; // addr seg04:0304
+extern_ uint16_t data_header1_snd1; // addr seg04:0302
+extern_ uint16_t data_header1_snd2; // addr seg04:0304
 
-extern uint16_t current_password[4]; // addr seg04:0310
+extern_ uint16_t current_password[4]; // addr seg04:0310
 
-extern uint16_t word_2880F; // addr seg04:032F
+extern_ uint16_t word_2880F; // addr seg04:032F
 
-extern uint16_t word_28814; // addr seg04:0334
+extern_ uint16_t word_28814; // addr seg04:0334
 
-extern uint16_t word_2881C; // addr seg04:033C
+extern_ uint16_t word_2881C; // addr seg04:033C
 
-extern Color color1; // addr seg04:0342
-extern Color color2; // addr seg04:0345
+extern_ Color color1; // addr seg04:0342
+extern_ Color color2; // addr seg04:0345
 
-extern uint8_t byte_28836[16]; // addr seg04:0356
+extern_ uint8_t byte_28836[16]; // addr seg04:0356
 
-extern uint16_t word_28852; // addr seg04:0372
-extern uint16_t word_28854; // addr seg04:0374
-extern uint16_t word_28856; // addr seg04:0376
-extern uint8_t word_28858[20]; // addr seg04:0378
+extern_ uint16_t word_28852; // addr seg04:0372
+extern_ uint16_t word_28854; // addr seg04:0374
+extern_ uint16_t word_28856; // addr seg04:0376
+extern_ uint8_t word_28858[20]; // addr seg04:0378
 
-extern uint16_t word_2886E; // addr seg04:038E
+extern_ uint16_t word_2886E; // addr seg04:038E
 
-extern uint16_t word_28870; // addr seg04:0390
+extern_ uint16_t word_28870; // addr seg04:0390
 
-extern uint16_t video_screenShakeX; // addr seg04:039E
-extern uint16_t video_screenShakeY; // addr seg04:03A0
+extern_ uint16_t video_screenShakeX; // addr seg04:039E
+extern_ uint16_t video_screenShakeY; // addr seg04:03A0
 
 enum Buttons
 {
@@ -83,95 +84,95 @@ enum Buttons
 	BUTTON_ATTACK      = BIT(15)
 };
 
-extern uint16_t buttons_down; // addr seg04:03B6
-extern uint16_t buttons_pressed; // addr seg04:03B8
-extern uint16_t buttons_previous; // addr seg04:03BA
+extern_ uint16_t buttons_down; // addr seg04:03B6
+extern_ uint16_t buttons_pressed; // addr seg04:03B8
+extern_ uint16_t buttons_previous; // addr seg04:03BA
 
-extern uint16_t word_288A2; // addr seg04:03C2
-extern uint16_t word_288A4; // addr seg04:03C4
+extern_ uint16_t word_288A2; // addr seg04:03C2
+extern_ uint16_t word_288A4; // addr seg04:03C4
 
-extern int16_t word_288C0; // addr seg04:03E0
-extern uint16_t word_288C2; // addr seg04:03E2
-extern uint16_t inventory_items[12]; // addr seg04:03E4
-extern uint16_t inventory_cur_icons[12]; // addr seg04:03FC
+extern_ int16_t word_288C0; // addr seg04:03E0
+extern_ uint16_t word_288C2; // addr seg04:03E2
+extern_ uint16_t inventory_items[12]; // addr seg04:03E4
+extern_ uint16_t inventory_cur_icons[12]; // addr seg04:03FC
 
-extern uint16_t word_288F4[3]; // addr seg04:0414
+extern_ uint16_t word_288F4[3]; // addr seg04:0414
 
-extern uint16_t word_28903[3]; // addr seg04:0423
-extern uint16_t word_28909[3]; // addr seg04:0429
+extern_ uint16_t word_28903[3]; // addr seg04:0423
+extern_ uint16_t word_28909[3]; // addr seg04:0429
 
-extern uint16_t word_2892D[128]; // addr seg04:044D
+extern_ uint16_t word_2892D[128]; // addr seg04:044D
 
-extern uint16_t loaded_chunks2[16]; // addr seg04:124D
-extern uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
-extern uint16_t loaded_chunks11[32]; // addr seg04:12AD
-extern uint16_t loaded_chunks_end11[32]; // addr seg04:12ED
-extern uint16_t word_2980D[20]; // addr seg04:132D
-extern uint8_t* word_29835[20]; // addr seg04:1355
-extern uint16_t word_29885[20]; // addr seg04:13A5
-extern uint16_t word_298AD[20]; // addr seg04:13CD
-extern uint16_t word_298D5[20]; // addr seg04:13F5
-extern uint16_t word_298FD[20]; // addr seg04:141D
-extern int16_t word_29925[20]; // addr seg04:1445
-extern uint16_t word_2994D[20]; // addr seg04:146D
-extern uint16_t word_29975[20]; // addr seg04:1495
-extern int16_t word_2999D[20]; // addr seg04:14BD
-extern uint16_t word_299C5[20]; // addr seg04:14E5
-extern uint16_t word_299ED[20]; // addr seg04:150D
-extern uint16_t word_29A15[20]; // addr seg04:1535
-extern uint16_t word_29A3D[20]; // addr seg04:155D
-extern uint16_t word_29A65[20]; // addr seg04:1585
-extern uint16_t word_29A8D[20]; // addr seg04:15AD
-extern uint16_t word_29AB5[20]; // addr seg04:15D5
-extern uint16_t word_29ADD[20]; // addr seg04:15FD
-extern uint16_t word_29B05[20]; // addr seg04:1625
-extern uint16_t word_29B2D[20]; // addr seg04:164D
-extern uint16_t word_29B55[20]; // addr seg04:1675
-extern int16_t word_29BA5[20]; // addr seg04:16C5
-extern int16_t word_29BCD[20]; // addr seg04:16ED
-extern uint16_t word_29B7D[20]; // addr seg04:169D
-extern uint16_t word_29BF5[20]; // addr seg04:1715
-extern uint16_t word_29C1D[20]; // addr seg04:173D
-extern uint16_t word_29C45[20]; // addr seg04:1765
-extern uint16_t word_29C6D[20]; // addr seg04:178D
-extern uint16_t word_29C95[20]; // addr seg04:17B5
-extern uint16_t word_29CBD[20]; // addr seg04:17DD
-extern uint16_t word_29CE5[20]; // addr seg04:1805
-extern uint16_t word_29D0D[20]; // addr seg04:182D
-extern uint16_t word_29D35[20]; // addr seg04:1855
-extern uint16_t word_29D5D[20]; // addr seg04:187D
-extern uint16_t word_29D85[20]; // addr seg04:18A5
-extern uint16_t word_29DAD[20]; // addr seg04:18CD
-extern uint16_t word_29DD5[20]; // addr seg04:18F5
-extern uint16_t word_29DFD[20]; // addr seg04:191D
-extern uint16_t word_29E25[20]; // addr seg04:1945
-extern uint16_t word_29E4D[20]; // addr seg04:196D
-extern uint16_t word_29E9D[20]; // addr seg04:19BD
-extern uint16_t word_29EC5[20]; // addr seg04:19E5
-extern uint16_t word_29EED[20]; // addr seg04:1A0D
+extern_ uint16_t loaded_chunks2[16]; // addr seg04:124D
+extern_ uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
+extern_ uint16_t loaded_chunks11[32]; // addr seg04:12AD
+extern_ uint16_t loaded_chunks_end11[32]; // addr seg04:12ED
+extern_ uint16_t word_2980D[20]; // addr seg04:132D
+extern_ uint8_t* word_29835[20]; // addr seg04:1355
+extern_ uint16_t word_29885[20]; // addr seg04:13A5
+extern_ uint16_t word_298AD[20]; // addr seg04:13CD
+extern_ uint16_t word_298D5[20]; // addr seg04:13F5
+extern_ uint16_t word_298FD[20]; // addr seg04:141D
+extern_ int16_t word_29925[20]; // addr seg04:1445
+extern_ uint16_t word_2994D[20]; // addr seg04:146D
+extern_ uint16_t word_29975[20]; // addr seg04:1495
+extern_ int16_t word_2999D[20]; // addr seg04:14BD
+extern_ uint16_t word_299C5[20]; // addr seg04:14E5
+extern_ uint16_t word_299ED[20]; // addr seg04:150D
+extern_ uint16_t word_29A15[20]; // addr seg04:1535
+extern_ uint16_t word_29A3D[20]; // addr seg04:155D
+extern_ uint16_t word_29A65[20]; // addr seg04:1585
+extern_ uint16_t word_29A8D[20]; // addr seg04:15AD
+extern_ uint16_t word_29AB5[20]; // addr seg04:15D5
+extern_ uint16_t word_29ADD[20]; // addr seg04:15FD
+extern_ uint16_t word_29B05[20]; // addr seg04:1625
+extern_ uint16_t word_29B2D[20]; // addr seg04:164D
+extern_ uint16_t word_29B55[20]; // addr seg04:1675
+extern_ int16_t word_29BA5[20]; // addr seg04:16C5
+extern_ int16_t word_29BCD[20]; // addr seg04:16ED
+extern_ uint16_t word_29B7D[20]; // addr seg04:169D
+extern_ uint16_t word_29BF5[20]; // addr seg04:1715
+extern_ uint16_t word_29C1D[20]; // addr seg04:173D
+extern_ uint16_t word_29C45[20]; // addr seg04:1765
+extern_ uint16_t word_29C6D[20]; // addr seg04:178D
+extern_ uint16_t word_29C95[20]; // addr seg04:17B5
+extern_ uint16_t word_29CBD[20]; // addr seg04:17DD
+extern_ uint16_t word_29CE5[20]; // addr seg04:1805
+extern_ uint16_t word_29D0D[20]; // addr seg04:182D
+extern_ uint16_t word_29D35[20]; // addr seg04:1855
+extern_ uint16_t word_29D5D[20]; // addr seg04:187D
+extern_ uint16_t word_29D85[20]; // addr seg04:18A5
+extern_ uint16_t word_29DAD[20]; // addr seg04:18CD
+extern_ uint16_t word_29DD5[20]; // addr seg04:18F5
+extern_ uint16_t word_29DFD[20]; // addr seg04:191D
+extern_ uint16_t word_29E25[20]; // addr seg04:1945
+extern_ uint16_t word_29E4D[20]; // addr seg04:196D
+extern_ uint16_t word_29E9D[20]; // addr seg04:19BD
+extern_ uint16_t word_29EC5[20]; // addr seg04:19E5
+extern_ uint16_t word_29EED[20]; // addr seg04:1A0D
 //---
-extern int16_t word_29F65[20]; // addr seg04:1A85
-extern int16_t word_29F8D[20]; // addr seg04:1AAD
-extern uint16_t word_29FB5[20]; // addr seg04:1AD5
+extern_ int16_t word_29F65[20]; // addr seg04:1A85
+extern_ int16_t word_29F8D[20]; // addr seg04:1AAD
+extern_ uint16_t word_29FB5[20]; // addr seg04:1AD5
 //---
-extern uint16_t word_2AA5B; // addr seg04:257B
-extern uint16_t word_2AA5D; // addr seg04:257D
-extern uint16_t video_scroll_x_tiles; // addr seg04:257F
-extern uint16_t video_scroll_y_tiles; // addr seg04:2581
+extern_ uint16_t word_2AA5B; // addr seg04:257B
+extern_ uint16_t word_2AA5D; // addr seg04:257D
+extern_ uint16_t video_scroll_x_tiles; // addr seg04:257F
+extern_ uint16_t video_scroll_y_tiles; // addr seg04:2581
 
-extern uint8_t byte_2AA63; // addr seg04:2583
-extern uint8_t byte_2AA64[8]; // addr seg04:2584
-extern uint8_t byte_2AA6C[8]; // addr seg04:258C
-extern uint8_t byte_2AA74[8]; // addr seg04:2594
-extern uint8_t byte_2AA7C[8]; // addr seg04:259C
+extern_ uint8_t byte_2AA63; // addr seg04:2583
+extern_ uint8_t byte_2AA64[8]; // addr seg04:2584
+extern_ uint8_t byte_2AA6C[8]; // addr seg04:258C
+extern_ uint8_t byte_2AA74[8]; // addr seg04:2594
+extern_ uint8_t byte_2AA7C[8]; // addr seg04:259C
 
-extern uint16_t video_level_max_x; // addr seg04:25A4
-extern uint16_t video_level_max_y; // addr seg04:25A6
+extern_ uint16_t video_level_max_x; // addr seg04:25A4
+extern_ uint16_t video_level_max_y; // addr seg04:25A6
 
-extern Color stru_2AA88; // addr seg04:25A8
+extern_ Color stru_2AA88; // addr seg04:25A8
 
-extern uint16_t previous_level; // addr seg04:25AB
-extern uint16_t current_level; // addr seg04:25AD
+extern_ uint16_t previous_level; // addr seg04:25AB
+extern_ uint16_t current_level; // addr seg04:25AD
 
 enum LevelFlags : uint8_t {
 	LVLFLAG_BIT1 = 0x1,
@@ -210,21 +211,21 @@ struct LevelHeader {
 #include "pack_disable.hpp"
 ;
 
-extern LevelHeader level_header; // addr seg04:25B3
+extern_ LevelHeader level_header; // addr seg04:25B3
 
-extern std::FILE* data_file INIT(= 0); // addr seg04:2BB2
-extern int32_t chunk_offsets[2]; // addr seg04:2BB4
-extern uint16_t decoded_data_len; // addr seg04:2BBC
+extern_ std::FILE* data_file INIT(= 0); // addr seg04:2BB2
+extern_ int32_t chunk_offsets[2]; // addr seg04:2BB4
+extern_ uint16_t decoded_data_len; // addr seg04:2BBC
 
 static const size_t metatile_data_size = 0x3600;
-extern uint8_t* metatile_data; // addr seg04:2E5D
+extern_ uint8_t* metatile_data; // addr seg04:2E5D
 static const size_t tileset_data_size = 0x8B80;
-extern uint8_t* tileset_data; // addr seg04:2E5F
+extern_ uint8_t* tileset_data; // addr seg04:2E5F
 static const size_t alloc_seg2_size = 0x2000;
-extern uint8_t* alloc_seg2; // addr seg04:2E61
+extern_ uint8_t* alloc_seg2; // addr seg04:2E61
 static const size_t tilemap_data_size = 0x3130;
-extern uint8_t* tilemap_data; // addr seg04:2E63
-extern uint8_t* tilemap_data_end; // addr seg04:2E65
+extern_ uint8_t* tilemap_data; // addr seg04:2E63
+extern_ uint8_t* tilemap_data_end; // addr seg04:2E65
 
 #include "pack_enable.hpp"
 struct WorldData
@@ -246,31 +247,31 @@ struct WorldData
 ;
 
 static const size_t world_data_size = 0xC000;
-extern uint8_t* world_data; // addr seg04:2E67
+extern_ uint8_t* world_data; // addr seg04:2E67
 static const size_t alloc_seg6_size = 0xC080;
-extern uint8_t* alloc_seg6; // addr seg04:2E69
-extern uint8_t* soundData2End; // addr seg04:2E6B
-extern uint8_t* soundData1End; // addr seg04:2E6D
-extern uint8_t* soundData0End; // addr seg04:2E6F
-extern uint16_t loaded_world_chunk; // addr seg04:2E71
+extern_ uint8_t* alloc_seg6; // addr seg04:2E69
+extern_ uint8_t* soundData2End; // addr seg04:2E6B
+extern_ uint8_t* soundData1End; // addr seg04:2E6D
+extern_ uint8_t* soundData0End; // addr seg04:2E6F
+extern_ uint16_t loaded_world_chunk; // addr seg04:2E71
 static const size_t alloc_seg11_size = 0x7000;
-extern uint8_t* alloc_seg11; // addr seg04:2E73
+extern_ uint8_t* alloc_seg11; // addr seg04:2E73
 static const size_t ptr3_size = 0x2ABA0;
-extern uint8_t* ptr3; // addr seg04:2E75
-extern uint8_t* ptr1; // addr seg04:2E79
+extern_ uint8_t* ptr3; // addr seg04:2E75
+extern_ uint8_t* ptr1; // addr seg04:2E79
 
-extern uint8_t chunk_buffer0[0x300]; // addr seg04:2E7D
-extern uint8_t chunk_buffer1[0x300]; // addr seg04:317D
-extern uint8_t chunk_buffer2[0x300]; // addr seg04:347D
-extern uint8_t chunk_buffer3[0x300]; // addr seg04:377D
-extern uint8_t chunk_buffer4[0x300]; // addr seg04:3A7D
-extern uint8_t chunk_buffer5[0x300]; // addr seg04:3D7D
-extern uint8_t chunk_buffer6[0x300]; // addr seg04:407D
-extern uint8_t chunk_buffer7[0x300]; // addr seg04:437D
-extern uint8_t chunk_buffer8[0x300]; // addr seg04:467D
-extern uint8_t chunk_buffer9[0x700]; // addr seg04:497D TODO confirm size
-extern uint8_t chunk_buffer10[0x1800]; // addr seg04:507D TODO confirm size
-extern uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO really confirm size (completely guessed)
+extern_ uint8_t chunk_buffer0[0x300]; // addr seg04:2E7D
+extern_ uint8_t chunk_buffer1[0x300]; // addr seg04:317D
+extern_ uint8_t chunk_buffer2[0x300]; // addr seg04:347D
+extern_ uint8_t chunk_buffer3[0x300]; // addr seg04:377D
+extern_ uint8_t chunk_buffer4[0x300]; // addr seg04:3A7D
+extern_ uint8_t chunk_buffer5[0x300]; // addr seg04:3D7D
+extern_ uint8_t chunk_buffer6[0x300]; // addr seg04:407D
+extern_ uint8_t chunk_buffer7[0x300]; // addr seg04:437D
+extern_ uint8_t chunk_buffer8[0x300]; // addr seg04:467D
+extern_ uint8_t chunk_buffer9[0x700]; // addr seg04:497D TODO confirm size
+extern_ uint8_t chunk_buffer10[0x1800]; // addr seg04:507D TODO confirm size
+extern_ uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO really confirm size (completely guessed)
 
 enum PaletteAction {
 	PALACT_NONE = 0,
@@ -278,20 +279,24 @@ enum PaletteAction {
 	PALACT_COPY = 4
 };
 
-extern PaletteAction palette_action INIT(= PALACT_NONE); // addr seg04:7EFE;
-extern Color palette1[0x100]; // addr seg04:7F02 ! Changed order !
-extern Color* pal_pointer INIT(= palette1); // addr seg04:7F00 ! Changed order!
-extern Color palette2[0x100]; // addr seg04:8202
+extern_ PaletteAction palette_action INIT(= PALACT_NONE); // addr seg04:7EFE;
+extern_ Color palette1[0x100]; // addr seg04:7F02 ! Changed order !
+extern_ Color* pal_pointer INIT(= palette1); // addr seg04:7F00 ! Changed order!
+extern_ Color palette2[0x100]; // addr seg04:8202
 
 // addr seg04:8562
-extern const uint16_t statusbarIconPos[13] = {
+extern const uint16_t statusbarIconPos[13]
+#ifdef VARS_HPP_DEFINITIONS
+= {
 	0x061F, 0x0623, 0x0B7F, 0x0B83, // Erik
 	0x0631, 0x0635, 0x0B91, 0x0B95, // Baleog
 	0x0643, 0x0647, 0x0BA3, 0x0BA7, // Olaf
 	0x064B // Trashcan
-};
+}
+#endif
+;
 
-extern uint32_t start_time; // addr seg04:8639
+extern_ uint32_t start_time; // addr seg04:8639
 
 struct DataHeader1 {
 	uint16_t dummy1;
@@ -308,11 +313,11 @@ struct DataHeader1 {
 
 	uint16_t dummy3[5];
 };
-extern DataHeader1 data_header1; // addr seg04:86B0
+extern_ DataHeader1 data_header1; // addr seg04:86B0
 
-extern uint16_t word_30BBA; // addr seg04:86DA
-extern uint16_t word_30BBC; // addr seg04:86DC
-extern uint16_t pressed_buttons; // addr seg04:86DE
+extern_ uint16_t word_30BBA; // addr seg04:86DA
+extern_ uint16_t word_30BBC; // addr seg04:86DC
+extern_ uint16_t pressed_buttons; // addr seg04:86DE
 
 // addr seg04:89F8
 /* use calcHeightTileMults instead!
@@ -331,66 +336,78 @@ const uint16_t heightTileMults[24] = {
 */
 
 // addr seg04:8E58
-extern const uint16_t heightPixelMults[8] = {
+extern const uint16_t heightPixelMults[8]
+#ifdef VARS_HPP_DEFINITIONS
+= {
 	86*0, 86*1, 86*2, 86*3,
 	86*4, 86*5, 86*6, 86*7
-};
+}
+#endif
+;
 
-extern uint16_t levelRowOffsets[0x100]; // addr seg04:8F68
+extern_ uint16_t levelRowOffsets[0x100]; // addr seg04:8F68
 
-extern uint16_t level_width_tiles; // addr seg04:9168
-extern uint16_t level_height_tiles; // addr seg04:916A
+extern_ uint16_t level_width_tiles; // addr seg04:9168
+extern_ uint16_t level_height_tiles; // addr seg04:916A
 
-extern uint8_t byte_3168B; // addr seg04:91AB
-extern uint8_t byte_3168C; // addr seg04:91AC
+extern_ uint8_t byte_3168B; // addr seg04:91AB
+extern_ uint8_t byte_3168C; // addr seg04:91AC
 
-extern uint8_t video_pixelPan; // addr seg04:92EE
-extern uint16_t word_317CF; // addr seg04:92EF
+extern_ uint8_t video_pixelPan; // addr seg04:92EE
+extern_ uint16_t word_317CF; // addr seg04:92EF
 
-extern uint16_t word_317D1; // addr seg04:92F1
-extern uint16_t word_317D3; // addr seg04:92F3
-extern uint16_t word_317D5; // addr seg04:92F5
+extern_ uint16_t word_317D1; // addr seg04:92F1
+extern_ uint16_t word_317D3; // addr seg04:92F3
+extern_ uint16_t word_317D5; // addr seg04:92F5
 
-extern uint16_t video_backBufBase INIT(= 0); // addr seg04:92F7
-extern uint16_t video_frontBufBase INIT(= 52); // addr seg04:92F9
-extern uint16_t video_resvBufBase INIT(= 104); // addr seg04:92FB
+extern_ uint16_t video_backBufBase INIT(= 0); // addr seg04:92F7
+extern_ uint16_t video_frontBufBase INIT(= 52); // addr seg04:92F9
+extern_ uint16_t video_resvBufBase INIT(= 104); // addr seg04:92FB
 
-extern bool video_initialized; // addr seg04:92FF
-extern uint8_t saved_video_mode; // addr seg04:9300
+extern_ bool video_initialized; // addr seg04:92FF
+extern_ uint8_t saved_video_mode; // addr seg04:9300
 
-extern uint16_t video_frontBuffer; // addr seg04:9305
-extern uint16_t video_resvBuffer; // addr seg04:9307
-extern uint16_t video_backBuffer; // addr seg04:9309
+extern_ uint16_t video_frontBuffer; // addr seg04:9305
+extern_ uint16_t video_resvBuffer; // addr seg04:9307
+extern_ uint16_t video_backBuffer; // addr seg04:9309
 
-extern uint16_t video_backBufAddr; // addr seg04:930B
-extern uint16_t video_frontBufAddr; // addr seg04:930D
-extern uint16_t video_resvBufAddr; // addr seg04:930F
+extern_ uint16_t video_backBufAddr; // addr seg04:930B
+extern_ uint16_t video_frontBufAddr; // addr seg04:930D
+extern_ uint16_t video_resvBufAddr; // addr seg04:930F
 
 // addr seg04:940C
-extern const uint16_t levelTileChunks[0x30] = {
+extern const uint16_t levelTileChunks[0x30]
+#ifdef VARS_HPP_DEFINITIONS
+= {
 	0xC6,  0xC8,  0xCA,  0xCC,  0x28,  0x2A,  0x2C,  0x2E,
 	0x30,  0x32,  0x34,  0x4B,  0x4D,  0x4F,  0x51,  0x53,
 	0x55,  0x72,  0x74,  0x76,  0x78,  0x7A,  0x7C,  0x7E,
 	0x80,  0x9C,  0x9E,  0xA0,  0xA2,  0xA4,  0xA6,  0xA8,
 	0xAA,  0xCE,  0xD0,  0xD2,  0xD4,  0x171, 0x17D, 0x186,
 	0x18C, 0x192, 0x17E, 0x1AF, 0x1B0, 0x1B1, 0x1B2, 0xDA
-};
+}
+#endif
+;
 
 // addr seg04:946C
-extern const uint16_t levelWorldChunks[0x30] = {
+extern const uint16_t levelWorldChunks[0x30]
+#ifdef VARS_HPP_DEFINITIONS
+= {
 	0x1C1, 0x1C1, 0x1C1, 0x1C1, 0x1C2, 0x1C2,  0x1C2, 0x1C2,
 	0x1C2, 0x1C2, 0x1C2, 0x1C3, 0x1C3, 0x1C3,  0x1C3, 0x1C3,
 	0x1C3, 0x1C4, 0x1C4, 0x1C4, 0x1C4, 0x1C4,  0x1C4, 0x1C4,
 	0x1C4, 0x1C5, 0x1C5, 0x1C5, 0x1C5, 0x1C5,  0x1C5, 0x1C5,
 	0x1C5, 0x1C1, 0x1C1, 0x1C1, 0x1C1, 0xFFFF, 0x1C6, 0x1C6,
 	0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6, 0x1C6,  0x1C6, 0x1C6
-};
+}
+#endif
+;
 
 static const size_t soundData_size = 0xE470;
-extern FarPtr soundData; // addr seg04:992A
+extern_ FarPtr soundData; // addr seg04:992A
 
-extern uint16_t did_init_timer; // addr seg04:A39A
-extern uint16_t timer_wait_count; // addr seg04:A39C
+extern_ uint16_t did_init_timer; // addr seg04:A39A
+extern_ uint16_t timer_wait_count; // addr seg04:A39C
 
 enum SpecialLevels
 {
