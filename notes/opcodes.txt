@@ -1,0 +1,97 @@
+======================================
+=== Script system opcode reference ===
+======================================
+
+
+
+Util functions:
+
+checkBit(a, b) {
+    if (b & BIT(a) == 0) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+----------------------------------------------------------
+
+Opcode 00
+Stop script
+
+Save current IP and stop script.
+
+----------------------------------------------------------
+
+Opcode 01
+Nop
+
+Does nothing
+
+----------------------------------------------------------
+
+Opcode 03 aaaa
+Jump to immediate
+
+goto a;
+
+----------------------------------------------------------
+
+Opcode 51 aaaa
+Read immediate word
+
+regA = a;
+
+----------------------------------------------------------
+
+Opcode 73 aabbbb
+Compare ??? to regA, jump if equal
+
+x = a * 0x28 + word_28522;
+if (word_299C5[x] == regA) {
+    goto b;
+}
+
+----------------------------------------------------------
+
+Opcode 97 aabbbb
+Test bit and set bool
+
+regA = checkBit(a, b);
+
+----------------------------------------------------------
+
+Opcode 99 aabbbb
+Test memory bit, set bool
+
+regA = checkBit(a, Mem[b]);
+
+----------------------------------------------------------
+
+Opcode A8 aabbbbcccc
+Test bit, compare to regA, jump if equal
+
+if (checkBit(a, b) == regA) {
+    goto c;
+}
+
+----------------------------------------------------------
+
+Opcode AA aabbbbcccc
+Test memory bit, compare to regA, jump if equal
+
+if (checkBit(a, Mem[b]) == regA) {
+    goto c;
+}
+
+----------------------------------------------------------
+
+8AB0 | 01 		; nop
+8AB1 | 51 0000		; read immediate word into A
+8AB4 | 73 1C 8ACF	; compare ??? to A, jump if equal
+8AB8 | 97 00 0001	; some kind of bit test?, store into A
+8ABC | AA 18 03B8 8ACF  ; bittest?, jump if true
+8AC2 | 99 1E 03B8	; read from memory, store into A
+8AC6 | A8 00 0001 8ACF  ; some kind of bit test?
+8ACC | 03 8AAF		; unconditional jump to immediate
+8AAF | 00		; end script

@@ -11,6 +11,7 @@
 
 #include "vga_emu.hpp"
 #include "input.hpp"
+#include "vm.hpp"
 #include "vars.hpp"
 
 // TODO
@@ -1269,7 +1270,7 @@ bool sub_13E52(uint16_t si, uint16_t bx)
 		word_28854 += 2;
 
 	word_29FB5[si] = ax & 0x7F;
-	word_2980D[si] = world_data_entry->field_3 + 3;
+	obj_script_resume[si] = world_data_entry->field_3 + 3;
 	word_29835[si] = world_data;
 	word_29A8D[si] = world_data_entry->field_7;
 	word_29925[si] = world_data_entry->field_9;
@@ -1499,41 +1500,6 @@ void sub_15517()
 	}
 }
 
-// addr seg00:424C
-void sub_1424C(int si)
-{
-	if (word_29835[si] == nullptr)
-		return;
-
-	if ((word_29A65[si] & BIT(12)) && word_29BF5[si] != 0)
-	{
-		word_29BF5[si]--;
-	}
-
-	word_28522 = si;
-	word_2886E = 0;
-	uint8_t* es = word_29835[si];
-
-	if ((word_29A65[si] & BIT(9)) || word_2880F != 0)
-	{
-		if (word_29BCD[si] & BIT(15))
-			return;
-
-		int bx = word_29BCD[si];
-		WorldData* world_data_entry = reinterpret_cast<WorldData*>(world_data + bx*21);
-
-		word_2980D[si] = world_data_entry->field_3;
-	}
-
-	/* TODO vm loop
-	int bx = word_2980D[si];
-	do
-	{
-		si =
-	} while
-	*/
-}
-
 // addr seg00:4207
 void sub_14207()
 {
@@ -1543,12 +1509,12 @@ void sub_14207()
 
 	for (int si = 0; si < word_28852; ++si)
 	{
-		sub_1424C(si);
+		runObjectScript(si);
 		if (word_28856 != 0)
 		{
 			for (int di = 0; di < word_28856; ++di)
 			{
-				sub_1424C(word_28858[di]);
+				runObjectScript(word_28858[di]);
 			}
 			word_28856 = 0;
 		}

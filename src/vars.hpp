@@ -84,7 +84,7 @@ extern_ uint16_t loaded_chunks2[16]; // addr seg04:124D
 extern_ uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
 extern_ uint16_t loaded_chunks11[32]; // addr seg04:12AD
 extern_ uint16_t loaded_chunks_end11[32]; // addr seg04:12ED
-extern_ uint16_t word_2980D[20]; // addr seg04:132D
+extern_ uint16_t obj_script_resume[20]; // addr seg04:132D
 extern_ uint8_t* word_29835[20]; // addr seg04:1355
 extern_ uint16_t word_29885[20]; // addr seg04:13A5
 extern_ uint16_t word_298AD[20]; // addr seg04:13CD
