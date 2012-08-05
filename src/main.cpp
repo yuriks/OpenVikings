@@ -1577,6 +1577,22 @@ void sub_14207()
 	}
 }
 
+// addr seg00:2CA3
+void sub_12CA3()
+{
+	// TODO byte_2880E = 0;
+	// TODO byte_28508 = 0;
+	// TODO word_288B4 = 0;
+	word_288AC = 0;
+	// TODO word_28816 = 0;
+	// TODO word_2882A = 0;
+	// TODO word_2882C = 0;
+	word_28814 = 0;
+	// TODO word_28811 = 0;
+	// TODO word_2AA8F = 0xFFFF;
+	word_288A2 = 0xFFFF;
+}
+
 // addr seg00:0000
 int main() {
 	vga_initialize();
@@ -1586,7 +1602,7 @@ int main() {
 	allocMemAndLoadData();
 	initSound();
 	initVideo();
-	// TODO setSomeGlobals(); sub_12CA3
+	sub_12CA3();
 	initGameState();
 	loadNextLevel(); // Logo fade in
 	timer_wait_count = 1;
