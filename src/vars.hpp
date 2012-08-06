@@ -33,6 +33,12 @@ extern_ uint16_t video_levelY; // addr seg04:0046
 extern_ uint16_t word_2854C; // addr seg04:006C
 extern_ uint16_t word_2854E; // addr seg04:006E
 
+extern_ uint16_t word_28558; // addr seg04:0078
+extern_ uint16_t word_2855A; // addr seg04:007A
+extern_ uint16_t word_2855C; // addr seg04:007C
+
+extern_ uint16_t word_28560; // addr seg04:0080
+
 extern_ uint16_t word_286E2; // addr seg04:0202
 
 extern_ uint16_t data_header1_snd1; // addr seg04:0302
@@ -56,6 +62,7 @@ extern_ uint16_t word_28854; // addr seg04:0374
 extern_ uint16_t word_28856; // addr seg04:0376
 extern_ uint8_t word_28858[20]; // addr seg04:0378
 
+extern_ uint16_t word_2886C; // addr seg04:038C
 extern_ uint16_t word_2886E; // addr seg04:038E
 
 extern_ uint16_t word_28870; // addr seg04:0390
@@ -124,10 +131,12 @@ extern_ uint16_t word_29DD5[20]; // addr seg04:18F5
 extern_ uint16_t word_29DFD[20]; // addr seg04:191D
 extern_ uint16_t word_29E25[20]; // addr seg04:1945
 extern_ uint16_t word_29E4D[20]; // addr seg04:196D
+extern_ uint16_t word_29E75[20]; // addr seg04:1995
 extern_ uint16_t word_29E9D[20]; // addr seg04:19BD
 extern_ uint16_t word_29EC5[20]; // addr seg04:19E5
 extern_ uint16_t word_29EED[20]; // addr seg04:1A0D
-//---
+extern_ uint16_t word_29F15[20]; // addr seg04:1A35
+extern_ uint16_t word_29F3D[20]; // addr seg04:1A5D
 extern_ int16_t word_29F65[20]; // addr seg04:1A85
 extern_ int16_t word_29F8D[20]; // addr seg04:1AAD
 extern_ uint16_t word_29FB5[20]; // addr seg04:1AD5

@@ -636,7 +636,60 @@ void sub_13A0E() {
 
 // addr seg00:15D2
 void sub_115D2() {
-	// TODO
+	// TODO sub_12345();
+	sub_14207();
+	// TODO sub_1386B();
+	// TODO sub_1625D();
+	// TODO sub_15546();
+	// TODO sub_13916();
+	// TODO sub_1064B();
+	// TODO sub_12FC6();
+	updateVgaBuffer();
+
+	waitForTimerInt();
+	// TODO sub_1DE05();
+	// TODO sub_165AA();
+	// TODO sub_16661();
+	// TODO sub_1DD9C();
+	// mov ax, 0xFFFE
+	// TODO sub_1C8F1();
+	updateVgaBuffer();
+
+	// TODO sub_15530();
+	// TODO sub_10704();
+	// TODO sub_12FCB();
+
+	waitForTimerInt();
+	// TODO sub_1DE05();
+	// TODO sub_165AA();
+	// TODO sub_16661();
+	// TODO sub_1DD9C();
+	// mov ax, 0xFFFE
+	// TODO sub_1C8F1();
+	updateVgaBuffer();
+
+	// TODO sub_10753();
+	// TODO sub_13C0C();
+	// TODO sub_12FD0();
+	// TODO sub_11792();
+
+	waitForTimerInt();
+	// TODO sub_1DE05();
+	// TODO sub_165AA();
+	// TODO sub_16661();
+	// TODO sub_1DD9C();
+	// mov ax, 0xFFFE
+	// TODO sub_1C8F1();
+	updateVgaBuffer();
+
+	waitForTimerInt();
+	// TODO sub_1DE05();
+	// TODO sub_165AA();
+	// TODO sub_16661();
+	// TODO sub_1DD9C();
+	// mov ax, 0xFFFE
+	// TODO sub_1C8F1();
+	updateVgaBuffer();
 }
 
 // addr seg00:6595
@@ -1227,7 +1280,7 @@ int sub_12F82(uint16_t ax, uint16_t* out_ax)
 		*out_ax = 0;
 		return true;
 	}
-	
+
 	if (ax == 0xFFFE)
 	{
 		word_28854 += 1;
@@ -1440,7 +1493,7 @@ void loadNextLevel() {
 	updateInitialBg();
 	sub_13BA5(); // TODO
 	sub_13A0E(); // TODO
-	sub_115D2(); // TODO
+	sub_115D2();
 	fadePalIn();
 	// TODO sub_12345();
 }
@@ -1505,7 +1558,7 @@ void sub_14207()
 
 	for (int si = 0; si < word_28852; ++si)
 	{
-		runObjectScript(si);
+		si = runObjectScript(si);
 		if (word_28856 != 0)
 		{
 			for (int di = 0; di < word_28856; ++di)
@@ -1544,7 +1597,7 @@ int main() {
 	initVideo();
 	sub_12CA3();
 	initGameState();
-	loadNextLevel(); // Logo fade in
+	loadNextLevel();
 	timer_wait_count = 1;
 
 	// Game main loop

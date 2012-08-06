@@ -1,8 +1,10 @@
 #include "vikings.hpp"
 #include "vm.hpp"
 
+#include <array>
 #include "vars.hpp"
 #include "main.hpp"
+#include "input.hpp"
 
 // seg04:008A
 static uint16_t vm_regA;
@@ -10,6 +12,7 @@ static uint16_t vm_regA;
 struct VMState
 {
 	bool run;
+	uint16_t return_si;
 	const uint8_t* rom;
 
 	uint16_t ip;
@@ -26,6 +29,8 @@ struct VMState
 		return tmp;
 	}
 };
+
+static void sub_1303A(VMState& vm);
 
 // addr seg00:53EA
 static uint16_t vm_checkBit(uint16_t bit_pos, uint16_t value)
@@ -45,8 +50,10 @@ static void op_unsupported(VMState& vm)
 
 static void op_stopScript(VMState& vm)
 {
-	obj_script_resume[word_28522] = vm.ip;
 	vm.run = false;
+	vm.return_si = word_28522;
+
+	obj_script_resume[word_28522] = vm.ip;
 }
 
 static void op_nop(VMState& vm)
@@ -65,19 +72,149 @@ static void op_loadImmediateWord(VMState& vm)
 
 static void op_testBitAndSet(VMState& vm)
 {
-	uint8_t a = vm.readImm8();
+	uint8_t a = vm.readImm8() / 2;
 	uint16_t b = vm.readImm16();
 	vm_regA = vm_checkBit(a, b);
 }
 
 static void op_testBitJumpEq(VMState& vm)
 {
-	uint8_t a = vm.readImm8();
+	uint8_t a = vm.readImm8() / 2;
 	uint16_t b = vm.readImm16();
+
 	if (vm_checkBit(a, b) == vm_regA)
 		op_jumpToImmediate(vm);
+	else
+		vm.ip += 2;
 }
 
+// TODO name
+static void op_obj_unknown1(VMState& vm)
+{
+	word_29EED[word_28522] = vm.readImm16();
+	word_29F15[word_28522] = 1;
+}
+
+// TODO name
+static void op_sub_13031(VMState& vm)
+{
+	VMState new_vm = vm;
+	sub_1303A(new_vm);
+	// TODO sub_135CF();
+}
+
+std::array<uint16_t*, 34> word_31826 =
+{
+	word_299C5, word_299ED, word_29A15, word_29A3D, // 0
+	word_29A65, word_29A8D, word_29AB5, word_29ADD, // 4
+	word_29B05, word_29B2D, word_29B55, word_29B7D, // 8
+	reinterpret_cast<uint16_t*>(word_29BA5), // 12
+	reinterpret_cast<uint16_t*>(word_29BCD), // 13
+	word_29BF5, word_29C1D, word_29C45, word_29C6D, // 14
+	word_29C95, word_29CBD, word_29CE5, word_29D0D, // 18
+	word_29D35, word_29D5D, word_29D85, word_29DAD, // 22
+	word_29DD5, word_29DFD, word_29E25, word_29E4D, // 26
+	word_29E75, word_29E9D, word_29EC5, word_29EED, // 30
+};
+
+// TODO name
+static void op_sub_147E7(VMState& vm)
+{
+	uint16_t* si = word_31826[vm.readImm8() / 2];
+	si[word_28522] |= vm_regA;
+}
+
+static uint16_t sub_15485(VMState& vm)
+{
+	uint16_t* si = word_31826[vm.readImm8() / 2];
+	return si[word_28522];
+}
+
+// TODO name
+static void op_sub_14A6B(VMState& vm)
+{
+	if (sub_15485(vm) != vm_regA)
+		op_jumpToImmediate(vm);
+	else
+		vm.ip += 2;
+}
+
+// TODO name
+static void op_loc_14686(VMState& vm)
+{
+	uint16_t* si = word_31826[vm.readImm8() / 2];
+	si[word_28522] = vm_regA;
+}
+
+// TODO name
+static void op_sub_14A1B(VMState& vm)
+{
+	if (sub_15485(vm) == vm_regA)
+		op_jumpToImmediate(vm);
+	else
+		vm.ip += 2;
+}
+
+static const int NUM_TRANSLATED_ADDRESSES = 1;
+
+namespace
+{
+struct AddressTranslation
+{
+	uint16_t address;
+	uint16_t* variable;
+};
+}
+
+static const std::array<AddressTranslation, NUM_TRANSLATED_ADDRESSES> ram_address_translations =
+{
+	{0x03B8, &buttons_pressed},
+};
+
+static uint16_t* translateRamAddress(uint16_t addr)
+{
+	for (int i = 0; i < NUM_TRANSLATED_ADDRESSES; ++i)
+	{
+		auto& entry = ram_address_translations[i];
+		if (entry.address == addr)
+			return entry.variable;
+	}
+
+	errorQuit("Untranslated VM RAM address.", addr);
+	return nullptr;
+}
+
+static uint16_t vm_checkBitRam(VMState& vm)
+{
+	uint16_t a = vm.readImm8() / 2;
+	uint16_t* b = translateRamAddress(vm.readImm16());
+
+	return vm_checkBit(a, *b);
+}
+
+// TODO name
+static void op_sub_14DB1(VMState& vm)
+{
+	if (vm_checkBitRam(vm) == vm_regA)
+		op_jumpToImmediate(vm);
+	else
+		vm.ip += 2;
+}
+
+// TODO name
+static void op_sub_14B59(VMState& vm)
+{
+	vm_regA = vm_checkBitRam(vm);
+}
+
+// TODO name
+static void op_sub_1431C(VMState& vm)
+{
+	word_28814 |= 1;
+
+	vm.return_si = word_28522;
+	vm.run = false;
+}
 
 static const int MAX_OPCODES = 216;
 static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
@@ -97,7 +234,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // sub_13753,      // 0x0C
 	op_unsupported, // sub_142DC,      // 0x0D
 	op_unsupported, // sub_142FC,      // 0x0E
-	op_unsupported, // sub_1431C,      // 0x0F
+	op_sub_1431C, // 0x0F
 	op_unsupported, // sub_14327,      // 0x10
 	op_unsupported, // sub_14334,      // 0x11
 	op_unsupported, // sub_14340,      // 0x12
@@ -107,7 +244,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // sub_15106,      // 0x16
 	op_unsupported, // sub_143F2,      // 0x17
 	op_unsupported, // sub_14409,      // 0x18
-	op_unsupported, // sub_14428,      // 0x19
+	op_obj_unknown1, // 0x19
 	op_unsupported, // sub_1559C,      // 0x1A
 	op_unsupported, // sub_143FE,      // 0x1B
 	op_unsupported, // sub_1443D,      // 0x1C
@@ -129,7 +266,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // sub_15F2C,      // 0x2C
 	op_unsupported, // sub_15F25,      // 0x2D
 	op_unsupported, // sub_1522C,      // 0x2E
-	op_unsupported, // sub_13031,      // 0x2F
+	op_sub_13031, // 0x2F
 	op_unsupported, // sub_144CF,      // 0x30
 	op_unsupported, // sub_144D3,      // 0x31
 	op_unsupported, // sub_15772,      // 0x32
@@ -168,7 +305,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // sub_14646,      // 0x53
 	op_unsupported, // sub_14652,      // 0x54
 	op_unsupported, // sub_1466E,      // 0x55
-	op_unsupported, // loc_14686,      // 0x56
+	op_loc_14686, // 0x56
 	op_unsupported, // loc_146A3,      // 0x57
 	op_unsupported, // loc_146B4,      // 0x58
 	op_unsupported, // loc_146DE,      // 0x59
@@ -180,7 +317,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // loc_147A7,      // 0x5F
 	op_unsupported, // loc_147BF,      // 0x60
 	op_unsupported, // loc_147CB,      // 0x61
-	op_unsupported, // loc_147E7,      // 0x62
+	op_sub_147E7, // 0x62
 	op_unsupported, // loc_147FF,      // 0x63
 	op_unsupported, // loc_1480B,      // 0x64
 	op_unsupported, // loc_14827,      // 0x65
@@ -197,12 +334,12 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // loc_148F7,      // 0x70
 	op_unsupported, // loc_14909,      // 0x71
 	op_unsupported, // loc_14A0B,      // 0x72
-	op_unsupported, // op_loc_14A1B,   // 0x73
+	op_sub_14A1B, // 0x73
 	op_unsupported, // loc_14A2B,      // 0x74
 	op_unsupported, // loc_14A3B,      // 0x75
 	op_unsupported, // loc_14A4B,      // 0x76
 	op_unsupported, // loc_14A5B,      // 0x77
-	op_unsupported, // loc_14A6B,      // 0x78
+	op_sub_14A6B, // 0x78
 	op_unsupported, // loc_14A7B,      // 0x79
 	op_unsupported, // loc_14A8B,      // 0x7A
 	op_unsupported, // loc_14A9B,      // 0x7B
@@ -235,7 +372,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // loc_14675,      // 0x96
 	op_testBitAndSet, // 0x97
 	op_unsupported, // loc_14B52,      // 0x98
-	op_unsupported, // op_sub_14B59,   // 0x99
+	op_sub_14B59, // 0x99
 	op_unsupported, // loc_14B60,      // 0x9A
 	op_unsupported, // loc_14B67,      // 0x9B
 	op_unsupported, // loc_14B71,      // 0x9C
@@ -252,7 +389,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // loc_14CDD,      // 0xA7
 	op_testBitJumpEq, // 0xA8
 	op_unsupported, // loc_14DA1,      // 0xA9
-	op_unsupported, // op_sub_14DB1,   // 0xAA
+	op_sub_14DB1, // 0xAA
 	op_unsupported, // loc_14DC1,      // 0xAB
 	op_unsupported, // loc_14DD1,      // 0xAC
 	op_unsupported, // loc_14DE4,      // 0xAD
@@ -301,34 +438,36 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 };
 
 // addr seg00:424C
-void runObjectScript(int object_slot)
+uint16_t runObjectScript(int object_slot)
 {
 	if (word_29835[object_slot] == nullptr)
-		return;
+		return object_slot;
 
 	if ((word_29A65[object_slot] & BIT(12)) && word_29BF5[object_slot] != 0)
 	{
 		word_29BF5[object_slot] -= 1;
 	}
 
+	VMState vm;
+	vm.run = true;
+	vm.rom = world_data;
+
 	word_28522 = object_slot;
 	word_2886E = 0;
-	uint8_t* es = word_29835[object_slot];
+	vm.rom = word_29835[object_slot];
 
 	if ((word_29A65[object_slot] & BIT(9)) || word_2880F != 0)
 	{
 		if (word_29BCD[object_slot] & BIT(15))
-			return;
+			return object_slot;
 
 		int bx = word_29BCD[object_slot];
+		vm.rom = world_data;
 		WorldData* world_data_entry = reinterpret_cast<WorldData*>(world_data + bx*21);
 
 		obj_script_resume[object_slot] = world_data_entry->field_3;
 	}
 
-	VMState vm;
-	vm.run = true;
-	vm.rom = world_data;
 	vm.ip = obj_script_resume[object_slot];
 
 	do
@@ -337,4 +476,79 @@ void runObjectScript(int object_slot)
 		opcode_table[next_instruction](vm);
 	}
 	while(vm.run);
+
+	return vm.return_si;
+}
+
+static void op2_stop(VMState& vm)
+{
+	vm.run = false;
+}
+
+static const int MAX_OPCODES2 = 27;
+static const OpcodeHandlerPtr opcode2_table[MAX_OPCODES2] =
+{
+	op_unsupported, // 0x00
+	op_unsupported, // 0x01
+	op_unsupported, // 0x02
+	op_unsupported, // 0x03
+	op_unsupported, // 0x04
+	op_unsupported, // 0x05
+	op_unsupported, // 0x06
+	op_unsupported, // 0x07
+	op_unsupported, // 0x08
+	op_unsupported, // 0x09
+	op_unsupported, // 0x0A
+	op_unsupported, // 0x0B
+	op_unsupported, // 0x0C
+	op_unsupported, // 0x0D
+	op2_stop, // 0x0E
+	op_unsupported, // 0x0F
+	op_unsupported, // 0x10
+	op_unsupported, // 0x11
+	op_unsupported, // 0x12
+	op_unsupported, // 0x13
+	op_unsupported, // 0x14
+	op_unsupported, // 0x15
+	op_unsupported, // 0x16
+	op_unsupported, // 0x17
+	op_unsupported, // 0x18
+	op_unsupported, // 0x19
+	op_unsupported, // 0x1A
+};
+
+// addr seg00:3084
+static void sub_13084(VMState& vm)
+{
+	vm.run = true;
+
+	if (word_28558 == 0 || --word_28558 == 0)
+	{
+		do
+		{
+			uint8_t next_instruction = vm.readImm8();
+			opcode2_table[next_instruction](vm);
+		}
+		while (vm.run);
+	}
+}
+
+// addr seg00:303A
+static void sub_1303A(VMState& vm)
+{
+	vm.ip = word_29EED[word_28522];
+	if (vm.ip != 0xFFFF)
+	{
+		word_28558 = word_29F15[word_28522];
+		word_2855A = word_29F3D[word_28522];
+		word_2855C = word_29F65[word_28522];
+		word_28560 = word_29F8D[word_28522];
+		word_2886C = 0;
+
+		sub_13084(vm);
+
+		word_29EED[word_28522] = vm.ip;
+		word_29F15[word_28522] = word_28558;
+		word_29F3D[word_28522] = word_2855A;
+	}
 }

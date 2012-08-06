@@ -1,3 +1,5 @@
 #pragma once
 
-void runObjectScript(int object_slot);
+#include <cstdint>
+
+uint16_t runObjectScript(int object_slot);
