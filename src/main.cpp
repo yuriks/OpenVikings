@@ -14,10 +14,6 @@
 #include "vm.hpp"
 #include "vars.hpp"
 
-// TODO
-void restoreErrorInt();
-uint32_t curSystemTime();
-
 // addr seg00:686F
 void restoreVideo() {
 	if (saved_video_mode != 0xFF) {
