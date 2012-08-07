@@ -176,7 +176,10 @@ enum LevelFlags : uint8_t {
 
 #include "pack_enable.hpp"
 struct LevelHeader {
-	/* 0000 */ uint8_t dummy1[7];
+	/* 0000 */ uint16_t level_header_start;
+	/* 0002 */ uint16_t anonymous_0;
+	/* 0004 */ uint16_t anonymous_1;
+	/* 0006 */ uint8_t anonymous_2;
 	/* 0007 */ uint8_t anonymous_3;
 	/* 0008 */ uint16_t anonymous_4;
 	/* 000A */ uint16_t anonymous_5;

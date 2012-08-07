@@ -1450,7 +1450,23 @@ void sub_11446()
 
 // addr seg00:1080
 void loadNextLevel() {
-	// TODO lotsa variables
+	word_2880F = 0;
+	// TODO word_28874 = 0;
+	// TODO word_28876 = 0;
+	word_28852 = 0;
+	// TODO word_2B044 = 0;
+	// TODO word_2A66F = 0;
+	// TODO byte_31A4B = 0;
+	// TODO word_2887A = 0;
+	// TODO word_2887C = 0;
+	// TODO word_28882 = 0;
+	// TODO word_28884 = 0;
+	// TODO word_288B6 = 0;
+	// TODO word_28878 = 0;
+	// TODO word_28872 = 0;
+	// TODO word_28828 = 0;
+	// TODO word_30C14 = 0;
+	// TODO word_288A6 = 0;
 
 	pressed_buttons = 0;
 	word_30BBC = 0;
@@ -1532,7 +1548,7 @@ void sub_10138()
 		word_28814 = 0;
 		// TODO sub_1774F();
 		word_2880F++;
-		// TODO sub_14207();
+		sub_14207();
 		loadNextLevel();
 	}
 

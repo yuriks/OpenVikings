@@ -95,12 +95,67 @@ static void op_obj_unknown1(VMState& vm)
 	word_29F15[word_28522] = 1;
 }
 
+// addr seg00:35CF
+static void sub_135CF(int di)
+{
+	if (word_298FD[di] != 0)
+		return;
+
+	if (word_29A65[di] & BIT(15))
+	{
+		word_29B55[di] += level_header.anonymous_0;
+	}
+
+	if (word_29A65[di] & BIT(14))
+	{
+		word_29B2D[di] += level_header.level_header_start;
+	}
+
+	int16_t ax = word_29B2D[di];
+	if (ax < 0)
+	{
+		if (-ax >= word_29C6D[di])
+			ax = -word_29C6D[di];
+	}
+	else
+	{
+		if (ax >= word_29C6D[di])
+			ax = word_29C6D[di];
+	}
+	word_29B2D[di] = ax;
+
+	ax = word_29B55[di];
+	if (ax < 0)
+	{
+		if (-ax >= word_29C95[di])
+			ax = -word_29C95[di];
+	}
+	else
+	{
+		if (ax >= word_29C95[di])
+			ax = word_29C95[di];
+	}
+	word_29B55[di] = ax;
+
+	if (word_29A65[di] & BIT(6))
+		ax = -word_29B2D[di];
+	else
+		ax = word_29B2D[di];
+	word_29E25[di] += ax;
+
+	if (word_29A65[di] & BIT(7))
+		ax = -word_29B55[di];
+	else
+		ax = word_29B55[di];
+	word_29E4D[di] += ax;
+}
+
 // TODO name
 static void op_sub_13031(VMState& vm)
 {
 	VMState new_vm = vm;
 	sub_1303A(new_vm);
-	// TODO sub_135CF();
+	sub_135CF(word_28522);
 }
 
 std::array<uint16_t*, 34> word_31826 =
@@ -216,6 +271,59 @@ static void op_sub_1431C(VMState& vm)
 	vm.run = false;
 }
 
+// addr seg00:3C93
+static void sub_13C93(int di)
+{
+	if (word_29FB5[di] != 0)
+	{
+		// TODO
+	}
+
+	uint16_t si = word_29CE5[di];
+	if (si != 0xFFFF)
+	{
+		word_29D0D[si] = 0xFFFF;
+	}
+
+	si = word_29D0D[di];
+	if (si != 0xFFFF)
+	{
+		word_29CE5[si] = 0xFFFF;
+	}
+
+	word_29835[di] = 0;
+	word_29EED[di] = 0xFFFF;
+
+	int di2 = di + 1;
+	if (word_28852 == di2)
+	{
+		do
+		{
+			di2 -= 1;
+		}
+		while (di2 >= 0 && word_29835[di2] == 0);
+
+		di2 += 1;
+		word_28852 = di2;
+	}
+
+	if (word_29BA5[di] != 0xFFFF && (word_29A65[di] & BIT(8)))
+	{
+		sub_139EF();
+		si = word_29BA5[di];
+		// TODO
+	}
+}
+
+// TODO name
+static void op_sub_14327(VMState& vm)
+{
+	sub_13C93(word_28522);
+
+	vm.return_si = word_28522;
+	vm.run = false;
+}
+
 static const int MAX_OPCODES = 216;
 static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 {
@@ -235,7 +343,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // sub_142DC,      // 0x0D
 	op_unsupported, // sub_142FC,      // 0x0E
 	op_sub_1431C, // 0x0F
-	op_unsupported, // sub_14327,      // 0x10
+	op_sub_14327, // 0x10
 	op_unsupported, // sub_14334,      // 0x11
 	op_unsupported, // sub_14340,      // 0x12
 	op_unsupported, // sub_1434C,      // 0x13
