@@ -1245,18 +1245,18 @@ bool sub_13D30(uint16_t di)
 {
 	if (word_2880F != 0)
 	{
-		return true;
+		return false;
 	}
 
 	if (di == 0xFFFF)
 	{
-		return false;
+		return true;
 	}
 
 	if (byte_28836[di / 8] & BIT(di % 8))
-		return true;
-	else
 		return false;
+	else
+		return true;
 }
 
 // addr seg00:3D52
@@ -1378,7 +1378,7 @@ bool sub_13809(int16_t ax, uint16_t di, uint16_t si, uint16_t* out_di)
 	word_28514 = ax;
 	word_28516 = di;
 	word_28518 = si;
-	if (sub_13D30(di))
+	if (!sub_13D30(di))
 	{
 		*out_di = 0;
 		return false;
