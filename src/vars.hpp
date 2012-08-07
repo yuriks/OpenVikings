@@ -48,6 +48,11 @@ extern_ uint16_t current_password[4]; // addr seg04:0310
 
 extern_ uint16_t word_2880F; // addr seg04:032F
 
+enum word_28814Bits
+{
+	W28814_GOTO_NEXT_LEVEL = BIT(0),
+	W28814_RESTART_LEVEL = BIT(1)
+};
 extern_ uint16_t word_28814; // addr seg04:0334
 
 extern_ uint16_t word_2881C; // addr seg04:033C
@@ -161,12 +166,12 @@ extern_ uint16_t previous_level; // addr seg04:25AB
 extern_ uint16_t current_level; // addr seg04:25AD
 
 enum LevelFlags : uint8_t {
-	LVLFLAG_BIT1 = 0x1,
-	LVLFLAG_BIT2 = 0x2,
-	LVLFLAG_BIT8 = 0x8,
-	LVLFLAG_BIT20 = 0x20,
-	LVLFLAG_BIT40 = 0x40,
-	LVLFLAG_BIT80 = 0x80
+	LVLFLAG_BIT1 = BIT(0),
+	LVLFLAG_BIT2 = BIT(1),
+	LVLFLAG_BIT8 = BIT(3),
+	LVLFLAG_BIT20 = BIT(5),
+	LVLFLAG_BIT40 = BIT(6),
+	LVLFLAG_BIT80 = BIT(7)
 };
 
 #include "pack_enable.hpp"

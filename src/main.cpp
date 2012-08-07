@@ -321,7 +321,7 @@ void initSound() {
 	// TODO word_32858
 	clearSoundBuffers();
 
-	if (!(data_header1_snd1 && data_header1_snd2 && 0x8000)) {
+	if (!(data_header1_snd1 && data_header1_snd2 && BIT(15))) {
 		// sound enabled
 		did_init_timer = 1;
 	} else {
@@ -438,7 +438,7 @@ void zeroInventory() {
 // addr seg00:08B8
 void initGameState() {
 	zeroInventory();
-	level_header.next_level_id = 0x27;
+	level_header.next_level_id = LEVEL_INTERPLAY;
 	word_288A2 = 0;
 }
 
@@ -1473,7 +1473,7 @@ void loadNextLevel() {
 	current_level = level_header.next_level_id;
 	loadLevelHeader(current_level);
 	// TODO setColor1And2();
-	if (current_level != 0x25)
+	if (current_level != LEVEL_RESPAWN)
 		zeroInventory();
 	drawStatusbar();
 	loadChunks3();
@@ -1522,9 +1522,9 @@ void sub_10138()
 
 		updateInput();
 	}
-	else if (ax & (BIT(0) | BIT(1)))
+	else if (ax & (W28814_GOTO_NEXT_LEVEL | W28814_RESTART_LEVEL))
 	{
-		if (ax & BIT(1))
+		if (ax & W28814_RESTART_LEVEL)
 		{
 			level_header.next_level_id = LEVEL_RESPAWN;
 		}
@@ -1665,16 +1665,16 @@ int main() {
 		// TODO sub_10350
 		// TODO sub_1086F
 
-		if (current_level < 0x25 && word_286E2 != 0)
+		if (current_level < LEVEL_RESPAWN && word_286E2 != 0)
 		{
 			if (byte_3168B != 1)
 			{
 				if (byte_3168C == 1)
-					word_28814 |= 1;
+					word_28814 |= W28814_GOTO_NEXT_LEVEL;
 			}
 			else
 			{
-				word_28814 |= 1;
+				word_28814 |= W28814_GOTO_NEXT_LEVEL;
 
 				int next_level = current_level - 1;
 				if (next_level < 0)

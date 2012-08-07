@@ -210,7 +210,7 @@ static void op_sub_14B59(VMState& vm)
 // TODO name
 static void op_sub_1431C(VMState& vm)
 {
-	word_28814 |= 1;
+	word_28814 |= W28814_GOTO_NEXT_LEVEL;
 
 	vm.return_si = word_28522;
 	vm.run = false;
