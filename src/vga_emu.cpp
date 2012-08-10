@@ -103,11 +103,25 @@ void vga_initialize() {
 		errorQuit(SDL_GetError(), 0);
 
 	SDL_RendererInfo renderer_info;
-	SDL_GetRendererInfo(vga_renderer, &renderer_info);
+	if (SDL_GetRendererInfo(vga_renderer, &renderer_info) < 0)
+		errorQuit(SDL_GetError(), 0);
+
+	int display_id = SDL_GetWindowDisplay(vga_window);
+	if (display_id < 0)
+		errorQuit(SDL_GetError(), 0);
+	SDL_DisplayMode display_mode;
+	if (SDL_GetCurrentDisplayMode(display_id, &display_mode) < 0)
+		errorQuit(SDL_GetError(), 0);
 
 	// Check if we can rely on vsync for timing.
-	if (renderer_info.flags & SDL_RENDERER_PRESENTVSYNC)
+	// The refresh rate tolerance is there because drivers for some reason
+	// sometimes offer refresh rates (for example 59Hz) that aren't quite
+	// 60Hz but can effectively be treated like it.
+	if ((renderer_info.flags & SDL_RENDERER_PRESENTVSYNC) &&
+		display_mode.refresh_rate >= 58 && display_mode.refresh_rate <= 62)
+	{
 		vga_has_vsync = true;
+	}
 
 	vga_texture = SDL_CreateTexture(
 		vga_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING,
