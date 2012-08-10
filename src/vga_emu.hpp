@@ -7,6 +7,7 @@ struct Color {
 };
 
 extern uint8_t vga_framebuffer[4][0x10000];
+extern bool vga_has_vsync;
 
 void vga_copyToVRAM(int plane_mask, uint8_t* source, uint16_t dest, uint16_t len);
 void vga_copyPlanesToVRAM(uint8_t* source, uint16_t dest, uint16_t len_plane);

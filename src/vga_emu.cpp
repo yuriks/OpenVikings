@@ -10,6 +10,7 @@
 //#define VRAM_DEBUG
 
 uint8_t vga_framebuffer[4][0x10000];
+bool vga_has_vsync = false;
 
 static uint32_t vga_palette[256];
 static uint16_t vga_start_address;
@@ -78,13 +79,11 @@ void vga_setPalette(const Color* palette) {
 
 void vga_setStartAddress(uint16_t addr) {
 	vga_start_address = addr;
-	vga_present();
 }
 
 void vga_setLineCompare(unsigned int scanline) {
 	// Divide by 2 because this VGA video mode uses doubled lines
 	vga_line_compare = scanline / 2;
-	vga_present();
 }
 
 void vga_initialize() {
@@ -99,9 +98,16 @@ void vga_initialize() {
 	if (vga_window == nullptr)
 		errorQuit(SDL_GetError(), 0);
 
-	vga_renderer = SDL_CreateRenderer(vga_window, -1, 0);
+	vga_renderer = SDL_CreateRenderer(vga_window, -1, SDL_RENDERER_PRESENTVSYNC);
 	if (vga_renderer == nullptr)
 		errorQuit(SDL_GetError(), 0);
+
+	SDL_RendererInfo renderer_info;
+	SDL_GetRendererInfo(vga_renderer, &renderer_info);
+
+	// Check if we can rely on vsync for timing.
+	if (renderer_info.flags & SDL_RENDERER_PRESENTVSYNC)
+		vga_has_vsync = true;
 
 	vga_texture = SDL_CreateTexture(
 		vga_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING,
@@ -186,5 +192,4 @@ void vga_present() {
 	SDL_RenderCopy(vga_renderer, vga_texture, nullptr, nullptr);
 
 	SDL_RenderPresent(vga_renderer);
-	handleSDLEvents();
 }

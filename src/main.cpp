@@ -12,6 +12,7 @@
 #include "vga_emu.hpp"
 #include "input.hpp"
 #include "vm.hpp"
+#include "timer.hpp"
 #include "vars.hpp"
 
 // addr seg00:686F
@@ -317,16 +318,14 @@ void clearSoundBuffers() {
 void initSound() {
 	// Major TODO
 
-	did_init_timer = 0;
 	// TODO word_32858
 	clearSoundBuffers();
 
 	if (!(data_header1_snd1 && data_header1_snd2 && BIT(15))) {
 		// sound enabled
-		did_init_timer = 1;
-	} else {
-		did_init_timer = 1;
 	}
+
+	timer_initialize();
 }
 
 // addr seg00:67FF
@@ -390,7 +389,7 @@ void updateVgaBuffer() {
 
 	vga_setStartAddress(bx);
 
-	timer_wait_count = 1;
+	timer_setWaitCount(1);
 
 	word_2AA5B = video_levelX;
 	word_2AA5D = video_levelY;
@@ -646,7 +645,7 @@ void sub_115D2() {
 	// TODO sub_12FC6();
 	updateVgaBuffer();
 
-	waitForTimerInt();
+	timer_wait();
 	// TODO sub_1DE05();
 	// TODO sub_165AA();
 	// TODO sub_16661();
@@ -659,7 +658,7 @@ void sub_115D2() {
 	// TODO sub_10704();
 	// TODO sub_12FCB();
 
-	waitForTimerInt();
+	timer_wait();
 	// TODO sub_1DE05();
 	// TODO sub_165AA();
 	// TODO sub_16661();
@@ -673,7 +672,7 @@ void sub_115D2() {
 	// TODO sub_12FD0();
 	// TODO sub_11792();
 
-	waitForTimerInt();
+	timer_wait();
 	// TODO sub_1DE05();
 	// TODO sub_165AA();
 	// TODO sub_16661();
@@ -682,7 +681,7 @@ void sub_115D2() {
 	// TODO sub_1C8F1();
 	updateVgaBuffer();
 
-	waitForTimerInt();
+	timer_wait();
 	// TODO sub_1DE05();
 	// TODO sub_165AA();
 	// TODO sub_16661();
@@ -794,13 +793,6 @@ void loadChunks3() {
 	}
 }
 
-// addr seg00:0130
-void waitForTimerInt() {
-	// TODO implement actual DOS-accurate timing
-	SDL_Delay(33);
-	//while (waitForTimerInt > 0);
-}
-
 // addr seg00:0FE6
 void loadPal2ToVga() {
 	palette_action = PALACT_NONE;
@@ -823,7 +815,7 @@ void fadePalOut() {
 
 		pal_pointer = palette2;
 		updateVgaBuffer();
-		waitForTimerInt();
+		timer_wait();
 	} while(++bx != 70);
 
 	color1.rgb[0] = 0;
@@ -849,7 +841,7 @@ void fadePalIn() {
 
 		// TODO dat hack
 		loadPal2ToVga();
-		waitForTimerInt();
+		timer_wait();
 	} while(--bx >= 0);
 
 	color1.rgb[0] = 0;
@@ -1527,13 +1519,13 @@ void sub_10138()
 		{
 			// TODO sub_101BE();
 			updateVgaBuffer();
-			waitForTimerInt();
+			timer_wait();
 			// TODO sub_108C8();
 			updateVgaBuffer();
-			waitForTimerInt();
+			timer_wait();
 			// TODO sub_108C8();
 			updateVgaBuffer();
-			waitForTimerInt();
+			timer_wait();
 		}
 
 		updateInput();
@@ -1614,7 +1606,7 @@ int main() {
 	sub_12CA3();
 	initGameState();
 	loadNextLevel();
-	timer_wait_count = 1;
+	timer_setWaitCount(1);
 
 	// Game main loop
 	while (true)
@@ -1637,7 +1629,7 @@ int main() {
 		// TODO sub_13916
 		// TODO sub_1064B
 		// TODO sub_12FC6
-		waitForTimerInt();
+		timer_wait();
 		// TODO sub_1DE05
 		// TODO sub_165AA
 		// TODO sub_16661
@@ -1652,7 +1644,7 @@ int main() {
 		// TODO sub_10704
 		// TODO sub_12FCB
 		// TODO loc_12D2C
-		waitForTimerInt();
+		timer_wait();
 		// TODO sub_1DE05
 		// TODO sub_165AA
 		// TODO sub_16661
@@ -1667,7 +1659,7 @@ int main() {
 		// TODO sub_12FD0
 		// TODO sub_11792
 		// TODO sub_101BE
-		waitForTimerInt();
+		timer_wait();
 		// TODO sub_1DE05
 		// TODO sub_165AA
 		// TODO sub_16661

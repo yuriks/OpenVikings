@@ -396,9 +396,6 @@ extern const uint16_t levelWorldChunks[0x30]
 static const size_t soundData_size = 0xE470;
 extern_ FarPtr soundData; // addr seg04:992A
 
-extern_ uint16_t did_init_timer; // addr seg04:A39A
-extern_ uint16_t timer_wait_count; // addr seg04:A39C
-
 enum SpecialLevels
 {
 	LEVEL_SPACESHIP = 0x00,

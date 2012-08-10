@@ -41,7 +41,6 @@ void calcLevelSize();
 void assembleLevelTiles();
 void loadImage(uint16_t chunk_id, uint16_t offset);
 void loadChunks3();
-void waitForTimerInt();
 void loadPal2ToVga();
 void fadePalOut();
 void fadePalIn();
