@@ -545,6 +545,8 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // loc_1787F,      // 0xD7
 };
 
+std::FILE* trace_file = nullptr;
+
 // addr seg00:424C
 uint16_t runObjectScript(int object_slot)
 {
@@ -578,14 +580,29 @@ uint16_t runObjectScript(int object_slot)
 
 	vm.ip = obj_script_resume[object_slot];
 
+	if (trace_file == nullptr)
+	{
+		trace_file = std::fopen("tracefile.txt", "w");
+	}
+
 	do
 	{
 		uint8_t next_instruction = vm.readImm8();
+		std::fprintf(trace_file, "%04x: %02x\n", vm.ip - 1, next_instruction);
+		std::fflush(trace_file);
 		opcode_table[next_instruction](vm);
 	}
 	while(vm.run);
 
+	std::fprintf(trace_file, "----: returned\n");
+
 	return vm.return_si;
+}
+
+
+static void op2_unsupported(VMState& vm)
+{
+	errorQuit("Unsupported opcode in sub-VM 2.", vm.rom[vm.ip - 1]);
 }
 
 static void op2_stop(VMState& vm)
@@ -596,33 +613,33 @@ static void op2_stop(VMState& vm)
 static const int MAX_OPCODES2 = 27;
 static const OpcodeHandlerPtr opcode2_table[MAX_OPCODES2] =
 {
-	op_unsupported, // 0x00
-	op_unsupported, // 0x01
-	op_unsupported, // 0x02
-	op_unsupported, // 0x03
-	op_unsupported, // 0x04
-	op_unsupported, // 0x05
-	op_unsupported, // 0x06
-	op_unsupported, // 0x07
-	op_unsupported, // 0x08
-	op_unsupported, // 0x09
-	op_unsupported, // 0x0A
-	op_unsupported, // 0x0B
-	op_unsupported, // 0x0C
-	op_unsupported, // 0x0D
+	op2_unsupported, // 0x00
+	op2_unsupported, // 0x01
+	op2_unsupported, // 0x02
+	op2_unsupported, // 0x03
+	op2_unsupported, // 0x04
+	op2_unsupported, // 0x05
+	op2_unsupported, // 0x06
+	op2_unsupported, // 0x07
+	op2_unsupported, // 0x08
+	op2_unsupported, // 0x09
+	op2_unsupported, // 0x0A
+	op2_unsupported, // 0x0B
+	op2_unsupported, // 0x0C
+	op2_unsupported, // 0x0D
 	op2_stop, // 0x0E
-	op_unsupported, // 0x0F
-	op_unsupported, // 0x10
-	op_unsupported, // 0x11
-	op_unsupported, // 0x12
-	op_unsupported, // 0x13
-	op_unsupported, // 0x14
-	op_unsupported, // 0x15
-	op_unsupported, // 0x16
-	op_unsupported, // 0x17
-	op_unsupported, // 0x18
-	op_unsupported, // 0x19
-	op_unsupported, // 0x1A
+	op2_unsupported, // 0x0F
+	op2_unsupported, // 0x10
+	op2_unsupported, // 0x11
+	op2_unsupported, // 0x12
+	op2_unsupported, // 0x13
+	op2_unsupported, // 0x14
+	op2_unsupported, // 0x15
+	op2_unsupported, // 0x16
+	op2_unsupported, // 0x17
+	op2_unsupported, // 0x18
+	op2_unsupported, // 0x19
+	op2_unsupported, // 0x1A
 };
 
 // addr seg00:3084
@@ -635,6 +652,8 @@ static void sub_13084(VMState& vm)
 		do
 		{
 			uint8_t next_instruction = vm.readImm8();
+			std::fprintf(trace_file, "2| %04x: %02x\n", vm.ip - 1, next_instruction);
+			std::fflush(trace_file);
 			opcode2_table[next_instruction](vm);
 		}
 		while (vm.run);
