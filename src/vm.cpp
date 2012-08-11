@@ -325,8 +325,8 @@ static void op_sub_14327(VMState& vm)
 }
 
 static const int MAX_OPCODES = 216;
-static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
-{
+static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
+{{
 	op_stopScript, // 0x00
 	op_nop, // 0x01
 	op_unsupported, // sub_177B2,      // 0x02
@@ -543,7 +543,7 @@ static const OpcodeHandlerPtr opcode_table[MAX_OPCODES] =
 	op_unsupported, // loc_178D6,      // 0xD5
 	op_unsupported, // loc_178F1,      // 0xD6
 	op_unsupported, // loc_1787F,      // 0xD7
-};
+}};
 
 std::FILE* trace_file = nullptr;
 
@@ -611,8 +611,8 @@ static void op2_stop(VMState& vm)
 }
 
 static const int MAX_OPCODES2 = 27;
-static const OpcodeHandlerPtr opcode2_table[MAX_OPCODES2] =
-{
+static const std::array<OpcodeHandlerPtr, MAX_OPCODES2> opcode2_table =
+{{
 	op2_unsupported, // 0x00
 	op2_unsupported, // 0x01
 	op2_unsupported, // 0x02
@@ -640,7 +640,7 @@ static const OpcodeHandlerPtr opcode2_table[MAX_OPCODES2] =
 	op2_unsupported, // 0x18
 	op2_unsupported, // 0x19
 	op2_unsupported, // 0x1A
-};
+}};
 
 // addr seg00:3084
 static void sub_13084(VMState& vm)
