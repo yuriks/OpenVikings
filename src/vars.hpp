@@ -21,6 +21,7 @@ struct FarPtr {
 	uint8_t* seg;
 };
 
+extern_ int16_t word_28512; // addr seg04:0032
 extern_ int16_t word_28514; // addr seg04:0034
 extern_ int16_t word_28516; // addr seg04:0036
 extern_ uint16_t word_28518; // addr seg04:0038
@@ -39,7 +40,11 @@ extern_ uint16_t word_2855C; // addr seg04:007C
 
 extern_ uint16_t word_28560; // addr seg04:0080
 
+extern_ uint16_t word_286E0; // addr seg04:0200
 extern_ uint16_t word_286E2; // addr seg04:0202
+extern_ uint16_t word_286E4; // addr seg04:0204
+
+extern_ uint16_t word_28716; // addr seg04:0236
 
 extern_ uint16_t data_header1_snd1; // addr seg04:0302
 extern_ uint16_t data_header1_snd2; // addr seg04:0304
@@ -59,6 +64,7 @@ extern_ uint16_t word_2881C; // addr seg04:033C
 
 extern_ Color color1; // addr seg04:0342
 extern_ Color color2; // addr seg04:0345
+extern_ uint16_t word_28828; // addr seg04:0348
 
 extern_ uint8_t byte_28836[16]; // addr seg04:0356
 
@@ -92,12 +98,18 @@ extern_ uint16_t word_28909[3]; // addr seg04:0429
 
 extern_ uint16_t word_2892D[128]; // addr seg04:044D
 
+extern_ uint16_t word_28D2D[128]; // addr seg04:084D
+
+extern_ uint16_t word_2912D[128]; // addr seg04:0C4D
+
+extern_ uint16_t word_2962D[128]; // addr seg04:114D
 extern_ uint16_t loaded_chunks2[16]; // addr seg04:124D
 extern_ uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
 extern_ uint16_t loaded_chunks11[32]; // addr seg04:12AD
 extern_ uint16_t loaded_chunks_end11[32]; // addr seg04:12ED
 extern_ uint16_t obj_script_resume[20]; // addr seg04:132D
 extern_ uint8_t* word_29835[20]; // addr seg04:1355
+extern_ uint16_t word_2985D[20]; // addr seg04:137D
 extern_ uint16_t word_29885[20]; // addr seg04:13A5
 extern_ uint16_t word_298AD[20]; // addr seg04:13CD
 extern_ uint16_t word_298D5[20]; // addr seg04:13F5
@@ -266,6 +278,8 @@ extern_ uint8_t chunk_buffer8[0x300]; // addr seg04:467D
 extern_ uint8_t chunk_buffer9[0x700]; // addr seg04:497D TODO confirm size
 extern_ uint8_t chunk_buffer10[0x1800]; // addr seg04:507D TODO confirm size
 extern_ uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO really confirm size (completely guessed)
+
+extern_ uint8_t byte_303DD; // addr seg04:7EFD
 
 enum PaletteAction {
 	PALACT_NONE = 0,

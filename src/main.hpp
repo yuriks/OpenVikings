@@ -60,6 +60,7 @@ bool sub_13D30(uint16_t di);
 int findFreeWord29835();
 int sub_12F82(uint16_t ax, uint16_t* out_ax);
 bool sub_13E52(uint16_t si, uint16_t bx);
+bool sub_13D68(uint16_t si);
 bool sub_13809(int16_t ax, uint16_t di, uint16_t si, uint16_t* out_di);
 void sub_11446();
 void loadNextLevel();

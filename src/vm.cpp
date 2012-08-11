@@ -2,6 +2,7 @@
 #include "vm.hpp"
 
 #include <array>
+#include <cassert>
 #include "vars.hpp"
 #include "main.hpp"
 #include "input.hpp"
@@ -210,7 +211,7 @@ static void op_sub_14A1B(VMState& vm)
 		vm.ip += 2;
 }
 
-static const int NUM_TRANSLATED_ADDRESSES = 1;
+static const int NUM_TRANSLATED_ADDRESSES = 8;
 
 namespace
 {
@@ -222,9 +223,15 @@ struct AddressTranslation
 }
 
 static const std::array<AddressTranslation, NUM_TRANSLATED_ADDRESSES> ram_address_translations =
-{
+{{
+	{0x0200, &word_286E0},
+	{0x0202, &word_286E2},
+	{0x0204, &word_286E4},
+	{0x0236, &word_28716},
+	{0x0348, &word_28828},
 	{0x03B8, &buttons_pressed},
-};
+	{0x03C2, &word_288A2},
+}};
 
 static uint16_t* translateRamAddress(uint16_t addr)
 {
@@ -276,7 +283,7 @@ static void sub_13C93(int di)
 {
 	if (word_29FB5[di] != 0)
 	{
-		// TODO
+		assert(false); // TODO
 	}
 
 	uint16_t si = word_29CE5[di];
@@ -324,6 +331,61 @@ static void op_sub_14327(VMState& vm)
 	vm.run = false;
 }
 
+static void op_loc_146A3(VMState& vm)
+{
+	uint16_t si = vm.readImm16();
+	*translateRamAddress(si) = vm_regA;
+}
+
+static void op_sub_14A2B(VMState& vm)
+{
+	uint16_t ax = *translateRamAddress(vm.readImm16());
+
+	if (ax == vm_regA)
+		op_jumpToImmediate(vm);
+	else
+		vm.ip += 2;
+}
+
+static void op_sub_14BA7(VMState& vm)
+{
+	uint16_t si = vm.readImm8() / 2;
+
+	if (vm_regA != 0)
+	{
+		vm_regA = BIT(si);
+	}
+
+	uint16_t dx = ~BIT(si);
+
+	uint16_t* var = translateRamAddress(vm.readImm16());
+	*var = (*var & dx) | vm_regA;
+}
+
+static void op_sub_142C1(VMState& vm)
+{
+	word_2985D[word_28522] = vm.ip + 2;
+	op_jumpToImmediate(vm);
+}
+
+static void op_sub_14532(VMState& vm)
+{
+	color1.rgb[0] = vm.readImm8() << 1;
+	color1.rgb[1] = vm.readImm8() << 1;
+	color1.rgb[2] = vm.readImm8() << 1;
+
+	byte_303DD |= BIT(0);
+	palette_action = PALACT_COPY;
+	pal_pointer = palette2;
+
+	fadePalKeepFirst();
+}
+
+static void op_sub_142D3(VMState& vm)
+{
+	vm.ip = word_2985D[word_28522];
+}
+
 static const int MAX_OPCODES = 216;
 static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 {{
@@ -332,8 +394,8 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_unsupported, // sub_177B2,      // 0x02
 	op_jumpToImmediate, // 0x03
 	op_unsupported, // sub_1782A,      // 0x04
-	op_unsupported, // sub_142C1,      // 0x05
-	op_unsupported, // sub_142D3,      // 0x06
+	op_sub_142C1, // 0x05
+	op_sub_142D3, // 0x06
 	op_unsupported, // sub_1368C,      // 0x07
 	op_unsupported, // sub_1367C,      // 0x08
 	op_unsupported, // sub_13743,      // 0x09
@@ -388,7 +450,7 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_unsupported, // sub_14340,      // 0x3A
 	op_unsupported, // sub_1524A,      // 0x3B
 	op_unsupported, // sub_15838,      // 0x3C
-	op_unsupported, // sub_14532,      // 0x3D
+	op_sub_14532, // 0x3D
 	op_unsupported, // sub_14590,      // 0x3E
 	op_unsupported, // sub_145E5,      // 0x3F
 	op_unsupported, // sub_14604,      // 0x40
@@ -414,7 +476,7 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_unsupported, // sub_14652,      // 0x54
 	op_unsupported, // sub_1466E,      // 0x55
 	op_loc_14686, // 0x56
-	op_unsupported, // loc_146A3,      // 0x57
+	op_loc_146A3, // 0x57
 	op_unsupported, // loc_146B4,      // 0x58
 	op_unsupported, // loc_146DE,      // 0x59
 	op_unsupported, // loc_14704,      // 0x5A
@@ -443,7 +505,7 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_unsupported, // loc_14909,      // 0x71
 	op_unsupported, // loc_14A0B,      // 0x72
 	op_sub_14A1B, // 0x73
-	op_unsupported, // loc_14A2B,      // 0x74
+	op_sub_14A2B, // 0x74
 	op_unsupported, // loc_14A3B,      // 0x75
 	op_unsupported, // loc_14A4B,      // 0x76
 	op_unsupported, // loc_14A5B,      // 0x77
@@ -484,7 +546,7 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_unsupported, // loc_14B60,      // 0x9A
 	op_unsupported, // loc_14B67,      // 0x9B
 	op_unsupported, // loc_14B71,      // 0x9C
-	op_unsupported, // loc_14BA7,      // 0x9D
+	op_sub_14BA7, // 0x9D
 	op_unsupported, // loc_14BCF,      // 0x9E
 	op_unsupported, // loc_14C09,      // 0x9F
 	op_unsupported, // loc_14C37,      // 0xA0
@@ -610,11 +672,107 @@ static void op2_stop(VMState& vm)
 	vm.run = false;
 }
 
+static void op2_sub_132DF(VMState& vm)
+{
+	static const uint16_t word_132D7[] = { 8, 32, 16, 176 };
+	static uint8_t byte_1339E = 0;
+
+	uint16_t di = word_2855C;
+	uint16_t si = vm.readImm8();
+
+	assert(si < 4);
+	uint16_t ax = word_132D7[si];
+
+	byte_1339E = 0;
+
+	if (si <= 2)
+	{
+		si = BIT(si);
+	}
+	else
+	{
+		si = BIT(1);
+		byte_1339E = 0xFF;
+	}
+
+	if (word_2886C == 0)
+	{
+		for (; di < word_28560; ++di)
+		{
+			if (byte_1339E != 0)
+			{
+				assert(false); // TODO
+			}
+
+			word_2912D[di] = ax;
+			word_2892D[di] = word_2892D[di] & ~BIT_RANGE(0, 2) | si;
+			word_2962D[di] = 0x202;
+		}
+	}
+	else
+	{
+		assert(false); // TODO
+	}
+}
+
+static void op2_sub_130EF(VMState& vm)
+{
+	uint16_t si = word_2855C;
+	uint16_t di = word_28522;
+	uint16_t cx = word_29D35[di];
+
+	if (word_2886C == 0)
+	{
+		for (; si < word_28560; ++si)
+		{
+			word_28D2D[si] = 72 * vm.readImm8() + cx;
+			word_2962D[si] = 0x202;
+		}
+	}
+	else
+	{
+		assert(false); // TODO
+	}
+}
+
+static void op2_sub_130A2(VMState& vm)
+{
+	uint16_t si = word_2855C;
+	uint16_t cx = 72 * vm.readImm8();
+
+	if (word_2886C == 0)
+	{
+		assert(false); // TODO
+	}
+	else
+	{
+		assert(false); // TODO
+	}
+}
+
+static void op2_sub_1339F(VMState& vm)
+{
+	uint16_t si = word_2855C;
+
+	if (word_2886C == 0)
+	{
+		for (; si < word_28560; ++si)
+		{
+			word_2892D[si] |= BIT(14);
+			reinterpret_cast<uint8_t*>(word_2962D)[si * 2 + 1] = 2; // TODO check this
+		}
+	}
+	else
+	{
+		assert(false); // TODO
+	}
+}
+
 static const int MAX_OPCODES2 = 27;
 static const std::array<OpcodeHandlerPtr, MAX_OPCODES2> opcode2_table =
 {{
 	op2_unsupported, // 0x00
-	op2_unsupported, // 0x01
+	op2_sub_130EF, // 0x01
 	op2_unsupported, // 0x02
 	op2_unsupported, // 0x03
 	op2_unsupported, // 0x04
@@ -634,10 +792,10 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES2> opcode2_table =
 	op2_unsupported, // 0x12
 	op2_unsupported, // 0x13
 	op2_unsupported, // 0x14
-	op2_unsupported, // 0x15
+	op2_sub_132DF, // 0x15
 	op2_unsupported, // 0x16
 	op2_unsupported, // 0x17
-	op2_unsupported, // 0x18
+	op2_sub_1339F, // 0x18
 	op2_unsupported, // 0x19
 	op2_unsupported, // 0x1A
 }};

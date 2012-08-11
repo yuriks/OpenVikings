@@ -1364,6 +1364,53 @@ bool sub_13E52(uint16_t si, uint16_t bx)
 	return true;
 }
 
+// addr seg00:3D68
+bool sub_13D68(uint16_t si)
+{
+	uint16_t di;
+
+	if (word_28854 == 0)
+	{
+		di = 36;
+		word_28512 = 128;
+	}
+	else if (word_28854 == 1)
+	{
+		di = 24;
+		word_28512 = 64;
+	}
+	else
+	{
+		di = 0;
+		word_28512 = 24;
+	}
+
+	while (true)
+	{
+		if ((word_2892D[di] | word_2962D[di]) == 0)
+		{
+			word_2851A = di;
+			word_28518 = word_29FB5[si] + di;
+
+			do
+			{
+				di++;
+				if (di == word_28518)
+					return true;
+				else if (di == word_28512)
+					return false;
+			}
+			while ((word_2892D[di] | word_2962D[di]) == 0);
+		}
+		else
+		{
+			di++;
+			if (di >= word_28512)
+				return false;
+		}
+	}
+}
+
 // addr seg00:3809
 bool sub_13809(int16_t ax, uint16_t di, uint16_t si, uint16_t* out_di)
 {
@@ -1392,8 +1439,7 @@ bool sub_13809(int16_t ax, uint16_t di, uint16_t si, uint16_t* out_di)
 
 	if (word_29FB5[si] != 0)
 	{
-		// TODO sub_13D68
-		if (!true)
+		if (!sub_13D68(si))
 		{
 			word_29835[si] = 0;
 			*out_di = 0;
