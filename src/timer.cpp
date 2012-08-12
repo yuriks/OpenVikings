@@ -2,8 +2,10 @@
 
 #include "vga_emu.hpp"
 #include "input.hpp"
+#include "main.hpp"
 
 #include <cstdint>
+#include <cassert>
 #include <SDL.h>
 #include <SDL_timer.h>
 
@@ -14,27 +16,31 @@ static Uint64 timer_deadline;
 void timer_initialize()
 {
 	SDL_InitSubSystem(SDL_INIT_TIMER);
+
+	if (vga_has_vsync)
+		vga_present(); // Pull closer to vsync before setting initial deadline
 	timer_deadline = SDL_GetPerformanceCounter();
 
 	timer_initialized = true;
 }
 
+static Uint64 timer_getFrameDuration()
+{
+	return SDL_GetPerformanceFrequency() / 60;
+}
+
 void timer_setWaitCount(int val)
 {
-	int diff = val - timer_wait_count;
-	bool neg_diff = false;
-	if (val < 0)
+	assert(val >= 0);
+
+	if (timer_wait_count == 0 && val != 0)
 	{
-		neg_diff = true;
-		val = -val;
+		timer_deadline += timer_getFrameDuration();
 	}
-
-	Uint64 shift_amount = SDL_GetPerformanceFrequency() * val / 60;
-
-	if (neg_diff == false)
-		timer_deadline += shift_amount;
-	else
-		timer_deadline -= shift_amount;
+	else if (timer_wait_count != 0 && val == 0)
+	{
+		timer_deadline -= timer_getFrameDuration();
+	}
 
 	timer_wait_count = val;
 }
@@ -46,18 +52,15 @@ uint16_t timer_getWaitCount()
 
 // addr seg00:0130
 void timer_wait() {
-	while (timer_wait_count > 0 && SDL_GetPerformanceCounter() < timer_deadline)
+	while (timer_wait_count > 0)
 	{
-		vga_present();
-		handleSDLEvents();
-
-		if (vga_has_vsync)
+		if (!vga_has_vsync || SDL_GetPerformanceCounter() < timer_deadline)
 		{
-			timer_wait_count--;
+			vga_present();
 		}
-		else
+
+		if (!vga_has_vsync)
 		{
-			timer_wait_count = 0;
 			Uint64 counter;
 			while ((counter = SDL_GetPerformanceCounter()) < timer_deadline)
 			{
@@ -68,5 +71,10 @@ void timer_wait() {
 					SDL_Delay((Uint32)ms_diff);
 			}
 		}
+
+		handleSDLEvents();
+		timer_wait_count--;
+
+		updateVidRegsAndPal();
 	}
 }

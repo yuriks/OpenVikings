@@ -21,6 +21,7 @@ inline void vga_setPixel(uint16_t dest_lfb, uint8_t color) {
 
 void vga_setStartAddress(uint16_t addr);
 void vga_setLineCompare(unsigned int scanline);
+void vga_setPixelPan(unsigned int pixels);
 
 void vga_initialize();
 void vga_deinitialize();

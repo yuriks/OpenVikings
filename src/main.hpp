@@ -68,3 +68,4 @@ void sub_10138();
 void sub_15517();
 void sub_14207();
 void sub_12CA3();
+void updateVidRegsAndPal();

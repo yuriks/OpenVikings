@@ -15,6 +15,7 @@ bool vga_has_vsync = false;
 static uint32_t vga_palette[256];
 static uint16_t vga_start_address;
 static unsigned int vga_line_compare = -1;
+static unsigned int vga_pixel_pan = 0;
 
 static SDL_Window* vga_window = nullptr;
 static SDL_Renderer* vga_renderer = nullptr;
@@ -84,6 +85,12 @@ void vga_setStartAddress(uint16_t addr) {
 void vga_setLineCompare(unsigned int scanline) {
 	// Divide by 2 because this VGA video mode uses doubled lines
 	vga_line_compare = scanline / 2;
+}
+
+void vga_setPixelPan(unsigned int pixels)
+{
+	assert(pixels < 16);
+	vga_pixel_pan = pixels;
 }
 
 void vga_initialize() {
@@ -172,10 +179,11 @@ void vga_present() {
 		uint16_t vram_offset = vram_line_offset;
 
 		for (int x = 0; x < win_width; x += 4) {
-			tex_pixels[x+0] = vga_palette[vga_framebuffer[0][vram_offset]];
-			tex_pixels[x+1] = vga_palette[vga_framebuffer[1][vram_offset]];
-			tex_pixels[x+2] = vga_palette[vga_framebuffer[2][vram_offset]];
-			tex_pixels[x+3] = vga_palette[vga_framebuffer[3][vram_offset]];
+			tex_pixels[x+0] = vga_palette[vga_framebuffer[(0 + vga_pixel_pan) % 4][vram_offset + (0 + vga_pixel_pan) / 4]];
+			tex_pixels[x+1] = vga_palette[vga_framebuffer[(1 + vga_pixel_pan) % 4][vram_offset + (1 + vga_pixel_pan) / 4]];
+			tex_pixels[x+2] = vga_palette[vga_framebuffer[(2 + vga_pixel_pan) % 4][vram_offset + (2 + vga_pixel_pan) / 4]];
+			tex_pixels[x+3] = vga_palette[vga_framebuffer[(3 + vga_pixel_pan) % 4][vram_offset + (3 + vga_pixel_pan) / 4]];
+
 #ifdef VRAM_DEBUG
 			if (debug_cur_line < vga_line_compare &&
 				vram_offset >= vga_start_address + (line_stride/4)*debug_cur_line + 320/4)

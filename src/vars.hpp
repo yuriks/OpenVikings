@@ -283,8 +283,8 @@ extern_ uint8_t byte_303DD; // addr seg04:7EFD
 
 enum PaletteAction {
 	PALACT_NONE = 0,
-	PALACT_UNK1 = 2,
-	PALACT_COPY = 4
+	PALACT_UNK1 = 1,
+	PALACT_COPY = 2
 };
 
 extern_ PaletteAction palette_action INIT(= PALACT_NONE); // addr seg04:7EFE;

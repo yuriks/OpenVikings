@@ -7,6 +7,8 @@
 #include <cerrno>
 #include <cstring>
 #include <algorithm>
+#include <cassert>
+#include <array>
 #include <SDL_timer.h>
 
 #include "vga_emu.hpp"
@@ -1638,6 +1640,37 @@ void sub_12CA3()
 	// TODO word_28811 = 0;
 	// TODO word_2AA8F = 0xFFFF;
 	word_288A2 = 0xFFFF;
+}
+
+// addr seg00:797A
+static void nullsub_1()
+{
+	// Empty function
+}
+
+// addr seg00:0FFC
+static void sub_10FFC()
+{
+	assert(false); // TODO
+}
+
+// addr seg00:797B
+void updateVidRegsAndPal()
+{
+	typedef void (*VoidFuncPtr)();
+	static const std::array<VoidFuncPtr, 3> palette_actions =
+	{{
+		nullsub_1, // PALACT_NONE
+		sub_10FFC, // PALACT_UNK1
+		loadPal2ToVga // PALACT_COPY
+	}};
+
+	if (video_initialized /* || !byte_128A8 related to dos modesetting, probably unecessary */ )
+	{
+		vga_setPixelPan(video_pixelPan);
+
+		palette_actions[palette_action]();
+	}
 }
 
 // addr seg00:0000
