@@ -180,6 +180,7 @@ static void op_sub_147E7(VMState& vm)
 	si[word_28522] |= vm_regA;
 }
 
+// addr seg00:5485
 static uint16_t sub_15485(VMState& vm)
 {
 	uint16_t* si = word_31826[vm.readImm8() / 2];
@@ -231,6 +232,7 @@ static const std::array<AddressTranslation, NUM_TRANSLATED_ADDRESSES> ram_addres
 	{0x0348, &word_28828},
 	{0x03B8, &buttons_pressed},
 	{0x03C2, &word_288A2},
+	{0x03CC, &word_288AC},
 }};
 
 static uint16_t* translateRamAddress(uint16_t addr)
@@ -386,6 +388,140 @@ static void op_sub_142D3(VMState& vm)
 	vm.ip = word_2985D[word_28522];
 }
 
+static void op_sub_1434C(VMState& vm)
+{
+	uint8_t ax = vm.readImm8();
+
+	if (ax == 0xD9)
+	{
+		assert(false); // TODO
+	}
+	else
+	{
+		vm.ip += 2;
+	}
+
+	if (ax == 0x11)
+	{
+		vga_vramCopy(0, 0x2ADC, 0x1600);
+		vga_vramCopy(0, 0x70BC, 0x1600);
+
+		vga_fillVRAM(0xF, 0, 0x0000, 0x2ADC);
+		vga_fillVRAM(0xF, 0, 0x40DC, 0x2FE0);
+		vga_fillVRAM(0xF, 0, 0x86BC, 0x7000);
+	}
+	else if (ax == 1)
+	{
+		freeMemAndQuit();
+	}
+}
+
+static void op_sub_14590(VMState& vm)
+{
+	color1.rgb[0] = 0;
+	color1.rgb[1] = 0;
+	color1.rgb[2] = 0;
+
+	byte_303DD &= ~BIT(0);
+	if (byte_303DD == 0)
+	{
+		pal_pointer = palette1;
+	}
+
+	palette_action = PALACT_COPY;
+	fadePalKeepFirst();
+}
+
+static void op_sub_145B5(VMState& vm)
+{
+	color2.rgb[0] = 0;
+	color2.rgb[1] = 0;
+	color2.rgb[2] = 0;
+
+	byte_303DD &= ~BIT(1);
+	if (byte_303DD == 0)
+	{
+		pal_pointer = palette1;
+	}
+
+	palette_action = PALACT_COPY;
+	fadePalKeepFirst();
+}
+
+static void op_sub_1268D(VMState& vm)
+{
+	word_2A287[word_2A66F] = 6;
+	word_2A287[word_2A66F + 1] = vm.readImm16();
+	word_2A66F += 2;
+}
+
+// addr seg00:547E
+static uint16_t sub_1547E(VMState& vm)
+{
+	return vm.readImm16();
+}
+
+// addr seg00:549A
+static uint16_t sub_1549A(VMState& vm)
+{
+	return *translateRamAddress(vm.readImm16());
+}
+
+// addr seg00:54A3
+static uint16_t sub_154A3(VMState& vm)
+{
+	uint16_t si = vm.readImm8() / 2;
+	uint16_t* di = word_31826[si];
+	si = word_28522;
+
+}
+
+uint16_t sub_15473(VMState& vm, uint16_t ax)
+{
+	typedef uint16_t (*FuncPtr)(VMState& vm);
+	static const std::array<FuncPtr, 5> off_30C98 =
+	{{
+		sub_1547E,
+		sub_15485,
+		sub_1549A,
+		nullptr, // TODO sub_154A3
+		nullptr, // TODO sub_12312
+	}};
+
+	return off_30C98[ax & 0x7](vm);
+}
+
+void calcStringAddress(VMState& vm)
+{
+	uint16_t ax = vm.readImm8();
+	word_28512 = ax;
+	uint16_t si = sub_15473(vm, ax);
+
+	word_2850A = load16LE(&script_data[si * 2]);
+}
+
+void getTextPosition(VMState& vm, uint16_t *out_x, uint16_t *out_y)
+{
+	uint16_t ax = vm.readImm8();
+
+	word_2854C = sub_15473(vm, ax);
+	*out_x = word_2854C;
+	*out_y = sub_15473(vm, ax >> 3);
+}
+
+static void op_sub_12634(VMState& vm)
+{
+	calcStringAddress(vm);
+	uint16_t pos_x, pos_y;
+	getTextPosition(vm, &pos_x, &pos_y);
+
+	word_2A287[word_2A66F] = 5; // Command (draw text?)
+	word_2A287[word_2A66F + 1] = pos_x; // X Position
+	word_2A287[word_2A66F + 2] = pos_y; // Y Position
+	word_2A287[word_2A66F + 3] = word_2850A; // String address
+	word_2A66F += 4;
+}
+
 static const int MAX_OPCODES = 216;
 static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 {{
@@ -408,7 +544,7 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_sub_14327, // 0x10
 	op_unsupported, // sub_14334,      // 0x11
 	op_unsupported, // sub_14340,      // 0x12
-	op_unsupported, // sub_1434C,      // 0x13
+	op_sub_1434C, // 0x13
 	op_unsupported, // sub_14F59,      // 0x14
 	op_unsupported, // sub_150FC,      // 0x15
 	op_unsupported, // sub_15106,      // 0x16
@@ -451,22 +587,22 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_unsupported, // sub_1524A,      // 0x3B
 	op_unsupported, // sub_15838,      // 0x3C
 	op_sub_14532, // 0x3D
-	op_unsupported, // sub_14590,      // 0x3E
+	op_sub_14590, // 0x3E
 	op_unsupported, // sub_145E5,      // 0x3F
 	op_unsupported, // sub_14604,      // 0x40
 	op_unsupported, // sub_1242E,      // 0x41
 	op_unsupported, // sub_12669,      // 0x42
 	op_unsupported, // sub_1267B,      // 0x43
 	op_unsupported, // sub_1246D,      // 0x44
-	op_unsupported, // sub_12634,      // 0x45
-	op_unsupported, // loc_1268D,      // 0x46
+	op_sub_12634, // 0x45
+	op_sub_1268D, // 0x46
 	op_unsupported, // locret_141F6,   // 0x47
 	op_unsupported, // loc_14FEC,      // 0x48
 	op_unsupported, // loc_14FC4,      // 0x49
 	op_unsupported, // loc_14FC8,      // 0x4A
 	op_unsupported, // loc_16252,      // 0x4B
 	op_unsupported, // loc_14561,      // 0x4C
-	op_unsupported, // loc_145B5,      // 0x4D
+	op_sub_145B5, // 0x4D
 	op_unsupported, // loc_144FD,      // 0x4E
 	op_unsupported, // loc_14501,      // 0x4F
 	op_unsupported, // loc_126A9,      // 0x50
@@ -768,20 +904,109 @@ static void op2_sub_1339F(VMState& vm)
 	}
 }
 
+static void sub_136FC(uint16_t di)
+{
+	if (word_29FB5[di] != 0)
+	{
+		uint16_t dx = word_29C1D[di] * 2;
+		uint16_t cx = word_29F8D[di];
+		for (uint16_t i = word_29F65[di]; i < cx; ++i)
+		{
+			word_28B2D[i] = dx - word_28B2D[i] - word_2912D[i];
+			word_2892D[i] |= BIT(9);
+			word_2962D[i] = 0x202;
+		}
+	}
+}
+
+static void op2_sub_131A4(VMState& vm)
+{
+	uint16_t dx = word_29C1D[word_28522];
+
+	for (uint16_t si = word_2855C; si < word_28560; ++si)
+	{
+		uint16_t ax = vm.readImm16() + dx;
+
+		word_28B2D[si] = ax;
+
+		if (!(word_2892D[si] & BIT(12)))
+		{
+			word_2922D[si] = ax;
+			word_2942D[si] = ax;
+			word_2892D[si] |= BIT(12);
+		}
+
+		word_2962D[si] = 0x202;
+	}
+
+	if (word_29A65[word_28522] & BIT(6))
+	{
+		sub_136FC(word_28522);
+	}
+}
+
+static void sub_137B8(uint16_t si)
+{
+	if (word_29FB5[si] != 0)
+	{
+		uint16_t dx = word_29C45[si] * 2;
+		uint16_t cx = word_29F8D[si];
+
+		for (uint16_t di = word_29F65[si]; di < cx; ++di)
+		{
+			word_28C2D[di] = dx - word_28C2D[di] - word_2912D[di];
+			word_2892D[di] |= BIT(10);
+			word_2962D[di] = 0x202;
+		}
+	}
+}
+
+static void op2_sub_1323D(VMState& vm)
+{
+	uint16_t dx = word_29C45[word_28522];
+
+	uint16_t si;
+	for (si = word_2855C; si < word_28560; ++si)
+	{
+		uint16_t ax = vm.readImm16() + dx;
+
+		word_28C2D[si] = ax;
+
+		if (!(word_2892D[si] & BIT(11)))
+		{
+			word_2932D[si] = ax;
+			word_2952D[si] = ax;
+			word_2892D[si] |= BIT(11);
+		}
+
+		word_2962D[si] = 0x202;
+	}
+
+	if (word_29A65[si] & BIT(7))
+	{
+		sub_137B8(si);
+	}
+}
+
+static void op2_jumpToImmediate(VMState& vm)
+{
+	vm.ip = load16LE(&vm.rom[vm.ip]);
+}
+
 static const int MAX_OPCODES2 = 27;
 static const std::array<OpcodeHandlerPtr, MAX_OPCODES2> opcode2_table =
 {{
 	op2_unsupported, // 0x00
 	op2_sub_130EF, // 0x01
 	op2_unsupported, // 0x02
-	op2_unsupported, // 0x03
+	op2_jumpToImmediate, // 0x03
 	op2_unsupported, // 0x04
 	op2_unsupported, // 0x05
 	op2_unsupported, // 0x06
 	op2_unsupported, // 0x07
-	op2_unsupported, // 0x08
+	op2_sub_131A4, // 0x08
 	op2_unsupported, // 0x09
-	op2_unsupported, // 0x0A
+	op2_sub_1323D, // 0x0A
 	op2_unsupported, // 0x0B
 	op2_unsupported, // 0x0C
 	op2_unsupported, // 0x0D

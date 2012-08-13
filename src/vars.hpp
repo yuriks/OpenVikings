@@ -25,6 +25,8 @@ struct FarPtr {
 static const unsigned int SCRIPT_DATA_SIZE = 0x4070;
 extern_ std::array<uint8_t, SCRIPT_DATA_SIZE> script_data;
 
+extern_ uint16_t word_2850A; // addr seg04:002A
+
 extern_ int16_t word_28512; // addr seg04:0032
 extern_ int16_t word_28514; // addr seg04:0034
 extern_ int16_t word_28516; // addr seg04:0036
@@ -101,11 +103,18 @@ extern_ uint16_t word_28903[3]; // addr seg04:0423
 extern_ uint16_t word_28909[3]; // addr seg04:0429
 
 extern_ uint16_t word_2892D[128]; // addr seg04:044D
-
+extern_ uint16_t word_28A2D[128]; // addr seg04:054D
+extern_ uint16_t word_28B2D[128]; // addr seg04:064D
+extern_ uint16_t word_28C2D[128]; // addr seg04:074D
 extern_ uint16_t word_28D2D[128]; // addr seg04:084D
+extern_ uint16_t word_28E2D[128]; // addr seg04:094D
 
+extern_ uint16_t word_2902D[128]; // addr seg04:0B4D
 extern_ uint16_t word_2912D[128]; // addr seg04:0C4D
-
+extern_ uint16_t word_2922D[128]; // addr seg04:0D4D
+extern_ uint16_t word_2932D[128]; // addr seg04:0E4D
+extern_ uint16_t word_2942D[128]; // addr seg04:0F4D
+extern_ uint16_t word_2952D[128]; // addr seg04:104D
 extern_ uint16_t word_2962D[128]; // addr seg04:114D
 extern_ uint16_t loaded_chunks2[16]; // addr seg04:124D
 extern_ uint8_t* loaded_chunks2_ptr[16]; // addr seg04:126D
@@ -161,6 +170,10 @@ extern_ uint16_t word_29F3D[20]; // addr seg04:1A5D
 extern_ int16_t word_29F65[20]; // addr seg04:1A85
 extern_ int16_t word_29F8D[20]; // addr seg04:1AAD
 extern_ uint16_t word_29FB5[20]; // addr seg04:1AD5
+
+extern_ uint16_t word_2A287[500]; // addr seg04:1DA7
+extern_ uint16_t word_2A66F; // addr seg04:218F
+
 //---
 extern_ uint16_t word_2AA5B; // addr seg04:257B
 extern_ uint16_t word_2AA5D; // addr seg04:257D
