@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <array>
 #include "vga_emu.hpp"
 
 // If included with VARS_HPP_DEFINITIONS, defines
@@ -20,6 +21,9 @@ struct FarPtr {
 	uint16_t offset;
 	uint8_t* seg;
 };
+
+static const unsigned int SCRIPT_DATA_SIZE = 0x4070;
+extern_ std::array<uint8_t, SCRIPT_DATA_SIZE> script_data;
 
 extern_ int16_t word_28512; // addr seg04:0032
 extern_ int16_t word_28514; // addr seg04:0034

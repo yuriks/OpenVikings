@@ -10,6 +10,7 @@
 #include <cassert>
 #include <array>
 #include <SDL_timer.h>
+#include <numeric>
 
 #include "vga_emu.hpp"
 #include "input.hpp"
@@ -70,6 +71,10 @@ void hwCheck() {
 			errorQuit("\nCannot find 'data.dat' file in the current directory.\n", errno);
 		}
 
+		static void errOpenVikingsExe() {
+			errorQuit("\nCannot find 'vikings.exe' file in the current directory or it's invalid.\n", errno);
+		}
+
 		static void errCopyprotect() {
 			errorQuit("\nCopy protection failure. Please run setup.\n", 0);
 		}
@@ -90,6 +95,21 @@ void hwCheck() {
 	data_file = std::fopen("data.dat", "rb");
 	if (!data_file)
 		Local::errOpenData();
+
+	// Read script from game exe.
+	std::FILE* vikings_exe_file = std::fopen("vikings.exe", "rb");
+	if (!vikings_exe_file)
+		Local::errOpenVikingsExe();
+
+	static const unsigned int SCRIPT_DATA_OFFSET = 0x7C60;
+	if (std::fseek(vikings_exe_file, SCRIPT_DATA_OFFSET, SEEK_SET) != 0)
+		Local::errOpenVikingsExe();
+	if (std::fread(script_data.data(), SCRIPT_DATA_SIZE, 1, vikings_exe_file) != 1)
+		Local::errOpenVikingsExe();
+
+	static const uint8_t SCRIPT_DATA_CHECKSUM = 0x66;
+	if (std::accumulate(std::begin(script_data), std::begin(script_data) + 16, (uint8_t)0) != SCRIPT_DATA_CHECKSUM)
+		Local::errOpenVikingsExe();
 
 	if (std::fread(&chunk_offsets, sizeof(int32_t), 2, data_file) != 2)
 		Local::errReadData();
