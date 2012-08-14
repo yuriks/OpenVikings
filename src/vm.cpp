@@ -33,6 +33,42 @@ struct VMState
 
 static void sub_1303A(VMState& vm);
 
+namespace
+{
+struct AddressTranslation
+{
+	uint16_t address;
+	uint16_t* variable;
+};
+}
+
+static const int NUM_TRANSLATED_ADDRESSES = 9;
+static const std::array<AddressTranslation, NUM_TRANSLATED_ADDRESSES> ram_address_translations =
+{{
+	{0x0200, &word_286E0},
+	{0x0202, &word_286E2},
+	{0x0204, &word_286E4},
+	{0x0236, &word_28716},
+	{0x028C, &last_typed_key},
+	{0x0348, &word_28828},
+	{0x03B8, &buttons_pressed},
+	{0x03C2, &word_288A2},
+	{0x03CC, &word_288AC},
+}};
+
+static uint16_t* translateRamAddress(uint16_t addr)
+{
+	for (int i = 0; i < NUM_TRANSLATED_ADDRESSES; ++i)
+	{
+		auto& entry = ram_address_translations[i];
+		if (entry.address == addr)
+			return entry.variable;
+	}
+
+	errorQuit("Untranslated VM RAM address.", addr);
+	return nullptr;
+}
+
 // addr seg00:53EA
 static uint16_t vm_checkBit(uint16_t bit_pos, uint16_t value)
 {
@@ -41,6 +77,20 @@ static uint16_t vm_checkBit(uint16_t bit_pos, uint16_t value)
 	else
 		return 1;
 }
+
+// addr seg00:542A
+static uint16_t vm_checkBitRam(VMState& vm)
+{
+	uint16_t a = vm.readImm8() / 2;
+	uint16_t* b = translateRamAddress(vm.readImm16());
+
+	return vm_checkBit(a, *b);
+}
+
+
+/*********************
+ ** Main VM opcodes **
+ *********************/
 
 typedef void (*OpcodeHandlerPtr)(VMState& vm);
 
@@ -210,51 +260,6 @@ static void op_sub_14A1B(VMState& vm)
 		op_jumpToImmediate(vm);
 	else
 		vm.ip += 2;
-}
-
-static const int NUM_TRANSLATED_ADDRESSES = 9;
-
-namespace
-{
-struct AddressTranslation
-{
-	uint16_t address;
-	uint16_t* variable;
-};
-}
-
-static const std::array<AddressTranslation, NUM_TRANSLATED_ADDRESSES> ram_address_translations =
-{{
-	{0x0200, &word_286E0},
-	{0x0202, &word_286E2},
-	{0x0204, &word_286E4},
-	{0x0236, &word_28716},
-	{0x028C, &last_typed_key},
-	{0x0348, &word_28828},
-	{0x03B8, &buttons_pressed},
-	{0x03C2, &word_288A2},
-	{0x03CC, &word_288AC},
-}};
-
-static uint16_t* translateRamAddress(uint16_t addr)
-{
-	for (int i = 0; i < NUM_TRANSLATED_ADDRESSES; ++i)
-	{
-		auto& entry = ram_address_translations[i];
-		if (entry.address == addr)
-			return entry.variable;
-	}
-
-	errorQuit("Untranslated VM RAM address.", addr);
-	return nullptr;
-}
-
-static uint16_t vm_checkBitRam(VMState& vm)
-{
-	uint16_t a = vm.readImm8() / 2;
-	uint16_t* b = translateRamAddress(vm.readImm16());
-
-	return vm_checkBit(a, *b);
 }
 
 // TODO name
@@ -807,6 +812,10 @@ uint16_t runObjectScript(int object_slot)
 	return vm.return_si;
 }
 
+
+/********************
+ ** Sub VM opcodes **
+ ********************/
 
 static void op2_unsupported(VMState& vm)
 {
