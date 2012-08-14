@@ -212,7 +212,7 @@ static void op_sub_14A1B(VMState& vm)
 		vm.ip += 2;
 }
 
-static const int NUM_TRANSLATED_ADDRESSES = 8;
+static const int NUM_TRANSLATED_ADDRESSES = 9;
 
 namespace
 {
@@ -229,6 +229,7 @@ static const std::array<AddressTranslation, NUM_TRANSLATED_ADDRESSES> ram_addres
 	{0x0202, &word_286E2},
 	{0x0204, &word_286E4},
 	{0x0236, &word_28716},
+	{0x028C, &last_typed_key},
 	{0x0348, &word_28828},
 	{0x03B8, &buttons_pressed},
 	{0x03C2, &word_288A2},
@@ -522,6 +523,15 @@ static void op_sub_12634(VMState& vm)
 	word_2A66F += 4;
 }
 
+static void op_sub_14604(VMState& vm)
+{
+	for (int i = word_29F65[word_28522]; i < word_29F8D[word_28522]; ++i)
+	{
+		word_2892D[i] |= ~(BIT(14) | BIT(13));
+		word_2962D[i] = 2;
+	}
+}
+
 static const int MAX_OPCODES = 216;
 static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 {{
@@ -589,7 +599,7 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES> opcode_table =
 	op_sub_14532, // 0x3D
 	op_sub_14590, // 0x3E
 	op_unsupported, // sub_145E5,      // 0x3F
-	op_unsupported, // sub_14604,      // 0x40
+	op_sub_14604, // 0x40
 	op_unsupported, // sub_1242E,      // 0x41
 	op_unsupported, // sub_12669,      // 0x42
 	op_unsupported, // sub_1267B,      // 0x43
@@ -900,7 +910,14 @@ static void op2_sub_1339F(VMState& vm)
 	}
 	else
 	{
-		assert(false); // TODO
+		for (; si < word_28560; ++si)
+		{
+			if (word_28A2D[si] & word_2886C)
+			{
+				word_2892D[si] |= BIT(14);
+				reinterpret_cast<uint8_t*>(word_2962D)[si * 2 + 1] = 2; // TODO check this
+			}
+		}
 	}
 }
 
@@ -993,6 +1010,54 @@ static void op2_jumpToImmediate(VMState& vm)
 	vm.ip = load16LE(&vm.rom[vm.ip]);
 }
 
+static void op2_sub_1341F(VMState& vm)
+{
+	uint16_t si = word_2855C;
+
+	if (word_2886C == 0)
+	{
+		for (; si < word_28560; ++si)
+		{
+			word_28A2D[si] = vm.readImm8();
+		}
+	}
+	else
+	{
+		assert(false); // TODO
+	}
+}
+
+static void op2_sub_1345E(VMState& vm)
+{
+	vm.return_si = word_2855C;
+	word_2886C = vm.readImm8();
+}
+
+static void op2_sub_133DE(VMState& vm)
+{
+	uint16_t si = word_2855C;
+
+	if (word_2886C == 0)
+	{
+		for (; si < word_28560; ++si)
+		{
+			word_2892D[si] |= ~(BIT(14) | BIT(13));
+			word_2962D[si] = 2;
+		}
+	}
+	else
+	{
+		for (; si < word_28560; ++si)
+		{
+			if (word_28A2D[si] & word_2886C)
+			{
+				word_2892D[si] |= ~(BIT(14) | BIT(13));
+				word_2962D[si] = 2;
+			}
+		}
+	}
+}
+
 static const int MAX_OPCODES2 = 27;
 static const std::array<OpcodeHandlerPtr, MAX_OPCODES2> opcode2_table =
 {{
@@ -1009,19 +1074,19 @@ static const std::array<OpcodeHandlerPtr, MAX_OPCODES2> opcode2_table =
 	op2_sub_1323D, // 0x0A
 	op2_unsupported, // 0x0B
 	op2_unsupported, // 0x0C
-	op2_unsupported, // 0x0D
+	op2_sub_1345E, // 0x0D
 	op2_stop, // 0x0E
 	op2_unsupported, // 0x0F
 	op2_unsupported, // 0x10
 	op2_unsupported, // 0x11
 	op2_unsupported, // 0x12
-	op2_unsupported, // 0x13
+	op2_sub_1341F, // 0x13
 	op2_unsupported, // 0x14
 	op2_sub_132DF, // 0x15
 	op2_unsupported, // 0x16
 	op2_unsupported, // 0x17
 	op2_sub_1339F, // 0x18
-	op2_unsupported, // 0x19
+	op2_sub_133DE, // 0x19
 	op2_unsupported, // 0x1A
 }};
 
