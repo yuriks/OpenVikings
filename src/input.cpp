@@ -14,6 +14,8 @@ uint16_t word_30BBA; // addr seg04:86DA
 uint16_t word_30BBC; // addr seg04:86DC
 uint16_t pressed_buttons; // addr seg04:86DE
 
+bool input_quit_requested;
+
 // addr seg04:8E68
 static const uint16_t scancode_to_ascii[128] =
 {
@@ -251,8 +253,8 @@ void handleSDLEvents()
 			keyboardHandler(event.key);
 			break;
 		case SDL_QUIT:
-			// TODO make it invoke the Alt-X handler
-			std::exit(0);
+			// Call ALT-X handler
+			input_quit_requested = true;
 			break;
 		}
 	}

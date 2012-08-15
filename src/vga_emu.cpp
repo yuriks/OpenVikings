@@ -70,12 +70,16 @@ void vga_vramCopy(uint16_t source, uint16_t dest, uint16_t len) {
 
 void vga_setPalette(const Color* palette) {
 	for (int i = 0; i < 256; ++i) {
-		vga_palette[i] =
-			palette->rgb[0] << (16+2) |
-			palette->rgb[1] <<  (8+2) |
-			palette->rgb[2] <<  (0+2);
-		palette++;
+		vga_setPaletteColor(i, palette[i]);
 	}
+}
+
+void vga_setPaletteColor(uint8_t index, const Color& color)
+{
+	vga_palette[index] =
+		color.rgb[0] << (16+2) |
+		color.rgb[1] <<  (8+2) |
+		color.rgb[2] <<  (0+2);
 }
 
 void vga_setStartAddress(uint16_t addr) {

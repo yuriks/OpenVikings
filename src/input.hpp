@@ -28,6 +28,7 @@ enum XTScancodes
 {
 	SCAN_ESCAPE       = 0x01,
 	SCAN_TAB          = 0x0F,
+	SCAN_Q            = 0x10,
 	SCAN_E            = 0x12,
 	SCAN_P            = 0x19,
 	SCAN_RETURN       = 0x1C,
@@ -68,6 +69,8 @@ extern uint16_t pressed_buttons; // addr seg04:86DE
 
 extern uint8_t pressed_keys[128]; // addr seg04:916C
 extern uint16_t button_key_assignments[128]; // addr seg04:91EC
+
+extern bool input_quit_requested;
 
 void updateInput();
 void handleSDLEvents();

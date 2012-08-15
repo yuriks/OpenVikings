@@ -1693,6 +1693,40 @@ void updateVidRegsAndPal()
 	}
 }
 
+// addr seg00:0350
+void quitHotkeyCheck()
+{
+	if (word_2A66F == 0 &&
+		input_quit_requested ||
+		pressed_keys[SCAN_F10] ||
+		(pressed_keys[SCAN_ALT] &&
+			(pressed_keys[SCAN_X] || pressed_keys[SCAN_Q] || pressed_keys[SCAN_F4]))
+		)
+	{
+		input_quit_requested = false;
+
+		if (word_288AC == 0x8000 || (level_header.level_flags & LVLFLAG_BIT8))
+		{
+			freeMemAndQuit();
+		}
+		else
+		{
+			static const Color black = { 0, 0, 0 };
+			vga_setPaletteColor(3, black);
+			palette1[3] = black;
+
+			if (color1 == black)
+			{
+				assert(false); // TODO sub_103CA();
+			}
+			else
+			{
+				assert(false); // TODO
+			}
+		}
+	}
+}
+
 // addr seg00:0000
 int main() {
 	vga_initialize();
@@ -1769,7 +1803,7 @@ int main() {
 		updateVgaBuffer();
 		// TODO mov     word_30C14, 0
 		// TODO sub_108C8
-		// TODO sub_10350
+		quitHotkeyCheck();
 		// TODO sub_1086F
 
 		if (current_level < LEVEL_RESPAWN && word_286E2 != 0)
