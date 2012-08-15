@@ -1806,6 +1806,17 @@ int main() {
 		quitHotkeyCheck();
 		// TODO sub_1086F
 
+		if (pressed_keys[SCAN_F4])
+		{
+			pressed_keys[SCAN_F4] = 0;
+#ifdef _MSC_VER
+			__debugbreak();
+#else
+			// TODO find the gcc way
+			assert(false);
+#endif
+		}
+
 		if (current_level < LEVEL_RESPAWN && word_286E2 != 0)
 		{
 			if (byte_3168B != 1)
