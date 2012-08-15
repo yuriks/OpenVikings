@@ -1819,12 +1819,7 @@ int main() {
 
 		if (current_level < LEVEL_RESPAWN && word_286E2 != 0)
 		{
-			if (byte_3168B != 1)
-			{
-				if (byte_3168C == 1)
-					word_28814 |= W28814_GOTO_NEXT_LEVEL;
-			}
-			else
+			if (pressed_keys[SCAN_F5] == 1)
 			{
 				word_28814 |= W28814_GOTO_NEXT_LEVEL;
 
@@ -1833,6 +1828,10 @@ int main() {
 					next_level = 0;
 
 				level_header.next_level_id = next_level;
+			}
+			else if (pressed_keys[SCAN_F6] == 1)
+			{
+				word_28814 |= W28814_GOTO_NEXT_LEVEL;
 			}
 		}
 	}

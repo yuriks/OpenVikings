@@ -371,9 +371,6 @@ extern_ uint16_t levelRowOffsets[0x100]; // addr seg04:8F68
 extern_ uint16_t level_width_tiles; // addr seg04:9168
 extern_ uint16_t level_height_tiles; // addr seg04:916A
 
-extern_ uint8_t byte_3168B; // addr seg04:91AB
-extern_ uint8_t byte_3168C; // addr seg04:91AC
-
 extern_ uint8_t video_pixelPan; // addr seg04:92EE
 extern_ uint16_t word_317CF; // addr seg04:92EF
 
