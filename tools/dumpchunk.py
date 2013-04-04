@@ -16,11 +16,11 @@ def read_chunk(f, chunk_id):
     data.fromfile(f, chunk_size)
     return data
 
-def write_chunk(func):
+def write_chunk(func, file_prefix='chunk'):
     chunk_id = int(sys.argv[1], 16)
     with open('data.dat', 'rb') as f:
         chunk_data = func(f, chunk_id)
-    with open('chunks/chunk%03x.bin' % (chunk_id,), 'wb') as f:
+    with open('chunks/%s%03x.bin' % (file_prefix, chunk_id), 'wb') as f:
         f.write(chunk_data)
 
 def main():

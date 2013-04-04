@@ -293,7 +293,7 @@ extern_ uint8_t chunk_buffer6[0x300]; // addr seg04:407D
 extern_ uint8_t chunk_buffer7[0x300]; // addr seg04:437D
 extern_ uint8_t chunk_buffer8[0x300]; // addr seg04:467D
 extern_ uint8_t chunk_buffer9[0x700]; // addr seg04:497D TODO confirm size
-extern_ uint8_t chunk_buffer10[0x1800]; // addr seg04:507D TODO confirm size
+extern_ uint8_t chunk_buffer10[0x1800]; // addr seg04:507D
 extern_ uint8_t chunk_buffer11[0x1800]; // addr seg04:687D TODO really confirm size (completely guessed)
 
 extern_ uint8_t byte_303DD; // addr seg04:7EFD
