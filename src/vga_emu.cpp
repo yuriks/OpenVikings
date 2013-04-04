@@ -117,7 +117,7 @@ void vga_initialize() {
 	if (SDL_GetRendererInfo(vga_renderer, &renderer_info) < 0)
 		errorQuit(SDL_GetError(), 0);
 
-	int display_id = SDL_GetWindowDisplay(vga_window);
+	int display_id = SDL_GetWindowDisplayIndex(vga_window);
 	if (display_id < 0)
 		errorQuit(SDL_GetError(), 0);
 	SDL_DisplayMode display_mode;
