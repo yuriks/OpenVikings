@@ -6,12 +6,79 @@ B - uncompressed planar VGA data
 
 0x00E - A+B: Inventory item graphics
 
-0x1C1 - A: Spaceship world data (Including endship)
-0x1C2 - A: Jungle world data
-0x1C3 - A: Desert world data
-0x1C4 - A: Machine world data
-0x1C5 - A: Wacky world data
-0x1C6 - A: System world data
+0x028 - A: Level header data - Level 5 'LLM0'
+
+0x02A - A: Level header data - Level 6 'FL0T'
+
+0x02C - A: Level header data - Level 7 'TRSS'
+
+0x02E - A: Level header data - Level 8 'PRHS'
+
+0x030 - A: Level header data - Level 9 'CVRN'
+
+0x032 - A: Level header data - Level 10 'BBLS'
+
+0x034 - A: Level header data - Level 11 'VLCN'
+
+0x04B - A: Level header data - Level 12 'QCKS'
+
+0x04D - A: Level header data - Level 13 'PHR0'
+
+0x04F - A: Level header data - Level 14 'C1R0'
+
+0x051 - A: Level header data - Level 15 'SPKS'
+
+0x053 - A: Level header data - Level 16 'JMNN'
+
+0x055 - A: Level header data - Level 17 'TTRS'
+
+0x072 - A: Level header data - Level 18 'JLLY'
+
+0x074 - A: Level header data - Level 19 'PLNG'
+
+0x076 - A: Level header data - Level 20 'BTRY'
+
+0x078 - A: Level header data - Level 21 'JNKR'
+
+0x07A - A: Level header data - Level 22 'CBLT'
+
+0x07C - A: Level header data - Level 23 'H0PP'
+
+0x07E - A: Level header data - Level 24 'SMRT'
+
+0x080 - A: Level header data - Level 25 'V8TR'
+
+0x09C - A: Level header data - Level 26 'NFL8'
+
+0x09E - A: Level header data - Level 27 'WKYY'
+
+0x0A0 - A: Level header data - Level 28 'CMB0'
+
+0x0A2 - A: Level header data - Level 29 '8BLL'
+
+0x0A4 - A: Level header data - Level 30 'TRDR'
+
+0x0A6 - A: Level header data - Level 31 'FNTM'
+
+0x0A8 - A: Level header data - Level 32 'WRLR'
+
+0x0AA - A: Level header data - Level 33 'TRPD'
+
+0x0C6 - A: Level header data - Level 1 'STRT'
+
+0x0C8 - A: Level header data - Level 2 'GR8T'
+
+0x0CA - A: Level header data - Level 3 'TLPT'
+
+0x0CC - A: Level header data - Level 4 'GRND'
+
+0x0CE - A: Level header data - Level 34 'TFFF'
+
+0x0D0 - A: Level header data - Level 35 'FRGT'
+
+0x0D2 - A: Level header data - Level 36 '4RN4'
+
+0x0D4 - A: Level header data - Level 37 'MSTR'
 
 0x180 - B: "The Lost Vikings" logo
 0x181 - A: palette for ???
@@ -21,9 +88,18 @@ B - uncompressed planar VGA data
 0x185 - A:
 0x186 - A: Lots of stuff, including data load list for the title screen.
 
+0x1C1 - A: Spaceship world data (Including endship)
+0x1C2 - A: Jungle world data
+0x1C3 - A: Desert world data
+0x1C4 - A: Machine world data
+0x1C5 - A: Wacky world data
+0x1C6 - A: System world data
 0x1C7-0x??? - A: Something to do with sound. Pair of loaded chunks depends on configured sound card.
 
 0x207-0x20F - A: Same as 0x207-0x20F
 
 0x211 - B: Graphics used in the rock show background (Demon head)
+
+0x213 - B: A bunch of points arranjed in a perspective floor patter, don't know where it's used
+
 0x215 - A: MT-32 instrument bank?
