@@ -56,16 +56,16 @@ class Op(object):
         self.is_jmp = '$' in operands
 
 instruction_table = {
-    0x00: Op('YIELD', '', halts=True, desc="Save IP and yield"),
-    0x01: Op('NOP', '', desc="No-op"),
-    0x03: Op('JMP', '$w', halts=True, desc="Unconditional jump"),
-    0x0f: Op('FINISH.LEVEL', '', halts=True, desc="Yield & finish level"),
-    0x51: Op('LDA', '#w', desc="Load A"),
-    0x73: Op('JE.UNK73', '#b$w', desc="Jump if <unknown> == op0"),
-    0x97: Op('TBS', '#b#w', desc="Test bit op0/2 in op1 and set A=1"),
-    0x99: Op('TBS', '#b*w', desc="Test bit op0/2 in (op1) and set A=1"),
-    0xA8: Op('TBJE', '#b#w$w', desc="Test bit op0/2 in op1 and jump if == A"),
-    0xAA: Op('TBJ', '#b*w$w', desc="Test bit op0/2 in (op1) and jump"),
+    0x00: Op('YIELD', '', halts=True, desc="save IP and yield"),
+    0x01: Op('NOP', ''),
+    0x03: Op('JMP', '$w', halts=True, desc="unconditional JuMP { goto op0; }"),
+    0x0f: Op('FINISH.LEVEL', '', halts=True, desc="yield & finish level"),
+    0x51: Op('LDA', '#w', desc="LoaD A { A = op0; }"),
+    0x73: Op('OBJPROP.JE', '#b$w', desc="jump if obj. property op0/2 for current object == A"),
+    0x97: Op('TBS', '#b#w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
+    0x99: Op('TBS', '#b*w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
+    0xA8: Op('TBJE', '#b#w$w', desc="Test Bit & Jump if Equal { if (bool((1 << op0/2) & op1) == A) goto op3; }"),
+    0xAA: Op('TBJ', '#b*w$w', desc="Test Bit & Jump { if ((1 << op0/2) & op1) goto op3; }"),
 }
 
 def decode(rom, ip, ram_symbols):
@@ -135,7 +135,7 @@ def format_disasm(disasm_list):
         if op:
             text = '%04X: %s %s' % (ip, op.mnemonic, ', '.join(opr_text))
             if op.desc:
-                text = text.ljust(31) + ' ; ' + op.desc
+                text = text.ljust(39) + ' ; ' + op.desc
             yield text
             if op.is_jmp:
                 yield ''
