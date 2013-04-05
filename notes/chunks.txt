@@ -80,13 +80,29 @@ B - uncompressed planar VGA data
 
 0x0D4 - A: Level header data - Level 37 'MSTR'
 
+0x0DA - A: Level header data - Level 0x2F Credits
+
+0x171 - A: Level header data - Level 0x25 Respawn
+
+0x17D - A: Level header data - Level 0x26 Main Menu
+0x17E - A: Level header data - Level 0x2A Main Menu 2
+
 0x180 - B: "The Lost Vikings" logo
 0x181 - A: palette for ???
 0x182 - A:
 0x183 - A:
 0x184 - A:
 0x185 - A:
-0x186 - A: Lots of stuff, including data load list for the title screen.
+0x186 - A: Level header data - Level 0x27 Interplay
+
+0x18C - A: Level header data - Level 0x28 Silicon & Sinapse
+
+0x192 - A: Level header data - Level 0x29 Warping to new zone
+
+0x1AF - A: Level header data - Level 0x2B Intro Cutscene 1
+0x1B0 - A: Level header data - Level 0x2C Intro Cutscene 2
+0x1B1 - A: Level header data - Level 0x2D Ending Cutscene 1
+0x1B2 - A: Level header data - Level 0x2E Ending Cutscene 2
 
 0x1C1 - A: Spaceship world data (Including endship)
 0x1C2 - A: Jungle world data
