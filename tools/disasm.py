@@ -47,19 +47,25 @@ def calc_operands_len(operands):
     return opr_len
 
 class Op(object):
-    def __init__(self, mnemonic, operands, halts=False, desc=None):
+    FLOW_NEXT = 0
+    FLOW_NORETURN = 1
+
+    def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None):
         self.mnemonic = mnemonic
         self.operands = operands
-        self.halts = halts
+        self.flow = flow
         self.desc = desc
         self.instr_len = 1 + calc_operands_len(operands)
         self.is_jmp = '$' in operands
 
 instruction_table = {
-    0x00: Op('YIELD', '', halts=True, desc="save IP and yield"),
+    'suffix': '',
+    0x00: Op('YIELD', '', desc="save IP and yield"),
     0x01: Op('NOP', ''),
-    0x03: Op('JMP', '$w', halts=True, desc="unconditional JuMP { goto op0; }"),
-    0x0f: Op('FINISH.LEVEL', '', halts=True, desc="yield & finish level"),
+    0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
+    0x0F: Op('FINISH.LEVEL', '', flow=Op.FLOW_NORETURN, desc="yield & finish level"),
+    0x19: Op('OBJ.UNK19', '#w'),
+    0x2F: Op('SUBVM2', '', desc="Invokes VM2"),
     0x51: Op('LDA', '#w', desc="LoaD A { A = op0; }"),
     0x73: Op('OBJPROP.JE', '#b$w', desc="jump if obj. property op0/2 for current object == A"),
     0x97: Op('TBS', '#b#w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
@@ -68,8 +74,10 @@ instruction_table = {
     0xAA: Op('TBJ', '#b*w$w', desc="Test Bit & Jump { if ((1 << op0/2) & op1) goto op3; }"),
 }
 
-def decode(rom, ip, ram_symbols):
-    op = instruction_table[rom[ip]]
+def decode(table, rom, ip, ram_symbols):
+    op = table.get(rom[ip])
+    if op is None:
+        return None, '%02x' % (rom[ip],), []
 
     original_ip = ip
     ip += 1
@@ -98,14 +106,14 @@ def decode(rom, ip, ram_symbols):
         else:
             raise ValueError("Invalid optype %s" % (optype,))
 
-    if not op.halts:
-        next_ips.append(ip)
-
     assert (ip - original_ip) == op.instr_len
+
+    if op.flow != Op.FLOW_NORETURN:
+        next_ips.append(ip)
 
     return op, opr_text, next_ips
 
-def disasm(rom, entry_point, ram_symbols={}):
+def disasm(table, rom, entry_point, ram_symbols):
     branch_list = [entry_point]
     program_lines = {}
 
@@ -114,26 +122,21 @@ def disasm(rom, entry_point, ram_symbols={}):
         if ip in program_lines:
             continue
 
-        opcode = rom[ip]
-        try:
-            op_info, opr_text, next_ips = decode(rom, ip, ram_symbols)
-            branch_list += next_ips
-        except KeyError:
-            op_info = None
-            opr_text = '%02x' % (opcode,)
-        program_lines[ip] = (ip, op_info, opr_text)
+        op_info, opr_text, next_ips = decode(table, rom, ip, ram_symbols)
+        branch_list += next_ips
+        program_lines[ip] = (ip, op_info, opr_text, table['suffix'])
 
-    return sorted(program_lines.values())
+    return program_lines.values()
 
 def format_disasm(disasm_list):
     next_ip = disasm_list[0][0]
 
-    for ip, op, opr_text in disasm_list:
+    for ip, op, opr_text, vm_type in disasm_list:
         if ip != next_ip:
             yield ';---------'
             yield ''
         if op:
-            text = '%04X: %s %s' % (ip, op.mnemonic, ', '.join(opr_text))
+            text = '%04X%s: %s %s' % (ip, vm_type, op.mnemonic, ', '.join(opr_text))
             if op.desc:
                 text = text.ljust(39) + ' ; ' + op.desc
             yield text
@@ -141,7 +144,7 @@ def format_disasm(disasm_list):
                 yield ''
             next_ip = ip + op.instr_len
         else:
-            yield '%04X: !!! UNSUPPORTED OPCODE: %s' % (ip, opr_text)
+            yield '%04X%s: !!! UNSUPPORTED OPCODE: %s' % (ip, vm_type, opr_text)
 
 def main():
     filename = sys.argv[1]
@@ -159,7 +162,7 @@ def main():
         with open(map_filename, 'rU') as f:
             ram_symbols = parse_map(f, 0x184E)
 
-    for line in format_disasm(disasm(rom, entry_point, ram_symbols)):
+    for line in format_disasm(sorted(disasm(instruction_table, rom, entry_point, ram_symbols))):
         print line
 
 if __name__ == '__main__':
