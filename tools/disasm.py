@@ -4,6 +4,25 @@ from struct import Struct
 import itertools
 import os
 
+def parse_map(f, seg):
+    symbols = {}
+    for l in f:
+        l = l.strip()
+        sl = l.split()
+        if len(sl) != 2:
+            continue
+        lseg, loff = sl[0].split(':')
+        if int(lseg, 16) == seg:
+            symbols[int(loff, 16)] = sl[1]
+
+    return symbols
+
+def try_get_symbol(symbol_map, addr):
+    if addr in symbol_map:
+        return symbol_map[addr]
+    else:
+        return '%X' % (addr,)
+
 # From http://stackoverflow.com/a/312464/42029
 def chunk_seq(l, n):
     """ Yield successive n-sized chunks from l.
@@ -49,7 +68,7 @@ instruction_table = {
     0xAA: Op('TBJ', '#b*w$w', desc="Test bit op0/2 in (op1) and jump"),
 }
 
-def decode(rom, ip):
+def decode(rom, ip, ram_symbols):
     op = instruction_table[rom[ip]]
 
     original_ip = ip
@@ -72,7 +91,7 @@ def decode(rom, ip):
         if optype == '#': # Immediate
             opr_text.append('#%X' % (value,))
         elif optype == '*': # Indirect
-            opr_text.append('($%X)' % (value,))
+            opr_text.append('($%s)' % (try_get_symbol(ram_symbols, value),))
         elif optype == '$': # Absolute label
             opr_text.append('$%X' % (value,))
             next_ips.append(value)
@@ -86,7 +105,7 @@ def decode(rom, ip):
 
     return op, opr_text, next_ips
 
-def disasm(rom, entry_point):
+def disasm(rom, entry_point, ram_symbols={}):
     branch_list = [entry_point]
     program_lines = {}
 
@@ -97,7 +116,7 @@ def disasm(rom, entry_point):
 
         opcode = rom[ip]
         try:
-            op_info, opr_text, next_ips = decode(rom, ip)
+            op_info, opr_text, next_ips = decode(rom, ip, ram_symbols)
             branch_list += next_ips
         except KeyError:
             op_info = None
@@ -127,12 +146,20 @@ def format_disasm(disasm_list):
 def main():
     filename = sys.argv[1]
     entry_point = int(sys.argv[2], 0)
+    if len(sys.argv) > 3:
+        map_filename = sys.argv[3]
+    else:
+        map_filename = None
 
     rom = array('B')
+    ram_symbols = {}
     with open(filename, 'rb') as f:
         rom.fromfile(f, os.path.getsize(filename))
+    if map_filename:
+        with open(map_filename, 'rU') as f:
+            ram_symbols = parse_map(f, 0x184E)
 
-    for line in format_disasm(disasm(rom, entry_point)):
+    for line in format_disasm(disasm(rom, entry_point, ram_symbols)):
         print line
 
 if __name__ == '__main__':
