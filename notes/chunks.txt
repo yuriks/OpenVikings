@@ -75,6 +75,8 @@ B - uncompressed planar VGA data
 
 0x0AA - A: Level header data - Level 33 'TRPD'
 
+0x0C3 - A+B: Tileset for Spaceship
+
 0x0C6 - A: Level header data - Level 1 'STRT'
 
 0x0C8 - A: Level header data - Level 2 'GR8T'
