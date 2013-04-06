@@ -1,13 +1,38 @@
 from util import read_word
 
-def seek_list(data):
-    pos = 0
+class ObjectInstance(object):
+    def __init__(self, xpos, ypos, width, height, type_id, unk4, unk5):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.width = width
+        self.height = height
+        self.type_id = type_id
+        self.unk4 = unk4
+        self.unk5 = unk5
+
+    def __str__(self):
+        return "ObjectInstance {{ x: {0.xpos:4}, y: {0.ypos:4}, w: {0.width:3}, h: {0.height:3}, type: {0.type_id:02X}h, {0.unk4:3X}h, {0.unk5:3X}h }}".format(self)
+
+def load_object_list(data, pos):
+    objects = []
+
     while True:
-        val = read_word(data, pos)
-        if val == 0xFFFF:
-            return pos + 2
-        else:
-            pos += 0xE;
+        xpos = read_word(data, pos)
+        if xpos == 0xFFFF:
+            pos += 2
+            break
+        ypos = read_word(data, pos+2)
+        width = read_word(data, pos+4)
+        height = read_word(data, pos+6)
+        type_id = read_word(data, pos+8)
+        unk4 = read_word(data, pos+10)
+        unk5 = read_word(data, pos+12)
+
+        objects.append(ObjectInstance(xpos, ypos, width, height, type_id, unk4, unk5))
+
+        pos += 14;
+
+    return pos, objects
 
 def load_palette_list(data, pos):
     pals = []
@@ -64,28 +89,31 @@ def load_chunk_list(data, pos):
 
 class LoadList(object):
     def __init__(self):
+        self.objects = None
         self.palettes = None
         self.unknown = None
         self.objects = None
         self.animations = None
 
     def load(self, load_list):
-        current_pos = seek_list(load_list)
+        current_pos, self.objects = load_object_list(load_list, 0)
         current_pos, self.palettes = load_palette_list(load_list, current_pos)
         current_pos, self.unknown = process_list(load_list, current_pos)
-        current_pos, self.objects = load_chunk_list(load_list, current_pos)
+        current_pos, self.object_gfx = load_chunk_list(load_list, current_pos)
         current_pos, self.animations = load_chunk_list(load_list, current_pos)
 
     def __str__(self):
         s = ''
 
+        for obj in self.objects:
+            s += str(obj) + '\n'
         for chunk_id, load_position in self.palettes:
             s += "Load palette chunk 0x%03X into position %d (offs: 0x%03X)\n" % (
                     chunk_id, load_position, load_position*3)
         s += "Unknown bitset: %02x\n" % (self.unknown[0],)
         for vals in self.unknown[1]:
             s += "Unknown data: %02x %02x %02x\n" % vals
-        for chunk_id in self.objects:
+        for chunk_id in self.object_gfx:
             s += "Load object graphics from chunk 0x%03X\n" % (chunk_id,)
         for chunk_id in self.animations:
             s += "Load animation graphics from chunk 0x%03X\n" % (chunk_id,)
@@ -97,6 +125,13 @@ class LevelHeader(object):
         pass
 
     def load(self, data):
+        self.special_objs_type = data[0x7]
+        self.special_obj_x = read_word(data, 0x8)
+        self.special_obj_y = read_word(data, 0xA)
+        self.special_obj_type = read_word(data, 0xC)
+        self.special_obj_unk1 = read_word(data, 0xE)
+        self.special_obj_unk2 = read_word(data, 0x10)
+
         self.next_level = read_word(data, 0x16)
         self.flags = data[0x1C]
 
@@ -118,6 +153,8 @@ Height (metatiles): {0.height}
 Tilemap chunk: 0x{0.tilemap_chunk:03X}
 Tileset chunk: 0x{0.tileset_chunk:03X}
 Metatile chunk: 0x{0.metatile_chunk:03X}
+Special objects type: {0.special_objs_type}
+Special object info: {{ x: {0.special_obj_x}, y: {0.special_obj_y}, type: {0.special_obj_type:02X}h, {0.special_obj_unk1:X}h, {0.special_obj_unk2:X}h }}
 
 ============ Load list ============
 {0.load_list}"""
