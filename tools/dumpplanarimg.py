@@ -4,17 +4,19 @@ from array import array
 from struct import Struct
 import itertools
 
-def deplane_image(data):
-    plane_size = len(data) / 4
+def deplane_image(data, offset=0, plane_size=None, out_data=None):
+    if plane_size is None:
+        plane_size = len(data) / 4
 
     pixels = zip(
-        data[0*plane_size:1*plane_size],
-        data[1*plane_size:2*plane_size],
-        data[2*plane_size:3*plane_size],
-        data[3*plane_size:4*plane_size]
+        data[offset + 0*plane_size : offset + 1*plane_size],
+        data[offset + 1*plane_size : offset + 2*plane_size],
+        data[offset + 2*plane_size : offset + 3*plane_size],
+        data[offset + 3*plane_size : offset + 4*plane_size]
     )
 
-    out_data = array('B')
+    if out_data is None:
+        out_data = array('B')
     for t in pixels:
         for p in t:
             out_data.append(p)
