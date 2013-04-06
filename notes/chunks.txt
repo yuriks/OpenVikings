@@ -3,7 +3,18 @@ A - compressed, decompress with decompressChunk
 B - uncompressed planar VGA data
 
 0x001 - B: Vikings status bar
+0x002 - A+?: Font graphics
 
+0x004 - A+?: Erik active statusbar portrait
+0x005 - A+?: Baleog active statusbar portrait
+0x006 - A+?: Olaf active statusbar portrait
+0x007 - A+?: Erik inactive statusbar portrait
+0x008 - A+?: Baleog inactive statusbar portrait
+0x009 - A+?: Olaf inactive statusbar portrait
+0x00A - A+?: Erik dead statusbar portrait
+0x00B - A+?: Baleog dead statusbar portrait
+0x00C - A+?: Olaf dead statusbar portrait
+0x00D - A+B: Health bar graphics
 0x00E - A+B: Inventory item graphics
 
 0x028 - A: Level header data - Level 5 'LLM0'
@@ -116,6 +127,6 @@ B - uncompressed planar VGA data
 
 0x211 - B: Graphics used in the rock show background (Demon head)
 
-0x213 - B: A bunch of points arranjed in a perspective floor patter, don't know where it's used
+0x213 - B: A bunch of points arranjed in a perspective floor pattern, don't know where it's used
 
 0x215 - A: MT-32 instrument bank?
