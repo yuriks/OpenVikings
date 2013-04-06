@@ -1,7 +1,7 @@
 import sys
 
 import lvtools.util as util
-from lvtools.loadlist import LoadList
+from lvtools.level import LoadList
 
 def main():
     header_data = util.load_file(sys.argv[1])

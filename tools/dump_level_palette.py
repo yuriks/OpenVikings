@@ -2,7 +2,7 @@ import sys
 
 import lvtools.chunk as chunk
 from lvtools.compression import decompress_data
-from lvtools.loadlist import LoadList
+from lvtools.level import LoadList
 import lvtools.palette as palette
 import lvtools.util as util
 
