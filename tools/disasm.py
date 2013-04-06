@@ -63,6 +63,8 @@ instruction_table = {
     0x00: Op('YIELD', '', desc="save IP and yield"),
     0x01: Op('NOP', ''),
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
+    0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
+    0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
     0x0F: Op('FINISH.LEVEL', '', flow=Op.FLOW_NORETURN, desc="yield & finish level"),
     0x19: Op('OBJ.UNK19', '#w'),
     0x2F: Op('SUBVM2', '', desc="Invoke VM2"),
