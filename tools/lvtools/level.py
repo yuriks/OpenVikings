@@ -1,17 +1,17 @@
 from util import read_word
 
 class ObjectInstance(object):
-    def __init__(self, xpos, ypos, width, height, type_id, unk4, unk5):
+    def __init__(self, xpos, ypos, width, height, type_id, unk4, user_data):
         self.xpos = xpos
         self.ypos = ypos
         self.width = width
         self.height = height
         self.type_id = type_id
         self.unk4 = unk4
-        self.unk5 = unk5
+        self.user_data = user_data
 
     def __str__(self):
-        return "ObjectInstance {{ x: {0.xpos:4}, y: {0.ypos:4}, w: {0.width:3}, h: {0.height:3}, type: {0.type_id:02X}h, {0.unk4:3X}h, {0.unk5:3X}h }}".format(self)
+        return "ObjectInstance {{ x: {0.xpos:4}, y: {0.ypos:4}, w: {0.width:3}, h: {0.height:3}, type: {0.type_id:02X}h, {0.unk4:3X}h, userdata: {0.user_data:4X}h }}".format(self)
 
 def load_object_list(data, pos):
     objects = []
@@ -26,9 +26,9 @@ def load_object_list(data, pos):
         height = read_word(data, pos+6)
         type_id = read_word(data, pos+8)
         unk4 = read_word(data, pos+10)
-        unk5 = read_word(data, pos+12)
+        user_data = read_word(data, pos+12)
 
-        objects.append(ObjectInstance(xpos, ypos, width, height, type_id, unk4, unk5))
+        objects.append(ObjectInstance(xpos, ypos, width, height, type_id, unk4, user_data))
 
         pos += 14;
 
@@ -130,7 +130,7 @@ class LevelHeader(object):
         self.special_obj_y = read_word(data, 0xA)
         self.special_obj_type = read_word(data, 0xC)
         self.special_obj_unk1 = read_word(data, 0xE)
-        self.special_obj_unk2 = read_word(data, 0x10)
+        self.special_obj_user_data = read_word(data, 0x10)
 
         self.next_level = read_word(data, 0x16)
         self.flags = data[0x1C]
@@ -154,7 +154,7 @@ Tilemap chunk: 0x{0.tilemap_chunk:03X}
 Tileset chunk: 0x{0.tileset_chunk:03X}
 Metatile chunk: 0x{0.metatile_chunk:03X}
 Special objects type: {0.special_objs_type}
-Special object info: {{ x: {0.special_obj_x}, y: {0.special_obj_y}, type: {0.special_obj_type:02X}h, {0.special_obj_unk1:X}h, {0.special_obj_unk2:X}h }}
+Special object info: {{ x: {0.special_obj_x}, y: {0.special_obj_y}, type: {0.special_obj_type:02X}h, {0.special_obj_unk1:X}h, userdata: {0.special_obj_user_data:X}h }}
 
 ============ Load list ============
 {0.load_list}"""
