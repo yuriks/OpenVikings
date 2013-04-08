@@ -50,22 +50,22 @@ def load_palette_list(data, pos):
 
     return pos, pals
 
-def process_list(data, pos):
-    unk_bitset = read_word(data, pos)
+def load_palette_cycle_list(data, pos):
+    active_cycles = read_word(data, pos)
     pos += 2
 
-    unk_list = []
+    cycles = []
 
     while True:
-        val_a = data[pos]
-        if val_a == 0:
+        speed = data[pos]
+        if speed == 0:
             pos += 1
             break
-        val_b = data[pos+1]
-        val_c = data[pos+2]
+        first = data[pos+1]
+        last = data[pos+2]
         pos += 3
 
-        unk_list.append((val_a, val_b, val_c))
+        cycles.append((speed, first, last))
 
         while True:
             val_d = read_word(data, pos)
@@ -73,7 +73,7 @@ def process_list(data, pos):
             if val_d == 0xFFFF:
                 break
 
-    return pos, (unk_bitset, unk_list)
+    return pos, active_cycles, cycles
 
 def load_object_graphics_list(data, pos):
     chunks = []
@@ -103,14 +103,15 @@ class LoadList(object):
     def __init__(self):
         self.objects = None
         self.palettes = None
-        self.unknown = None
+        self.active_pal_cycles = None
+        self.pal_cycles = None
         self.objects = None
         self.animations = None
 
     def load(self, load_list):
         current_pos, self.objects = load_object_list(load_list, 0)
         current_pos, self.palettes = load_palette_list(load_list, current_pos)
-        current_pos, self.unknown = process_list(load_list, current_pos)
+        current_pos, self.active_pal_cycles, self.pal_cycles = load_palette_cycle_list(load_list, current_pos)
         current_pos, self.object_gfx = load_object_graphics_list(load_list, current_pos)
         self.animations = load_animation_list(load_list, current_pos)
 
@@ -122,9 +123,13 @@ class LoadList(object):
         for chunk_id, load_position in self.palettes:
             s += "Load palette chunk 0x%03X into position %d (offs: 0x%03X)\n" % (
                     chunk_id, load_position, load_position*3)
-        s += "Unknown bitset: %02x\n" % (self.unknown[0],)
-        for vals in self.unknown[1]:
-            s += "Unknown data: %02x %02x %02x\n" % vals
+        s += "Enabled cycles: {0:08b}\n".format(self.active_pal_cycles)
+        for i, vals in enumerate(self.pal_cycles):
+            if (1 << i) & self.active_pal_cycles:
+                active_str = ''
+            else:
+                active_str = " (inactive)"
+            s += "Palette cycle:%s speed: %d, colors: %d-%d\n" % ((active_str,) + vals)
         for chunk_id in self.object_gfx:
             s += "Load object graphics from chunk 0x%03X\n" % (chunk_id,)
         for chunk_id in self.animations:
