@@ -30,3 +30,18 @@ def interleave_tileset(data):
     for planar_tile in take_n(data, tile_size):
         tiles.append(interleave_planar(planar_tile))
     return tiles
+
+def layout_tiles(tiles, tile_w, tile_h, tilemap):
+    output = array('B')
+    out_w = None
+    out_h = 0
+
+    for row in tilemap:
+        out_h += tile_h
+        for y in xrange(tile_h):
+            for tile_id in row:
+                data_begin = y * tile_w
+                output += tiles[tile_id][data_begin : data_begin + tile_w]
+            out_w = tile_w * len(row)
+
+    return output, out_w, out_h
