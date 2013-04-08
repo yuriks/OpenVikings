@@ -67,9 +67,9 @@ instruction_table = {
     0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
     0x0F: Op('FINISH.LEVEL', '', flow=Op.FLOW_NORETURN, desc="yield & finish level"),
-    0x19: Op('OBJ.UNK19', '#w'),
+    0x19: Op('SUBVM.IP', '#w', desc="Sets sub-vm instruction pointer"),
     0x1A: Op('J?.OBJ.UNK1A', '#b$w'),
-    0x2F: Op('SUBVM2', '', desc="Invoke VM2"),
+    0x2F: Op('SUBVM.RUN', '', desc="Invoke VM2"),
     # Variable Length Instruction, needs more work to decode: 0x41: Op('DIALOG.TEXT', '#b__#b'
     0x46: Op('DIALOG.COLOR', '#w', desc="Appends a dialog color change command"),
     0x51: Op('LDA', '#w', desc="LoaD A { A = op0; }"),
@@ -151,22 +151,21 @@ def disasm(table, rom, entry_point, ram_symbols):
     return program_lines.values()
 
 def format_disasm(disasm_list):
-    next_ip = disasm_list[0][0]
-
     for ip, op, opr_text, vm_type in disasm_list:
-        if ip != next_ip:
-            yield ';---------'
-            yield ''
         if op:
             text = '%04X%s: %s %s' % (ip, vm_type, op.mnemonic, ', '.join(opr_text))
             if op.desc:
                 text = text.ljust(39) + ' ; ' + op.desc
             yield text
-            if op.is_jmp:
+            if op.flow == Op.FLOW_NORETURN:
+                yield ';---------'
                 yield ''
-            next_ip = ip + op.instr_len
+            elif op.is_jmp:
+                yield ''
         else:
             yield '%04X%s: !!! UNSUPPORTED OPCODE: %s' % (ip, vm_type, opr_text)
+            yield ';---------'
+            yield ''
 
 def main():
     filename = sys.argv[1]
@@ -184,6 +183,7 @@ def main():
         with open(map_filename, 'rU') as f:
             ram_symbols = parse_map(f, 0x184E)
 
+    print '; %s - %04X' % (filename, entry_point)
     for line in format_disasm(sorted(disasm(instruction_table, rom, entry_point, ram_symbols))):
         print line
 
