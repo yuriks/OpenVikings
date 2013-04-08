@@ -75,7 +75,7 @@ def process_list(data, pos):
 
     return pos, (unk_bitset, unk_list)
 
-def load_chunk_list(data, pos):
+def load_object_graphics_list(data, pos):
     chunks = []
     while True:
         chunk_id = read_word(data, pos)
@@ -86,6 +86,18 @@ def load_chunk_list(data, pos):
         chunks.append(chunk_id)
 
     return pos, chunks
+
+def load_animation_list(data, pos):
+    chunks = []
+    while True:
+        chunk_id = read_word(data, pos)
+        if chunk_id == 0xFFFF:
+            break
+        pos += 5
+
+        chunks.append(chunk_id)
+
+    return chunks
 
 class LoadList(object):
     def __init__(self):
@@ -99,8 +111,8 @@ class LoadList(object):
         current_pos, self.objects = load_object_list(load_list, 0)
         current_pos, self.palettes = load_palette_list(load_list, current_pos)
         current_pos, self.unknown = process_list(load_list, current_pos)
-        current_pos, self.object_gfx = load_chunk_list(load_list, current_pos)
-        current_pos, self.animations = load_chunk_list(load_list, current_pos)
+        current_pos, self.object_gfx = load_object_graphics_list(load_list, current_pos)
+        self.animations = load_animation_list(load_list, current_pos)
 
     def __str__(self):
         s = ''
