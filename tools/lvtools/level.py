@@ -153,7 +153,7 @@ class LevelHeader(object):
         self.flags = data[0x1C]
 
         self.width = read_word(data, 0x29)
-        self.height = read_word(data, 0x29)
+        self.height = read_word(data, 0x2B)
 
         self.tilemap_chunk = read_word(data, 0x2E)
         self.tileset_chunk = read_word(data, 0x30)
