@@ -16,8 +16,7 @@ def rows_of_tiles(nt, n):
     if divisible_len != nt:
         yield range(divisible_len, nt) + [0]*(divisible_len + n - nt)
 
-def main(header_chunk_id, output_file, tiles_per_row):
-    level_header = level_info.load_level_header(chunk_id=header_chunk_id)
+def main(level_header, output_file, tiles_per_row):
     output_pal = palette.assemble_palette(level_header.load_list.palettes)
     tiles = extract_tiles(level_header)
 
@@ -28,4 +27,6 @@ def main(header_chunk_id, output_file, tiles_per_row):
         w.write_array(f, output_data)
 
 if __name__ == '__main__':
-    main(int(sys.argv[1], 0), sys.argv[2], int(sys.argv[3]))
+    level_id = int(sys.argv[1], 0)
+    level_header = level_info.load_level_header(level_id=level_id)
+    main(level_header, sys.argv[2], int(sys.argv[3]))
