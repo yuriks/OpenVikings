@@ -1,7 +1,10 @@
-import dump_tileset
+import sys
+import dump_tileset, dump_metatileset
 from lvtools import level_info
 
 if __name__ == '__main__':
+    dumper = {'tiles': dump_tileset, 'metatiles': dump_metatileset}[sys.argv[1]]
+
     filename = "tilesets/%02d_%s.png"
     for i, (chunk_id, name) in enumerate(level_info.level_info):
         if name in ('MainMenu', 'MainMenu2', 'Ending1'):
@@ -9,4 +12,4 @@ if __name__ == '__main__':
             continue
         print "Dumping %s..." % (name,)
 
-        dump_tileset.main(level_info.load_level_header(chunk_id=chunk_id), filename % (i, name), 16)
+        dumper.main(level_info.load_level_header(chunk_id=chunk_id), filename % (i, name), 16)
