@@ -45,3 +45,19 @@ def layout_tiles(tiles, tile_w, tile_h, tilemap):
             out_w = tile_w * len(row)
 
     return output, out_w, out_h
+
+def flip_image(image, image_w, hflip=False, vflip=False):
+    if not hflip and not vflip:
+        return image
+
+    rows = list(take_n(image, image_w))
+
+    if vflip:
+        rows.reverse()
+
+    if hflip:
+        for row in rows:
+            row.reverse()
+
+    # flatten list of arrays back
+    return array('B', (pixel for row in rows for pixel in row))
