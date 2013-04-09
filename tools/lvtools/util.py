@@ -23,3 +23,7 @@ def take_n(l, n):
     """
     for i in xrange(0, len(l), n):
         yield l[i:i+n]
+
+# From http://stackoverflow.com/a/8534391/42029
+def find_if(pred, l):
+    return next((x for x in l if pred(x)), None)
