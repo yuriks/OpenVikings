@@ -1,20 +1,8 @@
 import sys
-from array import array
 
-from lvtools import chunk, util, graphics, level_info
+from lvtools import chunk, level_info
 from lvtools.compression import decompress_data
 from lvtools.util import take_n, read_word
-import dump_tileset as tileset
-
-def parse_metatile_info(data):
-    metatiles = []
-    for i in xrange(0, len(data), 2 * 4):
-        # Read 4 values from data
-        tile = (util.read_word(data, i+offs) for offs in xrange(0, 8, 2))
-        # Extract attributes
-        tile = [(x >> 6, x & 0x10, x & 0x20) for x in tile]
-        metatiles.append(tile)
-    return metatiles
 
 def main(level_header, out):
     out.write("%d %d\n" % (level_header.width, level_header.height))
