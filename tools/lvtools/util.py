@@ -4,6 +4,9 @@ import os
 
 word = Struct('<H')
 
+def fread_word(f):
+    return read_word(f.read(2))
+
 def read_word(buf, offset=0):
     return word.unpack_from(buf, offset)[0]
 
