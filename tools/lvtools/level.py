@@ -137,11 +137,15 @@ class LoadList(object):
 
         return s
 
+snes_sprite_sizes = [(8, 16), (8, 32), (8, 64), (16, 32), (16, 64), (32, 64)]
+
 class LevelHeader(object):
     def __init__(self):
         pass
 
     def load(self, data):
+        self.raw_data = data
+
         self.special_objs_type = data[0x7]
         self.special_obj_x = read_word(data, 0x8)
         self.special_obj_y = read_word(data, 0xA)
@@ -150,6 +154,8 @@ class LevelHeader(object):
         self.special_obj_user_data = read_word(data, 0x10)
 
         self.next_level = read_word(data, 0x16)
+        self.sprite_sizes = read_word(data, 0x18)
+
         self.flags = data[0x1C]
 
         self.width = read_word(data, 0x29)
@@ -164,6 +170,7 @@ class LevelHeader(object):
 
     format_string = \
 """Next level: 0x{0.next_level:02X}
+Sprite sizes: {0.sprite_sizes} {sprite_size}
 Flags: 0x{0.flags:02X}
 Width (metatiles): {0.width}
 Height (metatiles): {0.height}
@@ -177,4 +184,4 @@ Special object info: {{ x: {0.special_obj_x}, y: {0.special_obj_y}, type: {0.spe
 {0.load_list}"""
 
     def __str__(self):
-        return self.format_string.format(self)
+        return self.format_string.format(self, sprite_size=snes_sprite_sizes[self.sprite_sizes])

@@ -5,7 +5,7 @@ class ObjectType(object):
 
     def __init__(self, data):
         self.gfx_chunk_id = read_word(data, 0x0)
-        self.unk_2 = data[0x2]
+        self.num_sprites = data[0x2]
         self.script_entry_point = read_word(data, 0x3)
         self.unk_5 = read_word(data, 0x5)
         self.unk_7 = read_word(data, 0x7)
@@ -19,7 +19,7 @@ class ObjectType(object):
 
     format_str = (
 """Graphics Chunk: {0.gfx_chunk_id:04X}h
-unk_2: {0.unk_2:X}h
+Number of sprites: {0.num_sprites}
 Script entry point: {0.script_entry_point:04X}h + 3
 unk_5: {0.unk_5:X}h
 unk_7: {0.unk_7:X}h
