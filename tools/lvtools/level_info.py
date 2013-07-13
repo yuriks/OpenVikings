@@ -54,7 +54,7 @@ level_info = [
 def load_level_header(chunk_id=None, level_id=None, title=None):
     if chunk_id is None:
         if level_id is None:
-            chunk_id = util.find_if(lambda (lchunk, ltitle): ltitle == title)[0]
+            chunk_id = util.find_if(lambda (lchunk, ltitle): ltitle == title, level_info)[0]
         else:
             chunk_id = level_info[level_id][0]
 
