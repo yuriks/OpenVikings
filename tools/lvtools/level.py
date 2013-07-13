@@ -146,6 +146,9 @@ class LevelHeader(object):
     def load(self, data):
         self.raw_data = data
 
+        self.music_command = data[0x4]
+        self.music_track = data[0x5]
+
         self.special_objs_type = data[0x7]
         self.special_obj_x = read_word(data, 0x8)
         self.special_obj_y = read_word(data, 0xA)
@@ -169,7 +172,9 @@ class LevelHeader(object):
         self.load_list.load(data[0x43:])
 
     format_string = \
-"""Next level: 0x{0.next_level:02X}
+"""Music command: {0.music_command}
+Music track: {0.music_track}
+Next level: 0x{0.next_level:02X}
 Sprite sizes: {0.sprite_sizes} {sprite_size}
 Flags: 0x{0.flags:02X}
 Width (metatiles): {0.width}
