@@ -35,6 +35,8 @@ for i, addr in enumerate(addresses):
     while b != '\0':
         if b == '\r':
             s += '\n'
+        elif b == '\\':
+            s += '\\\\'
         elif b not in string.printable:
             s += '\\x%02x' % (ord(b),)
         else:
@@ -42,4 +44,3 @@ for i, addr in enumerate(addresses):
         b = vikings.read(1)
 
     print s
-    print
