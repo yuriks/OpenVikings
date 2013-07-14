@@ -31,6 +31,24 @@ def interleave_tileset(data):
         tiles.append(interleave_planar(planar_tile))
     return tiles
 
+def mask_sprite(data, size, mask_color=None):
+    spr_len = size*size / 8 * 9
+    assert len(data) >= spr_len
+
+    out_data = array('B')
+
+    for y in xrange(0, spr_len, 9):
+        mask = data[y]
+        for x in xrange(8):
+            c = data[y+1+x]
+            if mask_color is not None and not mask & (0x80 >> x):
+                c = mask_color
+            out_data.append(c)
+
+    assert len(out_data) == size*size
+
+    return out_data
+
 def layout_tiles(tiles, tile_w, tile_h, tilemap):
     output = array('B')
     out_w = None
