@@ -1,9 +1,10 @@
 Formats:
 A - compressed, decompress with decompressChunk
 B - uncompressed planar VGA data
+S - masked sprite data
 
 0x001 - B: Vikings status bar
-0x002 - A+?: Font graphics
+0x002 - A+S: Font graphics
 
 0x004 - A+?: Erik active statusbar portrait
 0x005 - A+?: Baleog active statusbar portrait

@@ -1,7 +1,7 @@
+from lvtools.util import word, take_n
+
 import sys
 from array import array
-from struct import Struct
-import itertools
 import os
 
 def parse_map(f, seg):
@@ -23,15 +23,6 @@ def try_get_symbol(symbol_map, addr):
     else:
         return '%X' % (addr,)
 
-# From http://stackoverflow.com/a/312464/42029
-def chunk_seq(l, n):
-    """ Yield successive n-sized chunks from l.
-    """
-    for i in xrange(0, len(l), n):
-        yield l[i:i+n]
-
-word = Struct('<H')
-
 opr_lens = {
     'b': 1,
     'w': 2
@@ -40,7 +31,7 @@ opr_lens = {
 def calc_operands_len(operands):
     opr_len = 0
 
-    for opr in chunk_seq(operands, 2):
+    for opr in take_n(operands, 2):
         optype, opsize = opr
         opr_len += opr_lens[opsize]
 
@@ -62,7 +53,7 @@ instruction_table = {
     'suffix': '',
     0x00: Op('YIELD', '', desc="save IP and yield"),
     0x01: Op('NOP', ''),
-    0x02: Op('AUDIO.UNK02', '#w', desc="does something with audio"),
+    0x02: Op('AUDIO.SFX', '#w', desc="Play sound effect"),
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
     0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
@@ -107,7 +98,7 @@ def decode(table, rom, ip, ram_symbols):
 
     next_ips = []
     opr_text = []
-    for opr in chunk_seq(op.operands, 2):
+    for opr in take_n(op.operands, 2):
         optype, opsize = opr
         if opsize == 'b': # Byte
             value = rom[ip]
