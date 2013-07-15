@@ -76,7 +76,7 @@ class Op(object):
         self.flow = flow
         self.desc = desc
         self.instr_len = 1 + calc_operands_len(operands)
-        self.is_jmp = '$' in operands or flow == self.FLOW_NORETURN
+        self.is_jmp = ('$' in operands and jump_target_table is None) or flow == self.FLOW_NORETURN
         self.jump_target_table = jump_target_table
 
     def decode(self, rom, ip, ram_symbols):
