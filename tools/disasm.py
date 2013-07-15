@@ -38,17 +38,84 @@ def calc_operands_len(operands):
 
     return opr_len
 
+class Operand(object):
+    pass
+
+class OperandImmediate(Operand):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return '#{:X}'.format(self.value)
+
+class OperandDataPointer(Operand):
+    def __init__(self, address, ram_symbols=None):
+        self.address = address
+        self.symbol = ram_symbols and ram_symbols.get(self.address)
+
+    def __str__(self):
+        if self.symbol:
+            return '(${})'.format(self.symbol)
+        else:
+            return '(${:X})'.format(self.address)
+
+class OperandCodePointer(Operand):
+    def __init__(self, address):
+        self.address = address
+
+    def __str__(self):
+        return '${:X}'.format(self.address)
+
 class Op(object):
     FLOW_NEXT = 0
     FLOW_NORETURN = 1
 
-    def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None):
+    def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None, jump_target_table=None):
         self.mnemonic = mnemonic
         self.operands = operands
         self.flow = flow
         self.desc = desc
         self.instr_len = 1 + calc_operands_len(operands)
         self.is_jmp = '$' in operands or flow == self.FLOW_NORETURN
+        self.jump_target_table = jump_target_table
+
+    def decode(self, rom, ip, ram_symbols):
+        original_ip = ip
+        ip += 1
+
+        next_ips = []
+        operands = []
+        for opr in take_n(self.operands, 2):
+            optype, opsize = opr
+            if opsize == 'b': # Byte
+                value = rom[ip]
+                value_w = 1
+            elif opsize == 'w': # Word
+                value = word.unpack_from(rom, ip)[0]
+                value_w = 2
+            else:
+                raise ValueError("Invalid opsize %s" % (opsize,))
+            ip += value_w
+
+            if optype == '#': # Immediate
+                operands.append(OperandImmediate(value))
+            elif optype == '*': # Memory pointer
+                operands.append(OperandDataPointer(value, ram_symbols))
+            elif optype == '$': # Absolute label
+                operands.append(OperandCodePointer(value))
+                next_ips.append((self.jump_target_table, value))
+            else:
+                raise ValueError("Invalid optype %s" % (optype,))
+
+        assert (ip - original_ip) == self.instr_len
+
+        if self.flow != self.FLOW_NORETURN:
+            next_ips.append((None, ip))
+
+        return operands, next_ips
+
+# "Forward declare" dictionary
+subvm_instruction_table = {}
 
 instruction_table = {
     'suffix': '',
@@ -59,7 +126,7 @@ instruction_table = {
     0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
     0x0F: Op('FINISH.LEVEL', '', flow=Op.FLOW_NORETURN, desc="yield & finish level"),
-    0x19: Op('SUBVM.IP', '#w', desc="Sets sub-vm instruction pointer"),
+    0x19: Op('SUBVM.IP', '$w', desc="Sets sub-vm instruction pointer", jump_target_table=subvm_instruction_table),
     0x1A: Op('J?.OBJ.UNK1A', '#b$w'),
     0x2F: Op('SUBVM.RUN', '', desc="Invoke VM2"),
     # Variable Length Instruction, needs more work to decode: 0x41: Op('DIALOG.TEXT', '#b__#b'
@@ -89,13 +156,13 @@ instruction_table = {
     0xCF: Op('UNKCF', '$w'),
 }
 
-subvm_instruction_table = {
-    'suffix': '',
+subvm_instruction_table.update({
+    'suffix': '-subvm',
     0x02: instruction_table[0x02],
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="Unconditional JuMP { goto op0; }"),
     0x0E: Op('YIELD', '', desc="Save IP and yield"),
     0x15: Op('SPRITE.SIZE', '#b', desc="Set size of sprites for object. (0=8, 1=32, 2=16)"),
-}
+})
 
 vm_types = {
     'vm': instruction_table,
@@ -107,59 +174,30 @@ def decode(table, rom, ip, ram_symbols):
     if op is None:
         return None, '%02x' % (rom[ip],), []
 
-    original_ip = ip
-    ip += 1
+    operands, next_ips = op.decode(rom, ip, ram_symbols)
+    return op, operands, next_ips
 
-    next_ips = []
-    opr_text = []
-    for opr in take_n(op.operands, 2):
-        optype, opsize = opr
-        if opsize == 'b': # Byte
-            value = rom[ip]
-            value_w = 1
-        elif opsize == 'w': # Word
-            value = word.unpack_from(rom, ip)[0]
-            value_w = 2
-        else:
-            raise ValueError("Invalid opsize %s" % (opsize,))
-        ip += value_w
-
-        if optype == '#': # Immediate
-            opr_text.append('#%X' % (value,))
-        elif optype == '*': # Memory pointer
-            opr_text.append('($%s)' % (try_get_symbol(ram_symbols, value),))
-        elif optype == '$': # Absolute label
-            opr_text.append('$%X' % (value,))
-            next_ips.append(value)
-        else:
-            raise ValueError("Invalid optype %s" % (optype,))
-
-    assert (ip - original_ip) == op.instr_len
-
-    if op.flow != Op.FLOW_NORETURN:
-        next_ips.append(ip)
-
-    return op, opr_text, next_ips
-
-def disasm(table, rom, entry_point, ram_symbols):
-    branch_list = [entry_point]
+def disasm(rom, entrypoints, ram_symbols):
+    branch_list = entrypoints[:]
     program_lines = {}
 
     while branch_list:
-        ip = branch_list.pop()
+        table, ip = branch_list.pop()
         if ip in program_lines:
             continue
 
-        op_info, opr_text, next_ips = decode(table, rom, ip, ram_symbols)
-        branch_list += next_ips
-        program_lines[ip] = (ip, op_info, opr_text, table['suffix'])
+        op_info, operands, next_ips = decode(table, rom, ip, ram_symbols)
+        for t, a in next_ips:
+            branch_list.append((t or table, a))
+
+        program_lines[ip] = (ip, op_info, operands, table['suffix'])
 
     return program_lines.values()
 
 def format_disasm(disasm_list):
-    for ip, op, opr_text, vm_type in disasm_list:
+    for ip, op, operands, vm_type in disasm_list:
         if op:
-            text = '%04X%s: %s %s' % (ip, vm_type, op.mnemonic, ', '.join(opr_text))
+            text = '%04X%s: %s %s' % (ip, vm_type, op.mnemonic, ', '.join(map(str, operands)))
             if op.desc:
                 text = text.ljust(39) + ' ; ' + op.desc
             yield text
@@ -169,7 +207,8 @@ def format_disasm(disasm_list):
             elif op.is_jmp:
                 yield ''
         else:
-            yield '%04X%s: !!! UNSUPPORTED OPCODE: %s' % (ip, vm_type, opr_text)
+            # TODO clean up use of operands
+            yield '%04X%s: !!! UNSUPPORTED OPCODE: %s' % (ip, vm_type, operands)
             yield ';---------'
             yield ''
 
@@ -192,7 +231,7 @@ def main():
             ram_symbols = parse_map(f, 0x184E)
 
     print('; {} - {:04X} {}'.format(args.binary, entry_point, args.type))
-    for line in format_disasm(sorted(disasm(vm_types[args.type], rom, entry_point, ram_symbols))):
+    for line in format_disasm(sorted(disasm(rom, [(vm_types[args.type], entry_point)], ram_symbols))):
         print line
 
 if __name__ == '__main__':
