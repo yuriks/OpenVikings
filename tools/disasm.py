@@ -91,8 +91,10 @@ instruction_table = {
 
 subvm_instruction_table = {
     'suffix': '',
-    0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
-    0x0E: Op('YIELD', '', desc="save IP and yield"),
+    0x02: instruction_table[0x02],
+    0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="Unconditional JuMP { goto op0; }"),
+    0x0E: Op('YIELD', '', desc="Save IP and yield"),
+    0x15: Op('SPRITE.SIZE', '#b', desc="Set size of sprites for object. (0=8, 1=32, 2=16)"),
 }
 
 vm_types = {
