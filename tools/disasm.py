@@ -212,15 +212,21 @@ def format_disasm(disasm_list):
             yield ';---------'
             yield ''
 
-argparser = argparse.ArgumentParser(description="diassemble The Lost Vikings PC script binaries")
-argparser.add_argument('binary', help="path to binary to diassemble")
-argparser.add_argument('entrypoint', help="starting address for the disassembly")
-argparser.add_argument('-m', '--map', help="symbol map of vikings.exe. Used to show symbols instead of memory addresses")
-argparser.add_argument('-t', '--type', choices=('vm', 'subvm'), default='vm', help="type of program to diassemble")
+def create_argument_parser():
+    def hex_int(s):
+        return int(s, 0)
+
+    parser = argparse.ArgumentParser(description="diassemble The Lost Vikings PC script binaries")
+    parser.add_argument('binary', help="path to binary to diassemble")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-e', '--entrypoint', type=hex_int, help="starting address for the disassembly")
+    #group.add_argument('-o', '--object', type=hex_int, help="object of which script to disassemble (recommended)")
+    parser.add_argument('-m', '--map', help="symbol map of vikings.exe. Used to show symbols instead of memory addresses")
+    parser.add_argument('-t', '--type', choices=('vm', 'subvm'), default='vm', help="type of program to diassemble")
+    return parser
 
 def main():
-    args = argparser.parse_args()
-    entry_point = int(args.entrypoint, 0)
+    args = create_argument_parser().parse_args()
 
     rom = array('B')
     ram_symbols = {}
@@ -230,8 +236,8 @@ def main():
         with open(args.map, 'rU') as f:
             ram_symbols = parse_map(f, 0x184E)
 
-    print('; {} - {:04X} {}'.format(args.binary, entry_point, args.type))
-    for line in format_disasm(sorted(disasm(rom, [(vm_types[args.type], entry_point)], ram_symbols))):
+    print('; {} - {:04X} {}'.format(args.binary, args.entrypoint, args.type))
+    for line in format_disasm(sorted(disasm(rom, [(vm_types[args.type], args.entrypoint)], ram_symbols))):
         print line
 
 if __name__ == '__main__':
