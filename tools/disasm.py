@@ -123,7 +123,8 @@ class Op(object):
 
 
 class OpSprites(Op):
-    def __init__(self, mnemonic, operands, flow=Op.FLOW_NEXT, desc=None, jump_target_table=None):
+    def __init__(self, mnemonic, operands, flow=Op.FLOW_NEXT, desc=None, jump_target_table=None, filtered=False):
+        # super hard TODO: handle filtered
         super(OpSprites, self).__init__(mnemonic, operands, flow, desc, jump_target_table)
         self.instr_len = None
 
@@ -147,7 +148,7 @@ class OpSprites(Op):
         return operands, next_ips
 
 # "Forward declare" dictionary
-subvm_instruction_table = {}
+sprvm_instruction_table = {}
 
 instruction_table = {
     'suffix': '',
@@ -158,9 +159,9 @@ instruction_table = {
     0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
     0x0F: Op('FINISH.LEVEL', '', flow=Op.FLOW_NORETURN, desc="yield & finish level"),
-    0x19: Op('SUBVM.IP', '$w', desc="Sets sub-vm instruction pointer", jump_target_table=subvm_instruction_table),
+    0x19: Op('SPRVM.IP', '$w', desc="Sets sub-vm instruction pointer", jump_target_table=sprvm_instruction_table),
     0x1A: Op('J?.OBJ.UNK1A', '#b$w'),
-    0x2F: Op('SUBVM.RUN', '', desc="Invoke VM2"),
+    0x2F: Op('SPRVM.RUN', '', desc="Invoke animation VM"),
     # Variable Length Instruction, needs more work to decode: 0x41: Op('DIALOG.TEXT', '#b__#b'
     0x46: Op('DIALOG.COLOR', '#w', desc="Appends a dialog color change command"),
     0x51: Op('LDA', '#w', desc="LoaD A { A = op0; }"),
@@ -188,20 +189,40 @@ instruction_table = {
     0xCF: Op('UNKCF', '$w'),
 }
 
-subvm_instruction_table.update({
-    'suffix': '-subvm',
-    0x00: Op('SPRITE.ADVANCE', '#b', desc="Advance animation for all of object's sprites by op0 tiles."),
-    0x01: OpSprites('SPRITE.TILES', '#b', desc="Set list of tile indices for object sprites."), # length also depends on state! problematic ;_;
+sprvm_instruction_table.update({
+    'suffix': '-sprvm',
+    0x00: Op('SPR.ADVANCE', '#b', desc="Advance animation for sprites by op0 tiles."),
+    0x01: OpSprites('SPR.TILES', '#b', filtered=True, desc="Set list of tile indices for sprites."),
     0x02: instruction_table[0x02],
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="Unconditional JuMP { goto op0; }"),
+    0x04: Op('NOP', '#b'),
+    0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
+    0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
+    0x07: Op('UNK07', '#b'), # TODO
+    0x08: OpSprites('UNK08', '#w'), # TODO
+    0x09: Op('UNK09', '#b'), # TODO
+    0x0A: OpSprites('UNK0A', '#w'), # TODO
+    0x0B: Op('BRK', '', desc="Break into debugger."),
+    0x0C: OpSprites('SPR.PALS', '#b', filtered=True, desc="Set list of palettes for sprites."),
+    0x0D: Op('FILTER', '#b', desc="Set the value of the tag filter."),
     0x0E: Op('YIELD', '', desc="Save IP and yield"),
-    0x15: Op('SPRITE.SIZE', '#b', desc="Set size of sprites for object. (0=8, 1=32, 2=16)"),
-    0x18: Op('SPRITE.SET.HIDDEN2', '', desc="Set hidden2 flag for all object sprites."),
+    0x0F: Op('DELAY', '#b', desc="Set counter, save IP and yield"),
+    0x10: Op('SPR.XFLIP', '', desc="Toggle sprite X flip."),
+    0x11: Op('SPR.YFLIP', '', desc="Toggle sprite Y flip."),
+    0x12: Op('SPR.XYFLIP', '', desc="Toggle sprite X and Y flip."),
+    0x13: OpSprites('SPR.TAGS', '#b', filtered=True, desc="Set list of sprite tags."),
+    0x14: Op('UNK14', '#b'), # TODO
+    0x15: Op('SPR.SIZE', '#b', desc="Set size of sprites. (0=8, 1=32, 2=16)"),
+    0x16: Op('NOP', '#b'),
+    0x17: Op('UNK17', '#w'), # TODO
+    0x18: Op('SPR.SET.HIDDEN2', '', desc="Set hidden2 flag on sprites."),
+    0x19: Op('SPR.CLR.HIDDEN12', '', desc="Clear hidden and hidden2 flags on sprites."),
+    0x1A: Op('STOP', '', flow=Op.FLOW_NORETURN, desc="Clear IP and yield")
 })
 
 vm_types = {
     'vm': instruction_table,
-    'subvm': subvm_instruction_table,
+    'sprvm': sprvm_instruction_table,
 }
 
 def decode(table, rom, ip, obj, ram_symbols):
@@ -257,7 +278,7 @@ def create_argument_parser():
     group.add_argument('-e', '--entrypoint', type=hex_int, help="starting address for the disassembly")
     group.add_argument('-o', '--object', type=hex_int, help="object of which script to disassemble (recommended)")
     parser.add_argument('-m', '--map', help="symbol map of vikings.exe. Used to show symbols instead of memory addresses")
-    parser.add_argument('-t', '--type', choices=('vm', 'subvm'), default='vm', help="type of program to diassemble")
+    parser.add_argument('-t', '--type', choices=('vm', 'sprvm'), default='vm', help="type of program to diassemble")
     return parser
 
 def main():
