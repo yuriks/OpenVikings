@@ -1,4 +1,5 @@
 from lvtools.util import word, take_n
+import lvtools.world
 
 import sys
 from array import array
@@ -79,35 +80,66 @@ class Op(object):
         self.is_jmp = ('$' in operands and jump_target_table is None) or flow == self.FLOW_NORETURN
         self.jump_target_table = jump_target_table
 
-    def decode(self, rom, ip, ram_symbols):
+    def _decode_operand(self, opr, rom, ip, next_ips, ram_symbols):
+        optype, opsize = opr
+        if opsize == 'b': # Byte
+            value = rom[ip]
+            value_w = 1
+        elif opsize == 'w': # Word
+            value = word.unpack_from(rom, ip)[0]
+            value_w = 2
+        else:
+            raise ValueError("Invalid opsize %s" % (opsize,))
+
+        if optype == '#': # Immediate
+            operand = OperandImmediate(value)
+        elif optype == '*': # Memory pointer
+            operand = OperandDataPointer(value, ram_symbols)
+        elif optype == '$': # Absolute label
+            operand = OperandCodePointer(value)
+            next_ips.append((self.jump_target_table, value))
+        else:
+            raise ValueError("Invalid optype %s" % (optype,))
+
+        return operand, value_w
+
+    def decode(self, rom, ip, obj, ram_symbols):
         original_ip = ip
         ip += 1
 
         next_ips = []
         operands = []
         for opr in take_n(self.operands, 2):
-            optype, opsize = opr
-            if opsize == 'b': # Byte
-                value = rom[ip]
-                value_w = 1
-            elif opsize == 'w': # Word
-                value = word.unpack_from(rom, ip)[0]
-                value_w = 2
-            else:
-                raise ValueError("Invalid opsize %s" % (opsize,))
-            ip += value_w
-
-            if optype == '#': # Immediate
-                operands.append(OperandImmediate(value))
-            elif optype == '*': # Memory pointer
-                operands.append(OperandDataPointer(value, ram_symbols))
-            elif optype == '$': # Absolute label
-                operands.append(OperandCodePointer(value))
-                next_ips.append((self.jump_target_table, value))
-            else:
-                raise ValueError("Invalid optype %s" % (optype,))
+            operand, operand_size = self._decode_operand(opr, rom, ip, next_ips, ram_symbols)
+            ip += operand_size
+            operands.append(operand)
 
         assert (ip - original_ip) == self.instr_len
+
+        if self.flow != self.FLOW_NORETURN:
+            next_ips.append((None, ip))
+
+        return operands, next_ips
+
+
+class OpSprites(Op):
+    def __init__(self, mnemonic, operands, flow=Op.FLOW_NEXT, desc=None, jump_target_table=None):
+        super(OpSprites, self).__init__(mnemonic, operands, flow, desc, jump_target_table)
+        self.instr_len = None
+
+    def decode(self, rom, ip, obj, ram_symbols):
+        original_ip = ip
+        ip += 1
+
+        next_ips = []
+        operands = []
+        for sprite_i in xrange(obj.num_sprites):
+            for opr in take_n(self.operands, 2):
+                operand, operand_size = self._decode_operand(opr, rom, ip, next_ips, ram_symbols)
+                ip += operand_size
+                operands.append(operand)
+
+        assert (ip - original_ip) == 1 + obj.num_sprites * calc_operands_len(self.operands)
 
         if self.flow != self.FLOW_NORETURN:
             next_ips.append((None, ip))
@@ -158,10 +190,13 @@ instruction_table = {
 
 subvm_instruction_table.update({
     'suffix': '-subvm',
+    0x00: Op('SPRITE.ADVANCE', '#b', desc="Advance animation for all of object's sprites by op0 tiles."),
+    0x01: OpSprites('SPRITE.TILES', '#b', desc="Set list of tile indices for object sprites."), # length also depends on state! problematic ;_;
     0x02: instruction_table[0x02],
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="Unconditional JuMP { goto op0; }"),
     0x0E: Op('YIELD', '', desc="Save IP and yield"),
     0x15: Op('SPRITE.SIZE', '#b', desc="Set size of sprites for object. (0=8, 1=32, 2=16)"),
+    0x18: Op('SPRITE.SET.HIDDEN2', '', desc="Set hidden2 flag for all object sprites."),
 })
 
 vm_types = {
@@ -169,15 +204,15 @@ vm_types = {
     'subvm': subvm_instruction_table,
 }
 
-def decode(table, rom, ip, ram_symbols):
+def decode(table, rom, ip, obj, ram_symbols):
     op = table.get(rom[ip])
     if op is None:
         return None, '%02x' % (rom[ip],), []
 
-    operands, next_ips = op.decode(rom, ip, ram_symbols)
+    operands, next_ips = op.decode(rom, ip, obj, ram_symbols)
     return op, operands, next_ips
 
-def disasm(rom, entrypoints, ram_symbols):
+def disasm(rom, entrypoints, obj, ram_symbols):
     branch_list = entrypoints[:]
     program_lines = {}
 
@@ -186,7 +221,7 @@ def disasm(rom, entrypoints, ram_symbols):
         if ip in program_lines:
             continue
 
-        op_info, operands, next_ips = decode(table, rom, ip, ram_symbols)
+        op_info, operands, next_ips = decode(table, rom, ip, obj, ram_symbols)
         for t, a in next_ips:
             branch_list.append((t or table, a))
 
@@ -220,7 +255,7 @@ def create_argument_parser():
     parser.add_argument('binary', help="path to binary to diassemble")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-e', '--entrypoint', type=hex_int, help="starting address for the disassembly")
-    #group.add_argument('-o', '--object', type=hex_int, help="object of which script to disassemble (recommended)")
+    group.add_argument('-o', '--object', type=hex_int, help="object of which script to disassemble (recommended)")
     parser.add_argument('-m', '--map', help="symbol map of vikings.exe. Used to show symbols instead of memory addresses")
     parser.add_argument('-t', '--type', choices=('vm', 'subvm'), default='vm', help="type of program to diassemble")
     return parser
@@ -236,8 +271,16 @@ def main():
         with open(args.map, 'rU') as f:
             ram_symbols = parse_map(f, 0x184E)
 
-    print('; {} - {:04X} {}'.format(args.binary, args.entrypoint, args.type))
-    for line in format_disasm(sorted(disasm(rom, [(vm_types[args.type], args.entrypoint)], ram_symbols))):
+    obj = None
+    obj_string = ''
+    if args.object:
+        obj = lvtools.world.parse_object(rom, args.object)
+    if obj:
+        args.entrypoint = obj.script_entry_point + 3
+        obj_string = 'object {:X}h - '.format(args.object)
+
+    print('; {} - {}entrypoint {:04X}h {}'.format(args.binary, obj_string, args.entrypoint, args.type))
+    for line in format_disasm(sorted(disasm(rom, [(vm_types[args.type], args.entrypoint)], obj, ram_symbols))):
         print line
 
 if __name__ == '__main__':

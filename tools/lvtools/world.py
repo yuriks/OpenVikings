@@ -34,13 +34,15 @@ Max Y velocity: {0.max_y_velocity}""")
     def __str__(self):
         return self.format_str.format(self)
 
-def print_object(world_data, obj_idx):
+def parse_object(world_data, obj_idx):
     offset = obj_idx * ObjectType.ENTRY_SIZE
-    print ObjectType(world_data[offset:offset + ObjectType.ENTRY_SIZE])
+    return ObjectType(world_data[offset:offset + ObjectType.ENTRY_SIZE])
 
-def print_objects(world_data, num_objects):
+def parse_objects(world_data, num_objects):
     objects_data = world_data[:num_objects * ObjectType.ENTRY_SIZE]
 
-    for i, obj_data in enumerate(take_n(objects_data, ObjectType.ENTRY_SIZE)):
-        obj = ObjectType(obj_data)
+    return (ObjectType(obj_data) for obj_data in take_n(objects_data, ObjectType.ENTRY_SIZE))
+
+def print_objects(world_data, num_objects):
+    for i, obj in enumerate(parse_objects(world_data, num_objects)):
         print "=== Object type %Xh\n%s\n" % (i, obj)
