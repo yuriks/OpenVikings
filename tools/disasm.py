@@ -3,6 +3,7 @@ from lvtools.util import word, take_n
 import sys
 from array import array
 import os
+import argparse
 
 def parse_map(f, seg):
     symbols = {}
@@ -159,23 +160,24 @@ def format_disasm(disasm_list):
             yield ';---------'
             yield ''
 
+argparser = argparse.ArgumentParser(description="diassemble The Lost Vikings PC script binaries")
+argparser.add_argument('binary', help="path to binary to diassemble")
+argparser.add_argument('entrypoint', help="starting address for the disassembly")
+argparser.add_argument('-m', '--map', help="symbol map of vikings.exe. Used to show symbols instead of memory addresses")
+
 def main():
-    filename = sys.argv[1]
-    entry_point = int(sys.argv[2], 0)
-    if len(sys.argv) > 3:
-        map_filename = sys.argv[3]
-    else:
-        map_filename = None
+    args = argparser.parse_args()
+    entry_point = int(args.entrypoint, 0)
 
     rom = array('B')
     ram_symbols = {}
-    with open(filename, 'rb') as f:
-        rom.fromfile(f, os.path.getsize(filename))
-    if map_filename:
-        with open(map_filename, 'rU') as f:
+    with open(args.binary, 'rb') as f:
+        rom.fromfile(f, os.path.getsize(args.binary))
+    if args.map:
+        with open(args.map, 'rU') as f:
             ram_symbols = parse_map(f, 0x184E)
 
-    print '; %s - %04X' % (filename, entry_point)
+    print '; %s - %04X' % (args.binary, entry_point)
     for line in format_disasm(sorted(disasm(instruction_table, rom, entry_point, ram_symbols))):
         print line
 
