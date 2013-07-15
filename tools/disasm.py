@@ -89,6 +89,17 @@ instruction_table = {
     0xCF: Op('UNKCF', '$w'),
 }
 
+subvm_instruction_table = {
+    'suffix': '',
+    0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
+    0x0E: Op('YIELD', '', desc="save IP and yield"),
+}
+
+vm_types = {
+    'vm': instruction_table,
+    'subvm': subvm_instruction_table,
+}
+
 def decode(table, rom, ip, ram_symbols):
     op = table.get(rom[ip])
     if op is None:
@@ -164,6 +175,7 @@ argparser = argparse.ArgumentParser(description="diassemble The Lost Vikings PC 
 argparser.add_argument('binary', help="path to binary to diassemble")
 argparser.add_argument('entrypoint', help="starting address for the disassembly")
 argparser.add_argument('-m', '--map', help="symbol map of vikings.exe. Used to show symbols instead of memory addresses")
+argparser.add_argument('-t', '--type', choices=('vm', 'subvm'), default='vm', help="type of program to diassemble")
 
 def main():
     args = argparser.parse_args()
@@ -177,8 +189,8 @@ def main():
         with open(args.map, 'rU') as f:
             ram_symbols = parse_map(f, 0x184E)
 
-    print '; %s - %04X' % (args.binary, entry_point)
-    for line in format_disasm(sorted(disasm(instruction_table, rom, entry_point, ram_symbols))):
+    print('; {} - {:04X} {}'.format(args.binary, entry_point, args.type))
+    for line in format_disasm(sorted(disasm(vm_types[args.type], rom, entry_point, ram_symbols))):
         print line
 
 if __name__ == '__main__':
