@@ -67,41 +67,73 @@ class OperandCodePointer(Operand):
     def __str__(self):
         return '${:X}'.format(self.address)
 
+def unsupported_mode(x):
+    def f(rom, ip, ram_symbols):
+        raise ValueError("Unsupported addressing mode %s" % (x,))
+    return f
+
 class Op(object):
     FLOW_NEXT = 0
     FLOW_NORETURN = 1
+
+    addressing_modes = {
+        0: lambda rom, ip, ram_symbols: (OperandImmediate(word.unpack_from(rom, ip)[0]), 2),
+        1: unsupported_mode(1),
+        2: lambda rom, ip, ram_symbols: (OperandDataPointer(word.unpack_from(rom, ip)[0], ram_symbols), 2),
+        3: unsupported_mode(3),
+        4: unsupported_mode(4),
+        5: unsupported_mode(5),
+        6: unsupported_mode(6),
+        7: unsupported_mode(7),
+    }
 
     def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None, jump_target_table=None):
         self.mnemonic = mnemonic
         self.operands = operands
         self.flow = flow
         self.desc = desc
-        self.instr_len = 1 + calc_operands_len(operands)
         self.is_jmp = ('$' in operands and jump_target_table is None) or flow == self.FLOW_NORETURN
         self.jump_target_table = jump_target_table
 
-    def _decode_operand(self, opr, rom, ip, next_ips, ram_symbols):
+    def decode_operand(self, opr, rom, ip, next_ips, ram_symbols):
         optype, opsize = opr
-        if opsize == 'b': # Byte
-            value = rom[ip]
-            value_w = 1
-        elif opsize == 'w': # Word
-            value = word.unpack_from(rom, ip)[0]
-            value_w = 2
-        else:
-            raise ValueError("Invalid opsize %s" % (opsize,))
+        operands = []
+        oper_width = 0
 
-        if optype == '#': # Immediate
-            operand = OperandImmediate(value)
-        elif optype == '*': # Memory pointer
-            operand = OperandDataPointer(value, ram_symbols)
-        elif optype == '$': # Absolute label
-            operand = OperandCodePointer(value)
-            next_ips.append((self.jump_target_table, value))
+        if optype in '#*$':
+            if opsize == 'b': # Byte
+                value = rom[ip]
+                oper_width += 1
+            elif opsize == 'w': # Word
+                value = word.unpack_from(rom, ip)[0]
+                oper_width += 2
+            else:
+                raise ValueError("Invalid opsize %s" % (opsize,))
+
+            if optype == '#': # Immediate
+                operands.append(OperandImmediate(value))
+            elif optype == '*': # Memory pointer
+                operands.append(OperandDataPointer(value, ram_symbols))
+            elif optype == '$': # Absolute label
+                operands.append(OperandCodePointer(value))
+                next_ips.append((self.jump_target_table, value))
+        elif optype == 'A':
+            addressing_mode = rom[ip]
+            oper_width = 1
+            if opsize in '12':
+                new_operand, w = self.addressing_modes[addressing_mode % 8](rom, ip+oper_width, ram_symbols)
+                operands.append(new_operand)
+                oper_width += w
+                if opsize == '2':
+                    new_operand, w = self.addressing_modes[(addressing_mode >> 3) % 8](rom, ip+oper_width, ram_symbols)
+                    operands.append(new_operand)
+                    oper_width += w
+            else:
+                raise ValueError("Invalid opsize %s" % (opsize,))
         else:
             raise ValueError("Invalid optype %s" % (optype,))
 
-        return operand, value_w
+        return operands, oper_width
 
     def decode(self, rom, ip, obj, ram_symbols):
         original_ip = ip
@@ -110,11 +142,9 @@ class Op(object):
         next_ips = []
         operands = []
         for opr in take_n(self.operands, 2):
-            operand, operand_size = self._decode_operand(opr, rom, ip, next_ips, ram_symbols)
+            new_operands, operand_size = self.decode_operand(opr, rom, ip, next_ips, ram_symbols)
             ip += operand_size
-            operands.append(operand)
-
-        assert (ip - original_ip) == self.instr_len
+            operands += new_operands
 
         if self.flow != self.FLOW_NORETURN:
             next_ips.append((None, ip))
@@ -126,7 +156,6 @@ class OpSprites(Op):
     def __init__(self, mnemonic, operands, flow=Op.FLOW_NEXT, desc=None, jump_target_table=None, filtered=False):
         # super hard TODO: handle filtered
         super(OpSprites, self).__init__(mnemonic, operands, flow, desc, jump_target_table)
-        self.instr_len = None
 
     def decode(self, rom, ip, obj, ram_symbols):
         original_ip = ip
@@ -136,9 +165,9 @@ class OpSprites(Op):
         operands = []
         for sprite_i in xrange(obj.num_sprites):
             for opr in take_n(self.operands, 2):
-                operand, operand_size = self._decode_operand(opr, rom, ip, next_ips, ram_symbols)
+                new_operands, operand_size = self.decode_operand(opr, rom, ip, next_ips, ram_symbols)
                 ip += operand_size
-                operands.append(operand)
+                operands += new_operands
 
         assert (ip - original_ip) == 1 + obj.num_sprites * calc_operands_len(self.operands)
 
@@ -146,44 +175,6 @@ class OpSprites(Op):
             next_ips.append((None, ip))
 
         return self, operands, next_ips
-
-
-class OpDialogString(Op):
-    def __init__(self, mnemonic, desc=None):
-        super(OpDialogString, self).__init__(mnemonic, '', flow=Op.FLOW_NEXT, desc=desc)
-        self.instr_len = None
-
-    addressing_modes = {
-        0: lambda rom, ip, ram_symbols: (OperandImmediate(word.unpack_from(rom, ip)[0]), ip+2),
-        1: None,
-        2: None,
-        3: None,
-        4: None,
-        5: None,
-        6: None,
-        7: None,
-    }
-
-    def decode(self, rom, ip, obj, ram_symbols):
-        ip += 1
-
-        operands = []
-
-        addressing_mode = rom[ip]
-        ip += 1
-
-        new_operand, ip = self.addressing_modes[addressing_mode % 8](rom, ip, ram_symbols)
-        operands.append(new_operand)
-
-        load_mode = rom[ip]
-        ip += 1
-
-        new_operand, ip = self.addressing_modes[addressing_mode % 8](rom, ip, ram_symbols)
-        operands.append(new_operand)
-        new_operand, ip = self.addressing_modes[(addressing_mode >> 3) % 8](rom, ip, ram_symbols)
-        operands.append(new_operand)
-
-        return self, operands, [(None, ip)]
 
 
 class OpExtended():
@@ -233,14 +224,17 @@ instruction_table = {
     0x3D: Op('PAL1.FADE', '#b#b#b', desc="Set palette fade amount. (color1)"),
     0x3E: Op('PAL1.RESTORE', '', desc="Remove palette fade. (color1)"),
 
+    0x3F: Op('SPR.HIDE2', '', desc="Hides all the object's sprites using the HIDDEN2 flag."),
     0x40: Op('SPR.SHOW', '', desc="Unhide all the object's sprites."),
-    # Variable Length Instruction, needs more work to decode: 0x41: Op('DIALOG.TEXT', '#b__#b'
+    0x41: Op('DIALOG.DIALOG', 'A2A2', desc="Appends a dialog display command"),
+    0x42: Op('DIALOG.CLEAR', '', desc="Appends a clear command"),
 
-    0x45: OpDialogString('DIALOG.STRING', desc="Appends a putString command"),
+    0x45: Op('DIALOG.STRING', 'A1A2', desc="Appends a putString command"),
     0x46: Op('DIALOG.COLOR', '#w', desc="Appends a dialog color change command"),
 
     0x4C: Op('PAL2.FADE', '#b#b#b', desc="Set palette fade amount. (color2)"),
 
+    0x50: Op('DIALOG.CHAR', 'A2A1', desc="Appends a putChar command"),
     0x51: Op('LDA', '#w', desc="LoaD A { A = op0; }"),
     0x52: Op('OBJPROP.LDA', '#b', desc="LoaD A from current object op0/2"),
     0x53: Op('LDA', '*w', desc="LoaD A from memory"),
@@ -248,8 +242,10 @@ instruction_table = {
     0x56: Op('OBJPROP.STA', '#b', desc="STore A to current object op0/2"),
     0x57: Op('STA', '*w', desc="STore A to memory"),
     0x58: Op('OTHERPROP.STA', '#b', desc="Stores A to access target prop op0/2"),
-
+    0x59: Op('OBJPROP.ADD', '#b', desc="ADD A from current object property op0/2"),
     0x5A: Op('ADD', '*w', desc="ADD A to memory { *op0 += A; }"),
+
+    0x5C: Op('OBJPROP.SUB', '#b', desc="SUBtract A from current object property op0/2"),
 
     0x5F: Op('OBJPROP.ANDA', '#b', desc="AND current object op0/2 with A"),
     0x60: Op('ANDA', '*w', desc="AND memory with A { op0 &= A; }"),
@@ -266,6 +262,10 @@ instruction_table = {
     0x78: Op('OBJPROP.JNE', '#b$w', desc="jump if current object property op0/2 != A"),
     0x79: Op('JNE', '*w$w', desc="Jump if Not Equal { if (*op0 != A) goto op1; }"),
 
+    0x7C: Op('JL', '#w$w', desc="Jump if Less (signed) { if (op0 < A) goto op1; }"),
+
+    0x81: Op('JGE', '#w$w', desc="Jump if Greater or Equal (signed) { if (op0 >= A) goto op1; }"),
+
     0x96: Op('OBJ.OTHER.STA', '', desc="Store A to current object property access target"),
     0x97: Op('TBS', '#b#w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
 
@@ -278,6 +278,8 @@ instruction_table = {
     0xAA: Op('TBJ', '#b*w$w', desc="Test Bit & Jump { if ((1 << op0/2) & op1) goto op3; }"),
 
     0xCF: Op('UNKCF', '$w'),
+
+    0xD3: Op('CHECK.PASSWORD', '', desc="Executes a password check and sets global variables acoordingly."),
 }
 
 sprvm_instruction_table.update({
@@ -290,9 +292,9 @@ sprvm_instruction_table.update({
     0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
     0x07: Op('UNK07', '#b'), # TODO
-    0x08: OpSprites('UNK08', '#w'), # TODO
+    0x08: OpSprites('SPR.XPOS', '#w', desc="Set X sprite positions relative to object."),
     0x09: Op('UNK09', '#b'), # TODO
-    0x0A: OpSprites('UNK0A', '#w'), # TODO
+    0x0A: OpSprites('SPR.YPOS', '#w', desc="Set Y sprite positions relative to object."),
     0x0B: Op('BRK', '', desc="Break into debugger."),
     0x0C: OpSprites('SPR.PALS', '#b', filtered=True, desc="Set list of palettes for sprites."),
     0x0D: Op('FILTER', '#b', desc="Set the value of the tag filter."),
