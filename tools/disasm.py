@@ -119,7 +119,7 @@ class Op(object):
         if self.flow != self.FLOW_NORETURN:
             next_ips.append((None, ip))
 
-        return operands, next_ips
+        return self, operands, next_ips
 
 
 class OpSprites(Op):
@@ -145,7 +145,62 @@ class OpSprites(Op):
         if self.flow != self.FLOW_NORETURN:
             next_ips.append((None, ip))
 
-        return operands, next_ips
+        return self, operands, next_ips
+
+
+class OpDialogString(Op):
+    def __init__(self, mnemonic, desc=None):
+        super(OpDialogString, self).__init__(mnemonic, '', flow=Op.FLOW_NEXT, desc=desc)
+        self.instr_len = None
+
+    addressing_modes = {
+        0: lambda rom, ip, ram_symbols: (OperandImmediate(word.unpack_from(rom, ip)[0]), ip+2),
+        1: None,
+        2: None,
+        3: None,
+        4: None,
+        5: None,
+        6: None,
+        7: None,
+    }
+
+    def decode(self, rom, ip, obj, ram_symbols):
+        ip += 1
+
+        operands = []
+
+        addressing_mode = rom[ip]
+        ip += 1
+
+        new_operand, ip = self.addressing_modes[addressing_mode % 8](rom, ip, ram_symbols)
+        operands.append(new_operand)
+
+        load_mode = rom[ip]
+        ip += 1
+
+        new_operand, ip = self.addressing_modes[addressing_mode % 8](rom, ip, ram_symbols)
+        operands.append(new_operand)
+        new_operand, ip = self.addressing_modes[(addressing_mode >> 3) % 8](rom, ip, ram_symbols)
+        operands.append(new_operand)
+
+        return self, operands, [(None, ip)]
+
+
+class OpExtended():
+    def __init__(self, extended_codes):
+        self.extended_codes = extended_codes
+
+    def decode(self, rom, ip, obj, ram_symbols):
+        ip += 1
+        extended_byte = rom[ip]
+
+        if extended_byte in self.extended_codes:
+            op = self.extended_codes[extended_byte]
+        else:
+            op = self.extended_codes[None]
+
+        return op.decode(rom, ip, obj, ram_symbols)
+
 
 # "Forward declare" dictionary
 sprvm_instruction_table = {}
@@ -153,39 +208,75 @@ sprvm_instruction_table = {}
 instruction_table = {
     'suffix': '',
     0x00: Op('YIELD', '', desc="save IP and yield"),
-    0x01: Op('NOP', ''),
+    0x01: Op('NOP', ''), # TODO
     0x02: Op('AUDIO.SFX', '#w', desc="Play sound effect"),
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
+
     0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
+
     0x0F: Op('FINISH.LEVEL', '', flow=Op.FLOW_NORETURN, desc="yield & finish level"),
+
+    0x13: OpExtended({
+            0x01: Op('SPECIAL.QUIT', '#w', flow=Op.FLOW_NORETURN, desc="Quit game"),
+            0x11: Op('SPECIAL.COPYSTATUS', '#w', desc="Copy statusbar area to middle of screen"),
+            0xD9: Op('SPECIAL.LOADPAL', '#w', desc="Load palette from ROM address op1"),
+            None: Op('SPECIAL.NOP', '#w')
+        }),
+
     0x19: Op('SPRVM.IP', '$w', desc="Sets sub-vm instruction pointer", jump_target_table=sprvm_instruction_table),
+
     0x1A: Op('J?.OBJ.UNK1A', '#b$w'),
+
     0x2F: Op('SPRVM.RUN', '', desc="Invoke animation VM"),
+
+    0x3D: Op('PAL1.FADE', '#b#b#b', desc="Set palette fade amount. (color1)"),
+    0x3E: Op('PAL1.RESTORE', '', desc="Remove palette fade. (color1)"),
+
+    0x40: Op('SPR.SHOW', '', desc="Unhide all the object's sprites."),
     # Variable Length Instruction, needs more work to decode: 0x41: Op('DIALOG.TEXT', '#b__#b'
+
+    0x45: OpDialogString('DIALOG.STRING', desc="Appends a putString command"),
     0x46: Op('DIALOG.COLOR', '#w', desc="Appends a dialog color change command"),
+
+    0x4C: Op('PAL2.FADE', '#b#b#b', desc="Set palette fade amount. (color2)"),
+
     0x51: Op('LDA', '#w', desc="LoaD A { A = op0; }"),
     0x52: Op('OBJPROP.LDA', '#b', desc="LoaD A from current object op0/2"),
     0x53: Op('LDA', '*w', desc="LoaD A from memory"),
+
     0x56: Op('OBJPROP.STA', '#b', desc="STore A to current object op0/2"),
     0x57: Op('STA', '*w', desc="STore A to memory"),
     0x58: Op('OTHERPROP.STA', '#b', desc="Stores A to access target prop op0/2"),
+
     0x5A: Op('ADD', '*w', desc="ADD A to memory { *op0 += A; }"),
+
     0x5F: Op('OBJPROP.ANDA', '#b', desc="AND current object op0/2 with A"),
     0x60: Op('ANDA', '*w', desc="AND memory with A { op0 &= A; }"),
+
     0x62: Op('OBJPROP.ORA', '#b', desc="OR current object property op0/2 with A"),
+
     0x68: Op('JB', '#w$w', desc="Jump if Below { if (op0 < A) goto op1; }"),
+
     0x72: Op('JE', '#w$w', desc="Jump if Equal { if (op0 == A) goto op1; }"),
     0x73: Op('OBJPROP.JE', '#b$w', desc="jump if current object property op0/2 == A"),
     0x74: Op('JE', '*w$w', desc="Jump if Equal { if (*op0 == A) goto op1; }"),
+
     0x77: Op('JNE', '#w$w', desc="Jump if Not Equal { if (op0 != A) goto op1; }"),
     0x78: Op('OBJPROP.JNE', '#b$w', desc="jump if current object property op0/2 != A"),
     0x79: Op('JNE', '*w$w', desc="Jump if Not Equal { if (*op0 != A) goto op1; }"),
+
     0x96: Op('OBJ.OTHER.STA', '', desc="Store A to current object property access target"),
     0x97: Op('TBS', '#b#w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
+
     0x99: Op('TBS', '#b*w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
+
+    0x9D: Op('AB', '#b*w', desc="Assign Bit { if (A != 0) { A = (1 << op0/2); } *op1 = *op1 & ~(1 << op0/2) | A; }"),
+
     0xA8: Op('TBJE', '#b#w$w', desc="Test Bit & Jump if Equal { if (bool((1 << op0/2) & op1) == A) goto op3; }"),
+
     0xAA: Op('TBJ', '#b*w$w', desc="Test Bit & Jump { if ((1 << op0/2) & op1) goto op3; }"),
+
     0xCF: Op('UNKCF', '$w'),
 }
 
@@ -230,8 +321,7 @@ def decode(table, rom, ip, obj, ram_symbols):
     if op is None:
         return None, '%02x' % (rom[ip],), []
 
-    operands, next_ips = op.decode(rom, ip, obj, ram_symbols)
-    return op, operands, next_ips
+    return op.decode(rom, ip, obj, ram_symbols)
 
 def disasm(rom, entrypoints, obj, ram_symbols):
     branch_list = entrypoints[:]
