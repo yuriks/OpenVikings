@@ -5,6 +5,7 @@ import sys
 from array import array
 import os
 import argparse
+from copy import copy
 
 def parse_map(f, seg):
     symbols = {}
@@ -87,18 +88,19 @@ class Op(object):
         7: unsupported_mode(7),
     }
 
-    def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None, jump_target_table=None):
+    def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None, jump_target_vm=None):
         self.mnemonic = mnemonic
         self.operands = operands
         self.flow = flow
         self.desc = desc
-        self.is_jmp = ('$' in operands and jump_target_table is None) or flow == self.FLOW_NORETURN
-        self.jump_target_table = jump_target_table
+        self.is_jmp = ('$' in operands and jump_target_vm is None) or flow == self.FLOW_NORETURN
+        self.jump_target_vm = jump_target_vm
 
-    def decode_operand(self, opr, rom, ip, next_ips, ram_symbols):
+    def decode_operand(self, opr, state, rom, ip, ram_symbols):
         optype, opsize = opr
         operands = []
         oper_width = 0
+        next_states = []
 
         if optype in '#*$':
             if opsize == 'b': # Byte
@@ -116,7 +118,7 @@ class Op(object):
                 operands.append(OperandDataPointer(value, ram_symbols))
             elif optype == '$': # Absolute label
                 operands.append(OperandCodePointer(value))
-                next_ips.append((self.jump_target_table, value))
+                next_states.append(state.jumped(value, self.jump_target_vm))
         elif optype == 'A':
             addressing_mode = rom[ip]
             oper_width = 1
@@ -133,64 +135,64 @@ class Op(object):
         else:
             raise ValueError("Invalid optype %s" % (optype,))
 
-        return operands, oper_width
+        return operands, oper_width, next_states
 
-    def decode(self, rom, ip, obj, ram_symbols):
-        original_ip = ip
-        ip += 1
+    def decode(self, state, rom, obj, ram_symbols):
+        ip = state.ip + 1
 
-        next_ips = []
+        next_states = []
         operands = []
         for opr in take_n(self.operands, 2):
-            new_operands, operand_size = self.decode_operand(opr, rom, ip, next_ips, ram_symbols)
+            new_operands, operand_size, added_next_states = self.decode_operand(opr, state, rom, ip, ram_symbols)
             ip += operand_size
             operands += new_operands
+            next_states += added_next_states
 
         if self.flow != self.FLOW_NORETURN:
-            next_ips.append((None, ip))
+            next_states.append(state.jumped(ip))
 
-        return self, operands, next_ips
+        return self, operands, next_states
 
 
 class OpSprites(Op):
-    def __init__(self, mnemonic, operands, flow=Op.FLOW_NEXT, desc=None, jump_target_table=None, filtered=False):
+    def __init__(self, mnemonic, operands, flow=Op.FLOW_NEXT, desc=None, jump_target_vm=None, filtered=False):
         # super hard TODO: handle filtered
-        super(OpSprites, self).__init__(mnemonic, operands, flow, desc, jump_target_table)
+        super(OpSprites, self).__init__(mnemonic, operands, flow, desc, jump_target_vm)
 
-    def decode(self, rom, ip, obj, ram_symbols):
-        original_ip = ip
-        ip += 1
+    def decode(self, state, rom, obj, ram_symbols):
+        ip = state.ip + 1
 
-        next_ips = []
+        next_states = []
         operands = []
         for sprite_i in xrange(obj.num_sprites):
             for opr in take_n(self.operands, 2):
-                new_operands, operand_size = self.decode_operand(opr, rom, ip, next_ips, ram_symbols)
+                new_operands, operand_size, added_next_states = self.decode_operand(opr, state, rom, ip, ram_symbols)
                 ip += operand_size
                 operands += new_operands
+                next_states += added_next_states
 
-        assert (ip - original_ip) == 1 + obj.num_sprites * calc_operands_len(self.operands)
+        assert (ip - state.ip) == 1 + obj.num_sprites * calc_operands_len(self.operands)
 
         if self.flow != self.FLOW_NORETURN:
-            next_ips.append((None, ip))
+            next_states.append(state.jumped(ip))
 
-        return self, operands, next_ips
+        return self, operands, next_states
 
 
 class OpExtended():
     def __init__(self, extended_codes):
         self.extended_codes = extended_codes
 
-    def decode(self, rom, ip, obj, ram_symbols):
-        ip += 1
-        extended_byte = rom[ip]
+    def decode(self, state, rom, obj, ram_symbols):
+        state = state.jumped(state.ip + 1)
+        extended_byte = rom[state.ip]
 
         if extended_byte in self.extended_codes:
             op = self.extended_codes[extended_byte]
         else:
             op = self.extended_codes[None]
 
-        return op.decode(rom, ip, obj, ram_symbols)
+        return op.decode(state, rom, obj, ram_symbols)
 
 
 # "Forward declare" dictionary
@@ -215,7 +217,7 @@ instruction_table = {
             None: Op('SPECIAL.NOP', '#w')
         }),
 
-    0x19: Op('SPRVM.IP', '$w', desc="Sets sub-vm instruction pointer", jump_target_table=sprvm_instruction_table),
+    0x19: Op('SPRVM.IP', '$w', desc="Sets sub-vm instruction pointer", jump_target_vm='sprvm'),
 
     0x1A: Op('J?.OBJ.UNK1A', '#b$w'),
 
@@ -318,34 +320,76 @@ vm_types = {
     'sprvm': sprvm_instruction_table,
 }
 
-def decode(table, rom, ip, obj, ram_symbols):
-    op = table.get(rom[ip])
-    if op is None:
-        return None, '%02x' % (rom[ip],), []
+def decode(state, rom, obj, ram_symbols):
+    """Returns: (op_info, operands, next_states)"""
 
-    return op.decode(rom, ip, obj, ram_symbols)
+    table = vm_types[state.vm_type]
+    op = table.get(rom[state.ip])
+    if op is None:
+        return None, '%02x' % (rom[state.ip],), []
+
+    return op.decode(state, rom, obj, ram_symbols)
 
 def disasm(rom, entrypoints, obj, ram_symbols):
     branch_list = entrypoints[:]
     program_lines = {}
 
     while branch_list:
-        table, ip = branch_list.pop()
-        if ip in program_lines:
+        state = branch_list.pop()
+        if state in program_lines:
             continue
 
-        op_info, operands, next_ips = decode(table, rom, ip, obj, ram_symbols)
-        for t, a in next_ips:
-            branch_list.append((t or table, a))
+        op_info, operands, next_states = decode(state, rom, obj, ram_symbols)
+        branch_list += next_states
 
-        program_lines[ip] = (ip, op_info, operands, table['suffix'])
+        program_lines[state] = DisassembledInstruction(state, op_info, operands)
 
     return program_lines.values()
 
+class VMState(object):
+    def __init__(self, vm_type, ip):
+        self.vm_type = vm_type
+        self.ip = ip
+
+    def key(self):
+        return (self.ip, self.vm_type)
+
+    def __hash__(self):
+        return hash(self.key())
+
+    def __eq__(self, other):
+        return self.key() == other.key()
+
+    def __str__(self):
+        vm_type_suffix = vm_types[self.vm_type]['suffix']
+        return '{0:04X}{1}'.format(self.ip, vm_type_suffix)
+
+    def __repr__(self):
+        return 'VMState(vm_type={0}, ip={1})'.format(self.vm_type, self.ip)
+
+    def jumped(self, ip, vm=None):
+        n = copy(self)
+        n.ip = ip
+        n.vm_type = vm or self.vm_type
+        return n
+
+class DisassembledInstruction(object):
+    def __init__(self, state, op, operands):
+        self.state = state
+        self.op = op
+        self.operands = operands
+
+    def __repr__(self):
+        return 'DisassembledInstruction(state={0}, op={1}, operands={2})'.format(self.state, self.op, self.operands)
+
 def format_disasm(disasm_list):
-    for ip, op, operands, vm_type in disasm_list:
+    for instruction in disasm_list:
+        address = str(instruction.state)
+        op = instruction.op
+        operands = instruction.operands
+
         if op:
-            text = '%04X%s: %s %s' % (ip, vm_type, op.mnemonic, ', '.join(map(str, operands)))
+            text = '%s: %s %s' % (address, op.mnemonic, ', '.join(map(str, operands)))
             if op.desc:
                 text = text.ljust(39) + ' ; ' + op.desc
             yield text
@@ -356,7 +400,7 @@ def format_disasm(disasm_list):
                 yield ''
         else:
             # TODO clean up use of operands
-            yield '%04X%s: !!! UNSUPPORTED OPCODE: %s' % (ip, vm_type, operands)
+            yield '%s: !!! UNSUPPORTED OPCODE: %s' % (address, operands)
             yield ';---------'
             yield ''
 
@@ -393,7 +437,10 @@ def main():
         obj_string = 'object {:X}h - '.format(args.object)
 
     print('; {} - {}entrypoint {:04X}h {}'.format(args.binary, obj_string, args.entrypoint, args.type))
-    for line in format_disasm(sorted(disasm(rom, [(vm_types[args.type], args.entrypoint)], obj, ram_symbols))):
+
+    entry_point = VMState(args.type, args.entrypoint)
+    disassembled_instructions = disasm(rom, [entry_point], obj, ram_symbols)
+    for line in format_disasm(sorted(disassembled_instructions, key=lambda x: x.state.key())):
         print line
 
 if __name__ == '__main__':
