@@ -26,6 +26,12 @@ def try_get_symbol(symbol_map, addr):
     else:
         return '%X' % (addr,)
 
+def hex_leading_zero(val):
+    s = '{:X}'.format(val)
+    if not s[0].isdigit():
+        s = '0' + s
+    return s
+
 opr_lens = {
     'b': 1,
     'w': 2
@@ -44,11 +50,15 @@ class Operand(object):
     pass
 
 class OperandImmediate(Operand):
-    def __init__(self, value):
+    def __init__(self, value, const_map=None):
         self.value = value
+        self.symbol = const_map and const_map.get(self.value)
 
     def __str__(self):
-        return '#{:X}'.format(self.value)
+        if self.symbol:
+            return '#{}'.format(self.symbol)
+        else:
+            return '#{}'.format(hex_leading_zero(self.value))
 
 class OperandDataPointer(Operand):
     def __init__(self, address, ram_symbols=None):
@@ -59,14 +69,14 @@ class OperandDataPointer(Operand):
         if self.symbol:
             return '(${})'.format(self.symbol)
         else:
-            return '(${:X})'.format(self.address)
+            return '(${})'.format(hex_leading_zero(self.address))
 
 class OperandCodePointer(Operand):
     def __init__(self, address):
         self.address = address
 
     def __str__(self):
-        return '${:X}'.format(self.address)
+        return '${}'.format(hex_leading_zero(self.address))
 
 def unsupported_mode(x):
     def f(rom, ip, ram_symbols):
@@ -89,15 +99,16 @@ class Op(object):
         7: unsupported_mode(7),
     }
 
-    def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None, jump_target_vm=None):
+    def __init__(self, mnemonic, operands, flow=FLOW_NEXT, desc=None, jump_target_vm=None, operand_tags={}):
         self.mnemonic = mnemonic
         self.operands = operands
         self.flow = flow
         self.desc = desc
         self.is_jmp = ('$' in operands and jump_target_vm is None and flow != self.FLOW_CALL) or flow == self.FLOW_NORETURN
         self.jump_target_vm = jump_target_vm
+        self.operand_tags = operand_tags
 
-    def decode_operand(self, opr, state, rom, ip, ram_symbols):
+    def decode_operand(self, opr, operand_tag, state, rom, ip, ram_symbols):
         optype, opsize = opr
         operands = []
         oper_width = 0
@@ -114,7 +125,7 @@ class Op(object):
                 raise ValueError("Invalid opsize %s" % (opsize,))
 
             if optype == '#': # Immediate
-                operands.append(OperandImmediate(value))
+                operands.append(OperandImmediate(value, operand_tag))
             elif optype == '*': # Memory pointer
                 operands.append(OperandDataPointer(value, ram_symbols))
             elif optype == '$': # Absolute label
@@ -143,8 +154,9 @@ class Op(object):
 
         next_states = []
         operands = []
-        for opr in take_n(self.operands, 2):
-            new_operands, operand_size, added_next_states = self.decode_operand(opr, state, rom, ip, ram_symbols)
+        for i, opr in enumerate(take_n(self.operands, 2)):
+            tag = self.operand_tags and self.operand_tags[i]
+            new_operands, operand_size, added_next_states = self.decode_operand(opr, tag, state, rom, ip, ram_symbols)
             ip += operand_size
             operands += new_operands
             next_states += added_next_states
@@ -167,7 +179,8 @@ class OpSprites(Op):
         operands = []
         for sprite_i in xrange(obj.num_sprites):
             for opr in take_n(self.operands, 2):
-                new_operands, operand_size, added_next_states = self.decode_operand(opr, state, rom, ip, ram_symbols)
+                tag = self.operand_tags and self.operand_tags[i]
+                new_operands, operand_size, added_next_states = self.decode_operand(opr, tag, state, rom, ip, ram_symbols)
                 ip += operand_size
                 operands += new_operands
                 next_states += added_next_states
@@ -195,6 +208,20 @@ class OpExtended():
 
         return op.decode(state, rom, obj, ram_symbols)
 
+property_symbolic_constants = {
+        0x08: 'PROP_FLAGS',
+        0x16: 'PROP_USERDATA',
+        0x1C: 'PROP_TIMER',
+        0x1E: 'PROP_XPOS',
+        0x20: 'PROP_YPOS',
+        0x2C: 'PROP_GFX_PTR',
+        0x2E: 'PROP_USER1',
+        0x30: 'PROP_USER2',
+        0x32: 'PROP_USER3',
+        0x34: 'PROP_USER4',
+        0x38: 'PROP_XSPEED',
+        0x3A: 'PROP_YSPEED',
+        }
 
 # "Forward declare" dictionary
 sprvm_instruction_table = {}
@@ -241,30 +268,30 @@ instruction_table = {
 
     0x50: Op('DIALOG.CHAR', 'A2A1', desc="Appends a putChar command"),
     0x51: Op('LDA', '#w', desc="LoaD A { A = op0; }"),
-    0x52: Op('OBJPROP.LDA', '#b', desc="LoaD A from current object op0/2"),
+    0x52: Op('OBJPROP.LDA', '#b', operand_tags=(property_symbolic_constants,), desc="LoaD A from current object op0/2"),
     0x53: Op('LDA', '*w', desc="LoaD A from memory"),
 
-    0x56: Op('OBJPROP.STA', '#b', desc="STore A to current object op0/2"),
+    0x56: Op('OBJPROP.STA', '#b', operand_tags=(property_symbolic_constants,), desc="STore A to current object op0/2"),
     0x57: Op('STA', '*w', desc="STore A to memory"),
-    0x58: Op('OTHERPROP.STA', '#b', desc="Stores A to access target prop op0/2"),
-    0x59: Op('OBJPROP.ADD', '#b', desc="ADD A from current object property op0/2"),
+    0x58: Op('OTHERPROP.STA', '#b', operand_tags=(property_symbolic_constants,), desc="Stores A to access target prop op0/2"),
+    0x59: Op('OBJPROP.ADD', '#b', operand_tags=(property_symbolic_constants,), desc="ADD A from current object property op0/2"),
     0x5A: Op('ADD', '*w', desc="ADD A to memory { *op0 += A; }"),
 
-    0x5C: Op('OBJPROP.SUB', '#b', desc="SUBtract A from current object property op0/2"),
+    0x5C: Op('OBJPROP.SUB', '#b', operand_tags=(property_symbolic_constants,), desc="SUBtract A from current object property op0/2"),
 
-    0x5F: Op('OBJPROP.ANDA', '#b', desc="AND current object op0/2 with A"),
+    0x5F: Op('OBJPROP.ANDA', '#b', operand_tags=(property_symbolic_constants,), desc="AND current object op0/2 with A"),
     0x60: Op('ANDA', '*w', desc="AND memory with A { op0 &= A; }"),
 
-    0x62: Op('OBJPROP.ORA', '#b', desc="OR current object property op0/2 with A"),
+    0x62: Op('OBJPROP.ORA', '#b', operand_tags=(property_symbolic_constants,), desc="OR current object property op0/2 with A"),
 
     0x68: Op('JB', '#w$w', desc="Jump if Below { if (op0 < A) goto op1; }"),
 
     0x72: Op('JE', '#w$w', desc="Jump if Equal { if (op0 == A) goto op1; }"),
-    0x73: Op('OBJPROP.JE', '#b$w', desc="jump if current object property op0/2 == A"),
+    0x73: Op('OBJPROP.JE', '#b$w', operand_tags=(property_symbolic_constants, None), desc="jump if current object property op0/2 == A"),
     0x74: Op('JE', '*w$w', desc="Jump if Equal { if (*op0 == A) goto op1; }"),
 
     0x77: Op('JNE', '#w$w', desc="Jump if Not Equal { if (op0 != A) goto op1; }"),
-    0x78: Op('OBJPROP.JNE', '#b$w', desc="jump if current object property op0/2 != A"),
+    0x78: Op('OBJPROP.JNE', '#b$w', operand_tags=(property_symbolic_constants, None), desc="jump if current object property op0/2 != A"),
     0x79: Op('JNE', '*w$w', desc="Jump if Not Equal { if (*op0 != A) goto op1; }"),
 
     0x7C: Op('JL', '#w$w', desc="Jump if Less (signed) { if (op0 < A) goto op1; }"),
