@@ -76,6 +76,7 @@ def unsupported_mode(x):
 class Op(object):
     FLOW_NEXT = 0
     FLOW_NORETURN = 1
+    FLOW_CALL = 2
 
     addressing_modes = {
         0: lambda rom, ip, ram_symbols: (OperandImmediate(word.unpack_from(rom, ip)[0]), 2),
@@ -93,7 +94,7 @@ class Op(object):
         self.operands = operands
         self.flow = flow
         self.desc = desc
-        self.is_jmp = ('$' in operands and jump_target_vm is None) or flow == self.FLOW_NORETURN
+        self.is_jmp = ('$' in operands and jump_target_vm is None and flow != self.FLOW_CALL) or flow == self.FLOW_NORETURN
         self.jump_target_vm = jump_target_vm
 
     def decode_operand(self, opr, state, rom, ip, ram_symbols):
@@ -205,7 +206,7 @@ instruction_table = {
     0x02: Op('AUDIO.SFX', '#w', desc="Play sound effect"),
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
 
-    0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
+    0x05: Op('CALL', '$w', flow=Op.FLOW_CALL, desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
 
     0x0F: Op('FINISH.LEVEL', '', flow=Op.FLOW_NORETURN, desc="yield & finish level"),
@@ -291,7 +292,7 @@ sprvm_instruction_table.update({
     0x02: instruction_table[0x02],
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="Unconditional JuMP { goto op0; }"),
     0x04: Op('NOP', '#b'),
-    0x05: Op('CALL', '$w', desc="Save next IP to link reg and jump"),
+    0x05: Op('CALL', '$w', flow=Op.FLOW_CALL, desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
     0x07: Op('UNK07', '#b'), # TODO
     0x08: OpSprites('SPR.XPOS', '#w', desc="Set X sprite positions relative to object."),
