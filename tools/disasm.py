@@ -222,6 +222,8 @@ instruction_table = {
 
     0x1A: Op('J?.OBJ.UNK1A', '#b$w'),
 
+    0x1D: Op('UNK.1D', '#w$w', flow=Op.FLOW_CALL, desc="Test ??? and call (probably related to collisions)"),
+
     0x2F: Op('SPRVM.RUN', '', desc="Invoke animation VM"),
 
     0x3D: Op('PAL1.FADE', '#b#b#b', desc="Set palette fade amount. (color1)"),
