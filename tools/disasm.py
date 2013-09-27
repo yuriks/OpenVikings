@@ -223,9 +223,6 @@ property_symbolic_constants = {
         0x3A: 'PROP_YSPEED',
         }
 
-# "Forward declare" dictionary
-sprvm_instruction_table = {}
-
 instruction_table = {
     'suffix': '',
     0x00: Op('YIELD', '', desc="save IP and yield"),
@@ -314,7 +311,7 @@ instruction_table = {
     0xD3: Op('CHECK.PASSWORD', '', desc="Executes a password check and sets global variables acoordingly."),
 }
 
-sprvm_instruction_table.update({
+sprvm_instruction_table = {
     'suffix': '-sprvm',
     0x00: Op('SPR.ADVANCE', '#b', desc="Advance animation for sprites by op0 tiles."),
     0x01: OpSprites('SPR.TILES', '#b', filtered=True, desc="Set list of tile indices for sprites."),
@@ -343,7 +340,7 @@ sprvm_instruction_table.update({
     0x18: Op('SPR.SET.HIDDEN2', '', desc="Set hidden2 flag on sprites."),
     0x19: Op('SPR.CLR.HIDDEN12', '', desc="Clear hidden and hidden2 flags on sprites."),
     0x1A: Op('STOP', '', flow=Op.FLOW_NORETURN, desc="Clear IP and yield")
-})
+}
 
 vm_types = {
     'vm': instruction_table,
