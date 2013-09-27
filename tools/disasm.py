@@ -202,7 +202,7 @@ sprvm_instruction_table = {}
 instruction_table = {
     'suffix': '',
     0x00: Op('YIELD', '', desc="save IP and yield"),
-    0x01: Op('NOP', ''), # TODO
+    0x01: Op('NOP.01', ''), # TODO
     0x02: Op('AUDIO.SFX', '#w', desc="Play sound effect"),
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
 
@@ -291,7 +291,7 @@ sprvm_instruction_table.update({
     0x01: OpSprites('SPR.TILES', '#b', filtered=True, desc="Set list of tile indices for sprites."),
     0x02: instruction_table[0x02],
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="Unconditional JuMP { goto op0; }"),
-    0x04: Op('NOP', '#b'),
+    0x04: Op('NOP.04', '#b'),
     0x05: Op('CALL', '$w', flow=Op.FLOW_CALL, desc="Save next IP to link reg and jump"),
     0x06: Op('RET', '', flow=Op.FLOW_NORETURN, desc="Return to IP saved on link register"),
     0x07: Op('UNK07', '#b'), # TODO
@@ -309,7 +309,7 @@ sprvm_instruction_table.update({
     0x13: OpSprites('SPR.TAGS', '#b', filtered=True, desc="Set list of sprite tags."),
     0x14: Op('UNK14', '#b'), # TODO
     0x15: Op('SPR.SIZE', '#b', desc="Set size of sprites. (0=8, 1=32, 2=16)"),
-    0x16: Op('NOP', '#b'),
+    0x16: Op('NOP.16', '#b'),
     0x17: Op('UNK17', '#w'), # TODO
     0x18: Op('SPR.SET.HIDDEN2', '', desc="Set hidden2 flag on sprites."),
     0x19: Op('SPR.CLR.HIDDEN12', '', desc="Clear hidden and hidden2 flags on sprites."),
