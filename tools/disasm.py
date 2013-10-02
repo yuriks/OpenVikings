@@ -211,6 +211,7 @@ class OpExtended():
 property_symbolic_constants = {
         0x08: 'PROP_FLAGS',
         0x16: 'PROP_USERDATA',
+        0x1A: 'PROP_OBJECT_TYPE',
         0x1C: 'PROP_TIMER',
         0x1E: 'PROP_XPOS',
         0x20: 'PROP_YPOS',
@@ -300,6 +301,7 @@ instruction_table = {
 
     0x99: Op('TBS', '#b*w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
 
+    0x9C: Op('OBJPROP.AB', '#b#b', operand_tags=(None, property_symbolic_constants), desc="Assign Bit { if (A != 0) { A = (1 << op0/2); } objprop[op1] = objprop[op1] & ~(1 << op0/2) | A; }"),
     0x9D: Op('AB', '#b*w', desc="Assign Bit { if (A != 0) { A = (1 << op0/2); } *op1 = *op1 & ~(1 << op0/2) | A; }"),
 
     0xA8: Op('TBJE', '#b#w$w', desc="Test Bit & Jump if Equal { if (bool((1 << op0/2) & op1) == A) goto op3; }"),
