@@ -102,9 +102,9 @@ def main(stdin, stdout):
 
             jump = columns[c][i]
 
+            if l >= jump.upper_bound:
+                col_i[c] += 1
             if l < jump.lower_bound or l > jump.upper_bound:
-                if l > jump.upper_bound:
-                    col_i[c] += 1
                 out_line += u'  '
                 continue
 
