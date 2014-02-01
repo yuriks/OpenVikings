@@ -222,12 +222,13 @@ property_symbolic_constants = {
         0x34: 'PROP_USER4',
         0x38: 'PROP_XSPEED',
         0x3A: 'PROP_YSPEED',
+        0x3C: 'PROP_PROP_ACCESS_TARGET',
         }
 
 instruction_table = {
     'suffix': '',
     0x00: Op('YIELD', '', desc="save IP and yield"),
-    0x01: Op('NOP.01', ''), # TODO
+    0x01: Op('YIELD.SUBFRAME', '', desc="If on updates 2 or 3, stops execution without saving IP, else nop"),
     0x02: Op('AUDIO.SFX', '#w', desc="Play sound effect"),
     0x03: Op('JMP', '$w', flow=Op.FLOW_NORETURN, desc="unconditional JuMP { goto op0; }"),
 
@@ -281,6 +282,7 @@ instruction_table = {
     0x60: Op('ANDA', '*w', desc="AND memory with A { op0 &= A; }"),
 
     0x62: Op('OBJPROP.ORA', '#b', operand_tags=(property_symbolic_constants,), desc="OR current object property op0/2 with A"),
+    0x63: Op('ORA', '*w', desc="OR memory with A { *op0 |= A; }"),
 
     0x68: Op('JB', '#w$w', desc="Jump if Below { if (op0 < A) goto op1; }"),
 
@@ -296,7 +298,7 @@ instruction_table = {
 
     0x81: Op('JGE', '#w$w', desc="Jump if Greater or Equal (signed) { if (op0 >= A) goto op1; }"),
 
-    0x96: Op('OBJ.OTHER.STA', '', desc="Store A to current object property access target"),
+    0x96: Op('OBJ.OTHER.STA', '', desc="Set OTHER object to A"),
     0x97: Op('TBS', '#b#w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
 
     0x99: Op('TBS', '#b*w', desc="Test Bit & Set { A = bool((1 << op0/2) & op1) }"),
@@ -308,7 +310,9 @@ instruction_table = {
 
     0xAA: Op('TBJ', '#b*w$w', desc="Test Bit & Jump { if ((1 << op0/2) & op1) goto op3; }"),
 
-    0xCF: Op('UNKCF', '$w'),
+    0xCB: Op('DIALOG.DISPLAY', '', desc="Appends a DCMD_DISPLAY command."),
+
+    0xCF: Op('OTHER.J.OFFSCREEN', '$w', desc="Jump if OTHER object is offscreen."),
 
     0xD3: Op('CHECK.PASSWORD', '', desc="Executes a password check and sets global variables acoordingly."),
 }
