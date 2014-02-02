@@ -1,3 +1,3 @@
 include_rules
-: src/main.rs |> !rustc |>
 : src/dump-chunk.rs |> !rustc |> lvt-%B
+: src/decompress-data.rs |> !rustc |> lvt-%B

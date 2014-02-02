@@ -1,14 +1,14 @@
 extern mod extra;
-use extra::getopts::groups::{optflag, getopts, OptGroup};
+use extra::getopts::groups::{optopt, optflag, getopts, OptGroup};
 use getopts = extra::getopts::groups;
-use lvtools::chunk;
-use std::io::{println, File, stdout};
+use lvtools::compression;
+use std::io::{println, stdout, stdin};
 use std::num::{from_str_radix, FromStrRadix};
 
 mod lvtools;
 
 fn print_usage(program: &str, opts: &[OptGroup]) {
-	println!("Usage: {} [options..] <data.dat> <chunk_id>", program);
+	println!("Usage: {} [options..] [--size <length>]", program);
 	println(getopts::usage("Foobar", opts));
 }
 
@@ -29,6 +29,7 @@ fn main() {
 
 	let opts = ~[
 		optflag("h", "help", "show usage"),
+		optopt("s", "size", "manually specify output size instead of reading from header", "SIZE"),
 		];
 	let matches = match getopts(args.tail(), opts) {
 		Ok(m) => m,
@@ -40,17 +41,13 @@ fn main() {
 		return;
 	}
 
-	if matches.free.len() != 2 {
-		print_usage(args[0], opts);
-		fail!("Incorrect number of positional arguments.");
-	}
+	let mut input = stdin();
 
-	let chunk_id = from_str_multiradix(matches.free[1])
-		.expect("Invalid chunk id");
+	let data_size = match matches.opt_str("s") {
+		Some(size_str) => from_str_multiradix(size_str).expect("Invalid size"),
+		None => input.read_le_u16() as uint + 1,
+	};
+	let data = compression::decompress_data(&mut input, data_size);
 
-	let mut file = File::open(&Path::new(matches.free[0]))
-		.expect("Failed to open data file!");
-
-	let mut chunk_reader = chunk::ChunkReader::new(&mut file, chunk_id);
-	std::io::util::copy(&mut chunk_reader, &mut stdout());
+	stdout().write(data);
 }
