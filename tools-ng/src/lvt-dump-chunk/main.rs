@@ -4,24 +4,12 @@ extern mod lvtools;
 use extra::getopts::groups::{optflag, getopts, OptGroup};
 use getopts = extra::getopts::groups;
 use lvtools::chunk;
+use lvtools::util::from_str_multiradix;
 use std::io::{println, File, stdout};
-use std::num::{from_str_radix, FromStrRadix};
 
 fn print_usage(program: &str, opts: &[OptGroup]) {
 	println!("Usage: {} [options..] <data.dat> <chunk_id>", program);
 	println(getopts::usage("Foobar", opts));
-}
-
-fn from_str_multiradix<T: FromStrRadix>(s: &str) -> Option<T> {
-	if s.starts_with("0x") {
-		from_str_radix(s.slice_from(2), 16)
-	} else if s.starts_with("0o") {
-		from_str_radix(s.slice_from(2), 8)
-	} else if s.starts_with("0b") {
-		from_str_radix(s.slice_from(2), 2)
-	} else {
-		from_str_radix(s, 10)
-	}
 }
 
 fn main() {
