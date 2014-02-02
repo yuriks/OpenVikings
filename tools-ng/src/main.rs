@@ -1,7 +1,7 @@
 use std::io::{File, Truncate, Write};
+use lvtools::{chunk, compression};
 
-mod chunk;
-mod compression;
+mod lvtools;
 
 fn main() {
 	let mut file = File::open(&Path::new("data.dat"))
@@ -13,6 +13,6 @@ fn main() {
 	let data = compression::decompress_data(&mut chunk_reader, data_size);
 
 	let mut outfile = File::open_mode(&Path::new("out_chunk.bin"), Truncate, Write)
-		.expect("Failed to open out file!");
+		.expect("Failed to open output file!");
 	outfile.write(data);
 }

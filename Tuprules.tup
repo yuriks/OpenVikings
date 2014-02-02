@@ -1,0 +1,1 @@
+!rustc = |> rustc -O %f -o %o |> %B
