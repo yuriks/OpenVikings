@@ -1,7 +1,10 @@
 *.swp
 *.pyc
 
-/.tup
+.rust/
+bin/
+lib/
+build/
 
 /Debug/
 /Release/
