@@ -1,1 +1,1 @@
-!rustc = |> rustc -O %f -o %o |> %B
+!rustc = |> rustc -O -Z lto %f -o %o |> %B
