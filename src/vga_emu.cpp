@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "input.hpp"
 #include "main.hpp"
 

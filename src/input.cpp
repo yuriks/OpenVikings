@@ -1,7 +1,7 @@
 #include "input.hpp"
 
 #include <cstdlib>
-#include <SDL_events.h>
+#include <SDL2/SDL_events.h>
 #include "vars.hpp"
 
 uint16_t last_typed_key; // addr seg04:028C

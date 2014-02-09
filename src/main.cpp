@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cassert>
 #include <array>
-#include <SDL_timer.h>
+#include <SDL2/SDL_timer.h>
 #include <numeric>
 
 #include "vga_emu.hpp"

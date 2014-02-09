@@ -6,8 +6,8 @@
 
 #include <cstdint>
 #include <cassert>
-#include <SDL.h>
-#include <SDL_timer.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_timer.h>
 
 bool timer_initialized = false; // addr seg04:A39A
 static uint16_t timer_wait_count; // addr seg04:A39C
