@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <array>
 
 struct Color {
 	uint8_t rgb[3];
@@ -18,23 +19,19 @@ struct Color {
 	}
 };
 
-extern uint8_t vga_framebuffer[4][0x10000];
+// 8 pixels extra on each side for guard band clipping
+static const int vga_width = 8 + 320 + 8;
+static const int vga_height = 8 + 240 + 8;
+extern std::array<uint8_t, vga_width * vga_height> vga_framebuffer;
 extern bool vga_has_vsync;
 
-void vga_copyToVRAM(int plane_mask, uint8_t* source, uint16_t dest, uint16_t len);
-void vga_copyPlanesToVRAM(uint8_t* source, uint16_t dest, uint16_t len_plane);
-void vga_fillVRAM(int plane_mask, uint8_t value, uint16_t dest, uint16_t len);
-void vga_vramCopy(uint16_t source, uint16_t dest, uint16_t len);
-void vga_setPalette(const Color* palette);
-void vga_setPaletteColor(uint8_t index, const Color& color);
-
-inline void vga_setPixel(uint16_t dest_lfb, uint8_t color) {
-	vga_framebuffer[dest_lfb % 4][dest_lfb / 4] = color;
+inline uint8_t* vga_getPosPtr(int x, int y) {
+	return &vga_framebuffer[(x + 8) + (y + 8) * vga_width];
 }
 
-void vga_setStartAddress(uint16_t addr);
-void vga_setLineCompare(unsigned int scanline);
-void vga_setPixelPan(unsigned int pixels);
+void vga_setPalette(const Color* palette);
+void vga_setPaletteColor(uint8_t index, const uint32_t color);
+void vga_setPaletteColor(uint8_t index, const Color& color);
 
 void vga_initialize();
 void vga_deinitialize();
