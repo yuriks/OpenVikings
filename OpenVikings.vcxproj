@@ -73,20 +73,15 @@
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\timer.cpp" />
-    <ClCompile Include="src\vars.cpp" />
     <ClCompile Include="src\vga_emu.cpp" />
-    <ClCompile Include="src\vm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\input.hpp" />
     <ClInclude Include="src\main.hpp" />
-    <ClInclude Include="src\pack_disable.hpp" />
-    <ClInclude Include="src\pack_enable.hpp" />
     <ClInclude Include="src\timer.hpp" />
     <ClInclude Include="src\vars.hpp" />
     <ClInclude Include="src\vga_emu.hpp" />
     <ClInclude Include="src\vikings.hpp" />
-    <ClInclude Include="src\vm.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

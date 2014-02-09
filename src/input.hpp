@@ -1,7 +1,5 @@
+#pragma once
 #include "vikings.hpp"
-#include "vars.hpp"
-
-#include <cstdint>
 
 enum Buttons
 {
@@ -57,20 +55,4 @@ enum XTScancodes
 	SCAN_KPPERIOD_DEL = 0x53,
 };
 
-extern uint16_t last_typed_key; // addr seg04:028C
-
-extern uint16_t buttons_down; // addr seg04:03B6
-extern uint16_t buttons_pressed; // addr seg04:03B8
-extern uint16_t buttons_previous; // addr seg04:03BA
-
-extern uint16_t word_30BBA; // addr seg04:86DA
-extern uint16_t word_30BBC; // addr seg04:86DC
-extern uint16_t pressed_buttons; // addr seg04:86DE
-
-extern uint8_t pressed_keys[128]; // addr seg04:916C
-extern uint16_t button_key_assignments[128]; // addr seg04:91EC
-
-extern bool input_quit_requested;
-
-void updateInput();
 void handleSDLEvents();

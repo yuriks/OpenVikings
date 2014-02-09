@@ -2,21 +2,7 @@
 
 #include <cstdlib>
 #include <SDL2/SDL_events.h>
-#include "vars.hpp"
 
-uint16_t last_typed_key; // addr seg04:028C
-
-uint16_t buttons_down; // addr seg04:03B6
-uint16_t buttons_pressed; // addr seg04:03B8
-uint16_t buttons_previous; // addr seg04:03BA
-
-uint16_t word_30BBA; // addr seg04:86DA
-uint16_t word_30BBC; // addr seg04:86DC
-uint16_t pressed_buttons; // addr seg04:86DE
-
-bool input_quit_requested;
-
-// addr seg04:8E68
 static const uint16_t scancode_to_ascii[128] =
 {
 	  0,   0, '1', '2', '3', '4', '5', '6', //  0
@@ -28,9 +14,6 @@ static const uint16_t scancode_to_ascii[128] =
 	'B', 'N', 'M',   0,   0,   0,   0,   0, // 30
 	  0, 129,   0,   0,   0,   0,   0,   0, // 38
 };
-
-uint8_t pressed_keys[128]; // addr seg04:916C
-uint16_t button_key_assignments[128]; // addr seg04:91EC
 
 static const int MAX_TRANSLATED_SDL_SCANCODES = 128;
 static const uint8_t scancode_SDL_to_XT_table[MAX_TRANSLATED_SDL_SCANCODES] =
@@ -181,66 +164,6 @@ static uint8_t sdlToXTScancode(SDL_Scancode sdl_scancode_code)
 	return scancode_SDL_to_XT_table[sdl_scancode];
 }
 
-// addr seg00:2352
-// Reads bitfield set by keyboard handler and sets the varibles
-// actually read by the game.
-void updateInput()
-{
-	uint16_t ax = 0;
-	if (word_30BBA != 0)
-	{
-		// TODO sub_12EF8();
-		ax = word_30BBC;
-	}
-	ax |= pressed_buttons;
-
-	buttons_down = ax;
-	buttons_pressed = (ax ^ buttons_previous) & ax;
-	buttons_previous = ax;
-}
-
-// addr seg00:6440
-static void keyboardHandler(const SDL_KeyboardEvent& ev)
-{
-	uint8_t scancode = sdlToXTScancode(ev.keysym.scancode);
-
-	if (word_288AC == 0x8000)
-	{
-		if (ev.state == SDL_PRESSED && (
-			scancode == SCAN_CTRL ||
-			scancode == SCAN_ALT ||
-			scancode == SCAN_KPPERIOD_DEL ||
-			scancode == SCAN_F10 ||
-			scancode == SCAN_X ||
-			scancode == SCAN_S ||
-			scancode == SCAN_M))
-		{
-			pressed_keys[scancode] = 1;
-		}
-		else
-		{
-			pressed_buttons = 0xFFFF;
-		}
-	}
-	else
-	{
-		if (ev.state == SDL_PRESSED)
-		{
-			pressed_keys[scancode] = 1;
-			if (!(scancode == SCAN_S && pressed_keys[SCAN_ALT]))
-			{
-				pressed_buttons |= button_key_assignments[scancode];
-				last_typed_key = scancode < 64 ? scancode_to_ascii[scancode] : 0;
-			}
-		}
-		else
-		{
-			pressed_buttons &= ~button_key_assignments[scancode];
-			pressed_keys[scancode] = 0;
-		}
-	}
-}
-
 void handleSDLEvents()
 {
 	SDL_Event event;
@@ -250,11 +173,11 @@ void handleSDLEvents()
 		{
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
-			keyboardHandler(event.key);
+			//keyboardHandler(event.key);
 			break;
 		case SDL_QUIT:
 			// Call ALT-X handler
-			input_quit_requested = true;
+			//input_quit_requested = true;
 			break;
 		}
 	}

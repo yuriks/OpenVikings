@@ -1,11 +1,11 @@
-// Project-wide useful definitions
+// Useful project-wide definitions
 #pragma once
 
 #include <cstdint>
 
 #define BIT(i) (1 << (i))
 #define BIT_RANGE(start, end) ((BIT((end)-1) - 1) - (BIT(start) - 1))
-#define RANGE(x) (std::begin(x)), (std::end(x))
+#define RANGE(x) std::begin(x), std::end(x)
 
 static inline uint16_t load16LE(const uint8_t* d) {
 	return d[0] | d[1] << 8;

@@ -75,6 +75,6 @@ void timer_wait() {
 		handleSDLEvents();
 		timer_wait_count--;
 
-		updateVidRegsAndPal();
+		//updateVidRegsAndPal();
 	}
 }
