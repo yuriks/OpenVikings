@@ -143,9 +143,9 @@ size_t decompressChunk(const ChunkId chunk_id, uint8_t *const dst, const size_t 
 		}
 	}
 
-#if 1
+#if 0
 	char tmpfn[30];
-	sprintf(tmpfn, "chunks/chunk%03x.bin", chunk_id);
+	sprintf(tmpfn, "chunks/chunk%03x_decompressed.bin", chunk_id);
 	std::FILE* df = std::fopen(tmpfn, "wb");
 	std::fwrite(dst, decompressed_data_len, 1, df);
 	std::fclose(df);
