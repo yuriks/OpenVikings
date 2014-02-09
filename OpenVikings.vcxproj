@@ -70,12 +70,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\data.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\vga_emu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\data.hpp" />
     <ClInclude Include="src\input.hpp" />
     <ClInclude Include="src\main.hpp" />
     <ClInclude Include="src\timer.hpp" />
