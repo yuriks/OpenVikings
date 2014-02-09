@@ -25,5 +25,14 @@ int main() {
 	std::array<uint8_t, 0x400> buffer;
 	decompressChunk(0x0c6, buffer.data(), buffer.size());
 
+	while (true) {
+		input_handleSDLEvents();
+		if (input_quit_requested) {
+			break;
+		}
+
+		vga_present();
+	}
+
 	deinitializeGame();
 }

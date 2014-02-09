@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <SDL2/SDL_events.h>
 
+bool input_quit_requested;
+
 static const uint16_t scancode_to_ascii[128] =
 {
 	  0,   0, '1', '2', '3', '4', '5', '6', //  0
@@ -164,7 +166,7 @@ static uint8_t sdlToXTScancode(SDL_Scancode sdl_scancode_code)
 	return scancode_SDL_to_XT_table[sdl_scancode];
 }
 
-void handleSDLEvents()
+void input_handleSDLEvents()
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
@@ -176,8 +178,7 @@ void handleSDLEvents()
 			//keyboardHandler(event.key);
 			break;
 		case SDL_QUIT:
-			// Call ALT-X handler
-			//input_quit_requested = true;
+			input_quit_requested = true;
 			break;
 		}
 	}

@@ -55,4 +55,7 @@ enum XTScancodes
 	SCAN_KPPERIOD_DEL = 0x53,
 };
 
-void handleSDLEvents();
+// True if the game should quit
+extern bool input_quit_requested;
+
+void input_handleSDLEvents();
