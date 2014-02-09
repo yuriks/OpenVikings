@@ -10,13 +10,14 @@ build/
 /Release/
 /ipch/
 /*.opensdf
-/openvikings.sdf
-/openvikings.suo
-/openvikings.vcxproj.user
-/SDL.dll
+/OpenVikings.sdf
+/OpenVikings.*.suo
+/OpenVikings.vcxproj.user
+/SDL2.dll
 
 /chunks/
 /data.dat
 /vikings.exe
+/vikings.map
 /vikings/
 /resources/

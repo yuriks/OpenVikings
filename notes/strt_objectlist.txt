@@ -1,0 +1,14 @@
+// Erik standing on ground: y=418
+// on middle level: y=258
+// on upper lvel: y=162
+
+0x25F6 ObjectInstance { x:    0, y:    0, w:  16, h:  16, type: 48h, 828h,   0h }
+0x2604 ObjectInstance { x:  168, y:  248, w:  24, h:  24, type: 4Fh,  22h,   0h } // Door on middle corridor
+0x2612 ObjectInstance { x:  344, y:  152, w:  24, h:  48, type: 4Fh,  22h,   0h } // Door on baleog area
+0x2620 ObjectInstance { x:  208, y:  168, w:  16, h:  16, type: 04h,  63h,   0h } // Laser gun
+0x262E ObjectInstance { x:  112, y:  456, w:  32, h:   4, type: 46h,  24h,   0h } // Electricity beam
+0x263C ObjectInstance { x:  176, y:  416, w:   8, h:   8, type: 20h,  22h, 100h } // Help button; flag = auto-activate
+0x264A ObjectInstance { x:  336, y:  248, w:   8, h:   8, type: 3Fh,  22h,   0h } // EXIT sign message trigger
+0x2658 ObjectInstance { x:  144, y:  368, w:   8, h:   8, type: 1Dh,  20h,   2h } // Tomato
+0x2666 ObjectInstance { x:  288, y:  160, w:  16, h:  16, type: 77h,  2Dh,   0h } // Green alien
+0x2674 ObjectInstance { x:  368, y:  248, w:   8, h:   8, type: 43h,  22h,   0h } // EXIT sign
