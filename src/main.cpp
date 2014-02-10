@@ -44,7 +44,7 @@ static void deplaneMasked8x8Tile(const uint8_t* src_ptr, uint8_t* dst_ptr) {
 	n2 | e0 e1 e2 e3 f0 f1 f2 f3
 	n3 | g0 g1 g2 g3 h0 h1 h2 h3
 
-	X0-3 and x0-3 are the new masks for each line. What this operation entails
+	N0-3 and n0-3 are the new masks for each line. What this operation entails
 	is de-interleaving the upper and bottom halves of the tile, then
 	transposing each half and concatenating every pair of lines. However, it's
 	easier and faster to just scan the original matrix, calculating the
