@@ -12,9 +12,9 @@
 static const ChunkId FONT_CHUNK = 2;
 std::array<uint8_t, 0x1680> font_graphics;
 
-static void drawTextTile(int c, uint8_t *const dst, const ptrdiff_t dst_stride) {
+static void drawTextTile(int c, const DrawSurface& surface, int x, int y) {
 	assert(c >= 16 && c < 112);
-	drawMasked8x8Tile(&font_graphics[(c - 16) * 8 * 9], dst, dst_stride);
+	drawMasked8x8Tile(&font_graphics[(c - 16) * 8 * 9], surface, x, y);
 }
 
 static void deinitializeGame() {
@@ -53,7 +53,7 @@ int main() {
 			break;
 		}
 
-		drawTextTile('A', vga_getPosPtr(0, 0), vga_width);
+		drawTextTile('A', vga_surface, 0, 0);
 
 		vga_present();
 	}

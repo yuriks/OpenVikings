@@ -6,7 +6,7 @@
 #include "input.hpp"
 #include "main.hpp"
 
-std::array<uint8_t, vga_width * vga_height> vga_framebuffer;
+DrawSurface vga_surface;
 bool vga_has_vsync = false;
 
 static uint32_t vga_palette[256];
@@ -17,6 +17,7 @@ static SDL_Texture* vga_texture = nullptr;
 
 static const int win_width = 320;
 static const int win_height = 240;
+static std::array<uint8_t, (win_width + 16) * (win_height + 16)> vga_framebuffer;
 
 void vga_setPalette(const Color* palette) {
 	for (int i = 0; i < 256; ++i) {
@@ -79,6 +80,12 @@ void vga_initialize() {
 	if (vga_texture == nullptr)
 		errorQuit(SDL_GetError(), 0);
 
+	vga_surface.pixels = vga_framebuffer.data();
+	vga_surface.width = win_width;
+	vga_surface.height = win_height;
+	vga_surface.guard_band = 8;
+	vga_surface.stride = 8 + win_width + 8;
+
 	// Randomize initial memory contents. Just because.
 	std::srand(0xDEADBEEF);
 	for (int i = 0; i < 256; ++i) {
@@ -93,6 +100,8 @@ void vga_initialize() {
 }
 
 void vga_deinitialize() {
+	vga_surface.pixels = nullptr;
+
 	SDL_DestroyTexture(vga_texture);
 	SDL_DestroyRenderer(vga_renderer);
 	SDL_DestroyWindow(vga_window);
@@ -109,13 +118,13 @@ void vga_present() {
 
 	uint32_t* tex_pixels = reinterpret_cast<uint32_t*>(tex_pixels_raw);
 
-	const uint8_t* vram_line = vga_getPosPtr(0, 0);
+	const uint8_t* vram_line = vga_surface.at(0, 0);
 
-	for (int y = 0; y < win_height; ++y) {
-		for (int x = 0; x < win_width; ++x) {
+	for (int y = 0; y < vga_surface.height; ++y) {
+		for (int x = 0; x < vga_surface.width; ++x) {
 			tex_pixels[x] = vga_palette[vram_line[x]];
 		}
-		vram_line += vga_width;
+		vram_line += vga_surface.stride;
 		tex_pixels += tex_pitch / sizeof(uint32_t);
 	}
 

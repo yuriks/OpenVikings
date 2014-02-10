@@ -1,10 +1,10 @@
 #include "draw.hpp"
 #include "data.hpp"
 
-void drawMasked8x8Tile(uint8_t* tile_data, uint8_t *const dst, const ptrdiff_t dst_stride) {
+void drawMasked8x8Tile(uint8_t* tile_data, const DrawSurface& surface, int x, int y) {
 	MemoryStream src(tile_data, 8 * 9);
 
-	uint8_t* line = dst;
+	uint8_t* line = surface.at(x, y);
 	for (int y = 0; y < 8; ++y) {
 		uint8_t mask = src.read8();
 		for (int x = 0; x < 8; ++x) {
@@ -14,6 +14,6 @@ void drawMasked8x8Tile(uint8_t* tile_data, uint8_t *const dst, const ptrdiff_t d
 			}
 			mask <<= 1;
 		}
-		line += dst_stride;
+		line += surface.stride;
 	}
 }
