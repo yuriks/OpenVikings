@@ -34,8 +34,7 @@ int main() {
 	openDataFiles();
 
 	{
-		std::vector<uint8_t> font_buffer(font_graphics.size());
-		font_buffer.resize(decompressChunk(FONT_CHUNK, font_buffer.data(), font_buffer.size()));
+		std::vector<uint8_t> font_buffer = decompressChunk(FONT_CHUNK);
 		assert(font_graphics.size() == font_buffer.size());
 
 		for (size_t i = 0; i < font_buffer.size(); i += 9*8) {

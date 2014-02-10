@@ -81,8 +81,8 @@ std::vector<uint8_t> loadChunk(ChunkId chunk_id) {
 	return buffer;
 }
 
-/// Decompresses a chunk from the datafile to the buffer dst (with maximum size dst_size). Returns the actual size of the loaded data.
-size_t decompressChunk(const ChunkId chunk_id, uint8_t *const dst, const size_t dst_size) {
+/// Loads and decompresses a chunk from the datafile.
+std::vector<uint8_t> decompressChunk(const ChunkId chunk_id) {
 	// Original function ignored this id. Assert to ensure nothing funny goes through.
 	assert(chunk_id != 0xFFFA);
 
@@ -90,14 +90,12 @@ size_t decompressChunk(const ChunkId chunk_id, uint8_t *const dst, const size_t 
 	MemoryStream src(src_buffer.data(), src_buffer.size());
 
 	const uint16_t decompressed_data_len = src.read16() + 1u;
-	if (decompressed_data_len > dst_size) {
-		errorQuit("Buffer overrun while loading chunk", chunk_id);
-	}
+	std::vector<uint8_t> dst_buffer;
+	dst_buffer.reserve(decompressed_data_len);
 
 	std::array<uint8_t, 4096> scratch;
 	scratch.fill(0);
 
-	size_t dst_i = 0;
 	size_t scratch_i = 0;
 
 	while (true) {
@@ -111,12 +109,12 @@ size_t decompressChunk(const ChunkId chunk_id, uint8_t *const dst, const size_t 
 				scratch[scratch_i] = symbol;
 				scratch_i = (scratch_i + 1) % scratch.size();
 
-				dst[dst_i++] = symbol;
+				dst_buffer.push_back(symbol);
 			} else {
 				// Copy bytes from scratch area
 				const uint16_t copy_op = src.read16();
 
-				const size_t copy_len = std::min((copy_op >> 12) + 3u, decompressed_data_len - dst_i);
+				const size_t copy_len = std::min((copy_op >> 12) + 3u, decompressed_data_len - dst_buffer.size());
 				size_t copy_src = copy_op & 0xFFF; // mod 4096, exactly the size of the scratch
 
 				for (size_t j = 0; j < copy_len; ++j) {
@@ -126,19 +124,20 @@ size_t decompressChunk(const ChunkId chunk_id, uint8_t *const dst, const size_t 
 					scratch[scratch_i] = symbol;
 					scratch_i = (scratch_i + 1u) % scratch.size();
 
-					dst[dst_i++] = symbol;
+					dst_buffer.push_back(symbol);
 				}
 			}
 
-			if (dst_i >= decompressed_data_len) {
+			if (dst_buffer.size() >= decompressed_data_len) {
 				break;
 			}
 			bits >>= 1;
 		}
 
-		if (dst_i >= decompressed_data_len) {
-			// If this fails then a buffer overrun occurred. Bad!
-			assert(dst_i == decompressed_data_len);
+		if (dst_buffer.size() >= decompressed_data_len) {
+			// If this fails then we somehow decompressed more bytes than we
+			// should have. Bad!
+			assert(dst_buffer.size() == decompressed_data_len);
 			break;
 		}
 	}
@@ -147,9 +146,9 @@ size_t decompressChunk(const ChunkId chunk_id, uint8_t *const dst, const size_t 
 	char tmpfn[30];
 	sprintf(tmpfn, "chunks/chunk%03x_decompressed.bin", chunk_id);
 	std::FILE* df = std::fopen(tmpfn, "wb");
-	std::fwrite(dst, decompressed_data_len, 1, df);
+	std::fwrite(dst_buffer.data(), dst_buffer.size(), 1, df);
 	std::fclose(df);
 #endif
 
-	return decompressed_data_len;
+	return dst_buffer;
 }

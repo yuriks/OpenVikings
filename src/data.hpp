@@ -39,4 +39,4 @@ public:
 void openDataFiles();
 void closeDataFiles();
 std::vector<uint8_t> loadChunk(ChunkId chunk_id);
-size_t decompressChunk(ChunkId chunk_id, uint8_t* dst, size_t dst_size);
+std::vector<uint8_t> decompressChunk(ChunkId chunk_id);
