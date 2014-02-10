@@ -7,16 +7,10 @@
 #include "decoding.hpp"
 #include "draw.hpp"
 #include "debug.hpp"
+#include "game.hpp"
 #include <array>
 #include <vector>
-
-static const ChunkId FONT_CHUNK = 2;
-std::array<uint8_t, 0x1680> font_graphics;
-
-static void drawTextTile(int c, const DrawSurface& surface, int x, int y) {
-	assert(c >= 16 && c < 112);
-	drawMasked8x8Tile(&font_graphics[(c - 16) * 8 * 9], surface, x, y);
-}
+#include <SDL2/SDL_events.h>
 
 static void deinitializeGame() {
 	closeDataFiles();
@@ -31,35 +25,73 @@ void errorQuit(const char* message, unsigned int code) {
 	exit(1);
 }
 
+void eventLoop() {
+	std::vector<SDL_Event> game_events;
+	std::vector<SDL_Event> debug_events;
+
+	auto get_queue = [&game_events, &debug_events](uint32_t window_id) -> std::vector<SDL_Event>& {
+		if (window_id == vga_window.getWindowId()) {
+			return game_events;
+		} else if (window_id == debug_win.getWindowId()) {
+			return debug_events;
+		} else {
+			assert(false);
+			exit(1);
+		};
+	};
+
+	while (true) {
+		// Dispatch SDL events to the appropriate window.
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
+			case SDL_MOUSEBUTTONDOWN:
+			case SDL_MOUSEBUTTONUP:
+			case SDL_MOUSEMOTION:
+			case SDL_MOUSEWHEEL:
+				// This isn't the correct union member to use for any of these
+				// events, but all events with windowID have it in the same
+				// position, and SDL maintains ABI compatibility, so this is
+				// most likely fine.
+				get_queue(event.window.windowID).push_back(event);
+				break;
+			case SDL_QUIT:
+				input_quit_requested = true;
+				break;
+			case SDL_WINDOWEVENT:
+				if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+					// This needs to be caught in addition to SDL_QUIT when using multi-windows.
+					input_quit_requested = true;
+					break;
+				}
+			}
+		}
+
+		if (input_quit_requested) {
+			break;
+		}
+
+		game_frame(game_events);
+		debug_frame(debug_events);
+	}
+}
+
 int main() {
 	vga_initialize();
 	debug_initialize();
 	openDataFiles();
-
-	{
-		std::vector<uint8_t> font_buffer = decompressChunk(FONT_CHUNK);
-		assert(font_graphics.size() == font_buffer.size());
-
-		for (size_t i = 0; i < font_buffer.size(); i += 9*8) {
-			deplaneMasked8x8Tile(&font_buffer[i], &font_graphics[i]);
-		}
-	}
+	loadFont();
 
 	vga_window.palette[0] = 0x000000;
 	vga_window.palette[1] = 0x000000;
 	vga_window.palette[2] = 0xFBFBFB;
 	vga_window.palette[3] = 0x920000;
 
-	while (true) {
-		input_handleSDLEvents();
-		if (input_quit_requested) {
-			break;
-		}
-
-		drawTextTile('A', vga_window.getSurface(), 0, 0);
-
-		vga_window.present();
-	}
+	eventLoop();
 
 	deinitializeGame();
 }

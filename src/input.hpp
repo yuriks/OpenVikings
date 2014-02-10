@@ -57,5 +57,3 @@ enum XTScancodes
 
 // True if the game should quit
 extern bool input_quit_requested;
-
-void input_handleSDLEvents();

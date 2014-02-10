@@ -72,7 +72,7 @@ void timer_wait() {
 			}
 		}
 
-		input_handleSDLEvents();
+		//input_handleSDLEvents();
 		timer_wait_count--;
 
 		//updateVidRegsAndPal();

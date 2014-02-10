@@ -19,6 +19,7 @@ void VideoWindow::initialize(const int width, const int height) {
 		0);
 	if (sdl_window == nullptr)
 		errorQuit(SDL_GetError(), 0);
+	window_id = SDL_GetWindowID(sdl_window);
 
 	sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_PRESENTVSYNC);
 	if (sdl_renderer == nullptr)

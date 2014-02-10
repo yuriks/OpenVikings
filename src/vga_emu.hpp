@@ -29,6 +29,8 @@ class VideoWindow {
 	SDL_Renderer* sdl_renderer = nullptr;
 	SDL_Texture* sdl_texture = nullptr;
 
+	uint32_t window_id;
+
 	std::vector<uint8_t> framebuffer;
 
 	DrawSurface surface;
@@ -38,6 +40,10 @@ public:
 
 	const DrawSurface& getSurface() const {
 		return surface;
+	}
+
+	uint32_t getWindowId() const {
+		return window_id;
 	}
 
 	void setVgaColor(uint8_t index, const Color& color)

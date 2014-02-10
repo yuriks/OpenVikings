@@ -165,27 +165,3 @@ static uint8_t sdlToXTScancode(SDL_Scancode sdl_scancode_code)
 
 	return scancode_SDL_to_XT_table[sdl_scancode];
 }
-
-void input_handleSDLEvents()
-{
-	SDL_Event event;
-	while (SDL_PollEvent(&event))
-	{
-		switch (event.type)
-		{
-		case SDL_KEYDOWN:
-		case SDL_KEYUP:
-			//keyboardHandler(event.key);
-			break;
-		case SDL_QUIT:
-			input_quit_requested = true;
-			break;
-		case SDL_WINDOWEVENT:
-			if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-				// This needs to be caught in addition to SDL_QUIT when using multi-windows.
-				input_quit_requested = true;
-				break;
-			}
-		}
-	}
-}
