@@ -18,7 +18,7 @@ void timer_initialize()
 	SDL_InitSubSystem(SDL_INIT_TIMER);
 
 	if (vga_has_vsync)
-		vga_present(); // Pull closer to vsync before setting initial deadline
+		vga_window.present(); // Pull closer to vsync before setting initial deadline
 	timer_deadline = SDL_GetPerformanceCounter();
 
 	timer_initialized = true;
@@ -56,7 +56,7 @@ void timer_wait() {
 	{
 		if (!vga_has_vsync || SDL_GetPerformanceCounter() < timer_deadline)
 		{
-			vga_present();
+			vga_window.present();
 		}
 
 		if (!vga_has_vsync)

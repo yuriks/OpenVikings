@@ -180,6 +180,12 @@ void input_handleSDLEvents()
 		case SDL_QUIT:
 			input_quit_requested = true;
 			break;
+		case SDL_WINDOWEVENT:
+			if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+				// This needs to be caught in addition to SDL_QUIT when using multi-windows.
+				input_quit_requested = true;
+				break;
+			}
 		}
 	}
 }

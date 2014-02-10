@@ -71,6 +71,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\data.cpp" />
+    <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\decoding.cpp" />
     <ClCompile Include="src\draw.cpp" />
     <ClCompile Include="src\input.cpp" />
@@ -80,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\data.hpp" />
+    <ClInclude Include="src\debug.hpp" />
     <ClInclude Include="src\decoding.hpp" />
     <ClInclude Include="src\draw.hpp" />
     <ClInclude Include="src\input.hpp" />

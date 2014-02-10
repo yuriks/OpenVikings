@@ -6,6 +6,7 @@
 #include "data.hpp"
 #include "decoding.hpp"
 #include "draw.hpp"
+#include "debug.hpp"
 #include <array>
 #include <vector>
 
@@ -19,6 +20,7 @@ static void drawTextTile(int c, const DrawSurface& surface, int x, int y) {
 
 static void deinitializeGame() {
 	closeDataFiles();
+	debug_deinitialize();
 	vga_deinitialize();
 }
 
@@ -31,6 +33,7 @@ void errorQuit(const char* message, unsigned int code) {
 
 int main() {
 	vga_initialize();
+	debug_initialize();
 	openDataFiles();
 
 	{
@@ -42,10 +45,10 @@ int main() {
 		}
 	}
 
-	vga_setPaletteColor(0, 0x000000);
-	vga_setPaletteColor(1, 0x000000);
-	vga_setPaletteColor(2, 0xFBFBFB);
-	vga_setPaletteColor(3, 0x920000);
+	vga_window.palette[0] = 0x000000;
+	vga_window.palette[1] = 0x000000;
+	vga_window.palette[2] = 0xFBFBFB;
+	vga_window.palette[3] = 0x920000;
 
 	while (true) {
 		input_handleSDLEvents();
@@ -53,18 +56,9 @@ int main() {
 			break;
 		}
 
-		drawTextTile('A', vga_surface, 0, 0);
+		drawTextTile('A', vga_window.getSurface(), 0, 0);
 
-		vga_present();
-	}
-
-	while (true) {
-		input_handleSDLEvents();
-		if (input_quit_requested) {
-			break;
-		}
-
-		vga_present();
+		vga_window.present();
 	}
 
 	deinitializeGame();

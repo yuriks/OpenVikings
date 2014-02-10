@@ -1,9 +1,10 @@
 #pragma once
 #include "draw.hpp"
 #include "vikings.hpp"
-#include <cstdint>
-#include <algorithm>
 #include <array>
+#include <algorithm>
+#include <cstdint>
+#include <vector>
 
 struct Color {
 	uint8_t rgb[3];
@@ -19,13 +20,41 @@ struct Color {
 	}
 };
 
-extern DrawSurface vga_surface;
-extern bool vga_has_vsync;
+struct SDL_Window;
+struct SDL_Renderer;
+struct SDL_Texture;
 
-void vga_setPalette(const Color* palette);
-void vga_setPaletteColor(uint8_t index, const uint32_t color);
-void vga_setPaletteColor(uint8_t index, const Color& color);
+class VideoWindow {
+	SDL_Window* sdl_window = nullptr;
+	SDL_Renderer* sdl_renderer = nullptr;
+	SDL_Texture* sdl_texture = nullptr;
+
+	std::vector<uint8_t> framebuffer;
+
+	DrawSurface surface;
+
+public:
+	std::array<uint32_t, 256> palette;
+
+	const DrawSurface& getSurface() const {
+		return surface;
+	}
+
+	void setVgaColor(uint8_t index, const Color& color)
+	{
+		palette[index] =
+			color.rgb[0] << (16 + 2) |
+			color.rgb[1] << (8 + 2) |
+			color.rgb[2] << (0 + 2);
+	}
+
+	void initialize(int width, int height);
+	void deinitialize();
+	void present();
+};
+
+extern VideoWindow vga_window;
+extern bool vga_has_vsync;
 
 void vga_initialize();
 void vga_deinitialize();
-void vga_present();
