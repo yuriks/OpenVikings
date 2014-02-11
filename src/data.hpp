@@ -16,23 +16,32 @@ public:
 		: buffer_start(buffer), buffer_end(buffer + buffer_size), pos(buffer)
 	{}
 
+	const uint8_t* getBlock(size_t size) {
+		assert(pos + size <= buffer_end);
+		const uint8_t* ret = pos;
+		pos += size;
+		return ret;
+	}
+
 	uint8_t read8() {
-		assert(pos + 1 <= buffer_end);
-		return *pos++;
+		return *getBlock(1);
 	}
 
 	uint16_t read16() {
-		assert(pos + 2 <= buffer_end);
-		uint16_t val = load16LE(pos);
-		pos += 2;
-		return val;
+		return load16LE(getBlock(2));
 	}
 
 	uint32_t read32() {
-		assert(pos + 4 <= buffer_end);
-		uint16_t val = load32LE(pos);
-		pos += 4;
-		return val;
+		return load32LE(getBlock(4));
+	}
+
+	void skip(size_t n) {
+		pos += n;
+	}
+
+	size_t bytesRemaining() const {
+		assert(buffer_end >= pos);
+		return buffer_end - pos;
 	}
 };
 
