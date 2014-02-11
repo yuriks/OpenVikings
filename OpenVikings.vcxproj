@@ -75,6 +75,7 @@
     <ClCompile Include="src\decoding.cpp" />
     <ClCompile Include="src\draw.cpp" />
     <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\gui.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\timer.cpp" />

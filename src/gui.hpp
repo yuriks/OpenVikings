@@ -1,6 +1,7 @@
 #pragma once
 #include "draw.hpp"
 #include <string>
+#include <cstdint>
 
 typedef int WidgetId;
 
@@ -13,16 +14,7 @@ struct Gui {
 
 	DrawSurface surface;
 
-	void update_input(int new_mouse_x, int new_mouse_y, int new_mouse_buttons) {
-		mouse_x = new_mouse_x;
-		mouse_y = new_mouse_y;
-		mouse_buttons = new_mouse_buttons;
-	}
+	void update_input(int new_mouse_x, int new_mouse_y, int new_mouse_buttons);
 
-	void label(const std::string& text, int x, const int y) {
-		for (int c : text) {
-			drawTextTile(c, surface, x, y);
-			x += 8;
-		}
-	}
+	void label(const std::string& text, int x, const int y, uint8_t color = 2);
 };

@@ -17,3 +17,4 @@ void fillSurface(uint8_t color, const DrawSurface& surface);
 void drawMasked8x8Tile(uint8_t* tile_data, const DrawSurface& surface, int x, int y);
 void loadFont();
 void drawTextTile(int c, const DrawSurface& surface, int x, int y);
+void drawTextTilePlus(int c, uint8_t color, const DrawSurface& surface, int x, int y);

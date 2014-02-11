@@ -13,6 +13,7 @@ void debug_initialize() {
 	debug_win.palette[1] = 0x000000;
 	debug_win.palette[2] = 0xFBFBFB;
 	debug_win.palette[3] = 0x920000;
+	debug_win.palette[8] = 0xFBF300;
 }
 
 void debug_deinitialize() {
@@ -43,6 +44,7 @@ void debug_frame(std::vector<SDL_Event>& events) {
 
 	fillSurface(3, debug_win.getSurface());
 	gui.label("HELLO WORLD!", 8, 8);
+	gui.label("HELLO WORLD!", gui.mouse_x, gui.mouse_y, 8);
 
 	debug_win.present();
 }
