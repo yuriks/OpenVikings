@@ -86,6 +86,7 @@
     <ClInclude Include="src\decoding.hpp" />
     <ClInclude Include="src\draw.hpp" />
     <ClInclude Include="src\game.hpp" />
+    <ClInclude Include="src\gui.hpp" />
     <ClInclude Include="src\input.hpp" />
     <ClInclude Include="src\main.hpp" />
     <ClInclude Include="src\timer.hpp" />

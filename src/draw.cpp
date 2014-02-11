@@ -8,6 +8,7 @@ void fillSurface(uint8_t color, const DrawSurface& surface) {
 	uint8_t* line = surface.at(0, 0);
 	for (int y = 0; y < surface.height; ++y) {
 		std::fill_n(line, surface.width, color);
+		line += surface.stride;
 	}
 }
 
