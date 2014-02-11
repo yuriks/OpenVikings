@@ -6,7 +6,7 @@ VideoWindow debug_win;
 static Gui gui;
 
 void debug_initialize() {
-	debug_win.initialize(640, 480);
+	debug_win.initialize(640, 480, "OpenVikings - Debugger");
 	gui.surface = debug_win.getSurface();
 
 	debug_win.palette[0] = 0x000000;

@@ -9,11 +9,11 @@
 VideoWindow vga_window;
 bool vga_has_vsync = false;
 
-void VideoWindow::initialize(const int width, const int height) {
+void VideoWindow::initialize(const int width, const int height, const char* title) {
 	static const int GUARD_BAND = 8;
 
 	sdl_window = SDL_CreateWindow(
-		"OpenVikings",
+		title,
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		width, height,
 		0);
@@ -82,7 +82,7 @@ void vga_initialize() {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		errorQuit(SDL_GetError(), 0);
 
-	vga_window.initialize(320, 240);
+	vga_window.initialize(320, 240, "OpenVikings");
 }
 
 void vga_deinitialize() {

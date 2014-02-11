@@ -54,7 +54,7 @@ public:
 			color.rgb[2] << (0 + 2);
 	}
 
-	void initialize(int width, int height);
+	void initialize(int width, int height, const char* title);
 	void deinitialize();
 	void present();
 };
